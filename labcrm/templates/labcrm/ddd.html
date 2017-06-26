@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}详细信息{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="row-fluid">
+    <div class="span3">
+		<div id="accordion" role="tablist" aria-multiselectable="true">
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingOne">
+					<h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">用户列表</a>
+					</h4>
+				</div>
+				<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+					<ul>
+						<li>aaaa</li>
+						<li>aaaa</li>
+						<li>aaaa</li>
+						<li>aaaa</li>
+					</ul>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingTwo">
+					<h4 class="panel-title">
+						<a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">选择问卷</a>
+					</h4>
+				</div>
+				<div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+					<ul>
+						<li>aaaa</li>
+						<li>aaaa</li>
+						<li>aaaa</li>
+						<li>aaaa</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+    </div>
+    <div class="span7">
+		<h2>{{ user.nickname }}</h2>
+		<hr />
+		<table class="table table-hover table-striped">
+			<caption>详细信息</caption>
+				<thead>
+				<tr>
+					<th><b>Q</b></th>
+					<th><B>A</B></th>
+				</tr>
+				</thead>
+			<tbody>
+			{% for answer in user.answers.all %}
+				<tr>
+					<td>{{ answer.question }}</td>
+					<td>{{ answer.answer }}</td>
+				</tr>
+			{% endfor %}
+				<tr class='error'>
+					<td>111</td>
+					<td>222</td>
+				</tr>
+				<tr>
+					<td>333</td>
+					<td>444</td>
+				</tr>
+			</tbody>
+		</table>
+    </div>
+	<div class="span2">
+		<div class="btn-group btn-group-vertical">
+			<div class='btn'><h3>生成问卷</h3></div>
+			<div class='btn'><h3>修改资料</h3></div>
+			<div class='btn'><h3>添加记录</h3></div>
+		</div>
+	</div>
+  </div>
+</div>
+{% endblock %}

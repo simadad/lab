@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}用户列表{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="row-fluid">
+    <div class="span2">
+		{% block row-left %}
+		{% endblock %}
+    </div>
+    <div class="span10">
+		{% block row-right %}
+		{% endblock %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+	{% load static %}
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css">
+	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap\css\bootstrap.min.css' %}" />
+	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap\css\bootstrap-responsive.min.css' %}" />
+	{% block link %}<link />{% endblock %}
+    <title>{% block title %}标题{% endblock %}</title>
+</head>
+<body>
+<header>
+<h1><a href='{% url "homepage" %}'>crossin编程教室实验室</a></h1>
+{% block header %}{% endblock %} 
+</header>
+<hr />
+{% block content %}内容{% endblock %}
+<footer>
+	{% block footer %}页脚{% endblock %}
+	<span><b><a>***感谢访问***</a></b></span>
+</footer>
+{% block script %}{% endblock %}
+<script src="http://code.jquery.com/jquery.js"></script>
+<script src="https://cdn.bootcss.com/jquery/1.12.3/jquery.min.js"></script>
+<script src="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js"></script>
+</body>
+</html>
