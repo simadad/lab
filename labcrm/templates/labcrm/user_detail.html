@@ -43,13 +43,12 @@
 <h2>{{ user.nickname }}</h2>
 <hr />
 <table class="table table-hover table-striped">
-	<caption>详细信息</caption>
-		<thead>
+	<thead>
 		<tr>
 			<th><b>Q</b></th>
 			<th><B>A</B></th>
 		</tr>
-		</thead>
+	</thead>
 	<tbody>
 	{% for answer in user.answers.all %}
 		<tr>
