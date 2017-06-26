@@ -35,7 +35,7 @@
 </div>
 <div class="btn-group btn-group-vertical" role="group">
 	<button class='btn btn-info'><h3>生成问卷</h3></button><hr />
-	<button class='btn btn-info' onclick='info_modify()'><h3>修改资料</h3></button><hr />
+	<button class='btn btn-info' id='btnModify' onclick='info_modify()'><h3>修改资料</h3></button><hr />
 	<button class='btn btn-info'><h3>添加记录</h3></button>
 </div>
 {% endblock %}
@@ -47,14 +47,14 @@
 	<form id='form_details'>
 	<table class="table table-hover table-striped table-bordered">
 		<thead class="thead-inverse">
-			<tr>
-				<th><b>Q</b></th>
-				<th><b>A</b></th>
+			<tr id='trQuestion'>
+				<th>属性</th>
+				<th>值</th>
 			</tr>
 		</thead>
-		<tbody>
+		<tbody id='tagTbInfo'>
 		{% for answer in user.answers.all %}
-			<tr>
+			<tr class='trAnswer'>
 				<td>{{ answer.question }}</td>
 				<td><input class="form-control form-control-lg tagAnswer" type="text" placeholder="{{ answer.answer }}" readonly></td>
 			</tr>
@@ -80,18 +80,44 @@
 {% block script %}
 <script>
 function info_modify(){
+	// 禁用按钮
+	var btnModify = document.getElementById('btnModify');
+	btnModify.setAttribute('disabled', 'true');
+	// 去除只读属性
 	var tagsAanswer = document.getElementsByClassName("tagAnswer");
 	for(var i=0;i<tagsAanswer.length;i++){
 		tagsAanswer[i].removeAttribute("readonly");
 	};
-	
+	// 显示隐藏按钮
 	var tagBtnHidden = document.getElementById("tagBtnHidden");
 	var classVal = tagBtnHidden.getAttribute("class");
 	classVal = classVal.replace('hidden', '');
 	tagBtnHidden.setAttribute("class", classVal);
+	// 新增删除列表头
+	var tagTrQuestion = document.getElementById('trQuestion');
+	var tagThNew = document.createElement('th');
+	tagTrQuestion.appendChild(tagThNew);
+	tagThNew.setAttribute('id', 'delInfo');
+	tagThNew.innerHTML = '删除';
+	// 新增删除列
+	var tagsTrAnswer = document.getElementsByClassName('trAnswer');
+	for(var i=0;i<tagsTrAnswer.length;i++){
+		var tagTdNew = document.createElement('td');
+		tagsTrAnswer[i].appendChild(tagTdNew);
+		tagTdNew.innerHTML = '<input class="form-control form-control-lg btn-danger btn" type="button" value="X">';
+	};
 };
 
-
+function tagInfoAdd(){
+	var tagTbInfo = document.getElementById('tagTbInfo');
+	var tagTrNew = document.createElement('tr');
+	tagTbInfo.appendChild(tagTrNew);
+	tagTrNew.setAttribute('class', 'trAnswer');
+	tagTrNew.innerHTML = '\
+	<td><input class="form-control form-control-lg" type="text" placeholder="属性名"></td>\
+	<td><input class="form-control form-control-lg tagAnswer" type="text" placeholder="属性值"></td>\
+	<td><input class="form-control form-control-lg btn-danger btn" type="button" value="X"></td>'
+};
 
 </script>
 {% endblock %}
