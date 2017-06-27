@@ -35,7 +35,7 @@
 </div>
 <div class="btn-group btn-group-vertical" role="group">
 	<button class='btn btn-info'><h3>生成问卷</h3></button><hr />
-	<button class='btn btn-info' onclick='info_modify(this)'><h3>修改资料</h3></button><hr />
+	<button class='btn btn-info' id='btnModify' onclick='info_modify(this)'><h3>修改资料</h3></button><hr />
 	<button class='btn btn-info'><h3>添加记录</h3></button>
 </div>
 {% endblock %}
@@ -44,7 +44,8 @@
 <div class='col-md-12'>
 	<h2>{{ user.nickname }}</h2>
 	<hr />
-	<form id='form_details'>
+	<form id='form_details' action='' method='POST'>
+	{% csrf_token %}
 	<table class="table table-hover table-striped table-bordered">
 		<thead class="thead-inverse">
 			<tr id='trQuestion'>
@@ -53,10 +54,10 @@
 			</tr>
 		</thead>
 		<tbody id='tagTbInfo'>
-		{% for answer in user.answers.all %}
+		{% for question in user.questions.all %}
 			<tr class='trAnswer'>
-				<td>{{ answer.question }}</td>
-				<td><input class="form-control form-control-lg tagAnswer" type="text" placeholder="{{ answer.answer }}" readonly></td>
+				<td>{{ question }}</td>
+				<td><input class="form-control form-control-lg tagAnswer" name='tagAnswer' placeholder='属性值' type="text" value="{{ question.answers.last }}" readonly></td>
 			</tr>
 		{% endfor %}
 			<tr class='error'>
@@ -74,7 +75,7 @@
 </div>
 <div class='row hidden' id='tagBtnHidden'>
 	<div class="col-md-4 col-md-offset-1 btn btn-primary" type='button' onclick='tagInfoAdd()'>增添信息</div>
-	<div class="col-md-4 col-md-offset-2 btn btn-primary" type='button' onclick='modifyConfirm()'>确认修改</div>
+	<input class="col-md-4 col-md-offset-2 btn btn-primary" form='form_details' type='submit' value='确认修改' onclick='modifyComfirm()'>
 </div>
 {% endblock %}
 {% block script %}
@@ -82,10 +83,21 @@
 function info_modify(e){
 	// 禁用按钮
 	e.setAttribute('disabled', 'true');
-	// 去除只读属性
+	// 修改资料
 	var tagsAanswer = document.getElementsByClassName("tagAnswer");
 	for(var i=0;i<tagsAanswer.length;i++){
 		tagsAanswer[i].removeAttribute("readonly");
+		var tagQuestion = tagsAanswer[i].parentNode.previousSibling.previousSibling
+		tagQuestion.innerHTML = '\
+		<fieldset class="form-group">\
+			<input class="form-control form-control-lg" name="tagQuestion" type="text" placeholder="新属性名" list="attrOption"\
+			onblur="questionJudge(this)" value="' + tagQuestion.innerHTML + '">\
+			<datalist id="attrOption">\
+			{% for attr in attrs %}\
+				<option value="{{ attr.attr }}">\
+			{% endfor %}\
+			</datalist>\
+		</fieldset>'
 	};
 	// 显示隐藏按钮
 	var tagBtnHidden = document.getElementById("tagBtnHidden");
@@ -113,9 +125,9 @@ function questionJudge(e){
 		if('{{ attr.attr }}'==e.value){
 			e.parentNode.parentNode.nextSibling.nextSibling.innerHTML='\
 			<fieldset class="form-group">\
-				<input class="form-control form-control-lg" type="text" placeholder="属性值" list="valueOptions">\
+				<input class="form-control form-control-lg" name="tagAnswer" type="text" placeholder="属性值" list="valueOptions">\
 				<datalist id="valueOptions">\
-				{% for value in attr.options %}\
+				{% for value in attr.options.all %}\
 					<option value="{{ value }}">\
 				{% endfor %}\
 				</datalist>\
@@ -133,7 +145,7 @@ function tagInfoAdd(){
 	tagTrNew.innerHTML = '\
 	<td>\
 		<fieldset class="form-group">\
-			<input class="form-control form-control-lg" type="text" placeholder="新属性名" list="attrOption" onblur="questionJudge(this)">\
+			<input class="form-control form-control-lg" name="tagQuestion" type="text" placeholder="新属性名" list="attrOption" onblur="questionJudge(this)">\
 			<datalist id="attrOption">\
 			{% for attr in attrs %}\
 				<option value="{{ attr.attr }}">\
@@ -141,9 +153,27 @@ function tagInfoAdd(){
 			</datalist>\
 		</fieldset>\
 	</td>\
-	<td><input class="form-control form-control-lg tagAnswer" type="text" placeholder="属性值"></td>\
+	<td><input class="form-control form-control-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值"></td>\
 	<td><input class="form-control form-control-lg btn-danger btn" type="button" value="X"></td>'
 };
-
+function modifyComfirm(){
+	document.getElementById("form_details").onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest(),
+			para = document.getElementById('row-right'),
+			btnModify = document.getElementById('btnModify');
+		xhr.open("POST", f.action, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var rowNew = xhr.responseText;
+				para.innerHTML = rowNew;
+			};
+		};
+		xhr.send(formData);
+		btnModify.removeAttribute('disabled');
+	};
+}
 </script>
 {% endblock %}

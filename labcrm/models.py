@@ -16,6 +16,7 @@ class Paper(models.Model):
     user = models.ForeignKey(LabUser, verbose_name='用户', related_name='papers')
     create_time = models.DateTimeField(verbose_name='建表时间', auto_now_add=True)
     finished_time = models.DateTimeField(verbose_name='填写时间', null=True)
+    is_del = models.BooleanField(verbose_name='是否删除', default=False)
 
     def __str__(self):
         name = self.user.nickname + ' ' + self.create_time.strftime('%Y-%m-%d')
@@ -25,16 +26,24 @@ class Paper(models.Model):
 class UserAttr(models.Model):
     attr = models.CharField(verbose_name='属性', max_length=255)
     is_option = models.BooleanField(verbose_name='是否提供选项', default=False)
-    options = models.TextField(verbose_name='选项', null=True, blank=True)
 
     def __str__(self):
         return self.attr
 
 
+class AttrOption(models.Model):
+    option = models.CharField(verbose_name='选项', max_length=255)
+    attr = models.ForeignKey(UserAttr, verbose_name='属性', related_name='options')
+
+    def __str__(self):
+        return self.option
+
+
 class UserInfoQ(models.Model):
     user = models.ForeignKey(LabUser, verbose_name='用户', related_name='questions')
-    paper = models.ForeignKey(Paper, verbose_name='问卷', related_name='questions')
+    paper = models.ForeignKey(Paper, verbose_name='问卷', related_name='questions', blank=True, null=True)
     attr = models.ForeignKey(UserAttr, verbose_name='属性', related_name='questions')
+    is_del = models.BooleanField(verbose_name='是否删除', default=False)
 
     def __str__(self):
         return self.attr.attr
@@ -45,7 +54,7 @@ class UserInfoA(models.Model):
     question = models.ForeignKey(UserInfoQ, verbose_name='问题', on_delete=models.CASCADE, related_name='answers')
     answer = models.CharField(verbose_name='回答', max_length=255)
     create_time = models.DateTimeField(verbose_name='添加时间', auto_now_add=True)
-    modify_time = models.DateTimeField(verbose_name='最后修改时间', auto_now=True)
+    is_del = models.BooleanField(verbose_name='是否删除', default=False)
 
     def __str__(self):
         return self.answer

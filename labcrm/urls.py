@@ -3,7 +3,8 @@ from labcrm import views
 
 
 ajax_urls = [
-    url(r'^preview', views.ajax_preview, name='preview')
+    url(r'^preview', views.ajax_conf_preview, name='preview'),
+    url(r'^modify', views.ajax_detail_modify, name='modify')
 ]
 
 
