@@ -18,8 +18,12 @@ def user_detail(request):
     uid = request.GET.get('uid')
     user = get_object_or_404(LabUser, id=uid)
     print(222222, user, type(user))
+    attrs = UserAttr.objects.all()
+    attr_option = attrs.filter(is_option=True)
     return render(request, 'labcrm/user_detail.html', {
-        'user': user
+        'user': user,
+        'attrs': attrs,
+        'attr_option': attr_option
     })
 
 

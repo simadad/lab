@@ -35,7 +35,7 @@
 </div>
 <div class="btn-group btn-group-vertical" role="group">
 	<button class='btn btn-info'><h3>生成问卷</h3></button><hr />
-	<button class='btn btn-info' id='btnModify' onclick='info_modify()'><h3>修改资料</h3></button><hr />
+	<button class='btn btn-info' onclick='info_modify(this)'><h3>修改资料</h3></button><hr />
 	<button class='btn btn-info'><h3>添加记录</h3></button>
 </div>
 {% endblock %}
@@ -79,10 +79,9 @@
 {% endblock %}
 {% block script %}
 <script>
-function info_modify(){
+function info_modify(e){
 	// 禁用按钮
-	var btnModify = document.getElementById('btnModify');
-	btnModify.setAttribute('disabled', 'true');
+	e.setAttribute('disabled', 'true');
 	// 去除只读属性
 	var tagsAanswer = document.getElementsByClassName("tagAnswer");
 	for(var i=0;i<tagsAanswer.length;i++){
@@ -108,13 +107,40 @@ function info_modify(){
 	};
 };
 
+function questionJudge(e){
+	// 提供备选答案
+	{% for attr in attr_option %}
+		if('{{ attr.attr }}'==e.value){
+			e.parentNode.parentNode.nextSibling.nextSibling.innerHTML='\
+			<fieldset class="form-group">\
+				<input class="form-control form-control-lg" type="text" placeholder="属性值" list="valueOptions">\
+				<datalist id="valueOptions">\
+				{% for value in attr.options %}\
+					<option value="{{ value }}">\
+				{% endfor %}\
+				</datalist>\
+			</fieldset>'
+		};
+	{% endfor %}
+};
+
 function tagInfoAdd(){
+	// 添加新属性
 	var tagTbInfo = document.getElementById('tagTbInfo');
 	var tagTrNew = document.createElement('tr');
 	tagTbInfo.appendChild(tagTrNew);
 	tagTrNew.setAttribute('class', 'trAnswer');
 	tagTrNew.innerHTML = '\
-	<td><input class="form-control form-control-lg" type="text" placeholder="属性名"></td>\
+	<td>\
+		<fieldset class="form-group">\
+			<input class="form-control form-control-lg" type="text" placeholder="新属性名" list="attrOption" onblur="questionJudge(this)">\
+			<datalist id="attrOption">\
+			{% for attr in attrs %}\
+				<option value="{{ attr.attr }}">\
+			{% endfor %}\
+			</datalist>\
+		</fieldset>\
+	</td>\
 	<td><input class="form-control form-control-lg tagAnswer" type="text" placeholder="属性值"></td>\
 	<td><input class="form-control form-control-lg btn-danger btn" type="button" value="X"></td>'
 };
