@@ -79,8 +79,13 @@ function info_modify(e){
 	for(var i=0;i<tagsTrAnswer.length;i++){
 		var tagTdNew = document.createElement('td');
 		tagsTrAnswer[i].appendChild(tagTdNew);
-		tagTdNew.innerHTML = '<input class="form-control form-control-lg btn-danger btn" type="button" value="X">';
+		tagTdNew.innerHTML = '<input class="form-control form-control-lg btn-danger btn" type="button" value="X" onclick="infoDel(this)">';
 	};
+};
+
+function infoDel(e){
+	// 删除信息
+	document.getElementById('tagTbInfo').removeChild(e.parentNode.parentNode)
 };
 
 function questionJudge(e){
@@ -120,6 +125,7 @@ function tagInfoAdd(){
 	<td><input class="form-control form-control-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值"></td>\
 	<td><input class="form-control form-control-lg btn-danger btn" type="button" value="X"></td>'
 };
+
 function modifyComfirm(){
 	// ajax 返回修改确认后新结果
 	document.getElementById("form_details").onsubmit = function(e){
@@ -139,6 +145,7 @@ function modifyComfirm(){
 		xhr.send(formData);
 		btnModify.removeAttribute('disabled');
 	};
-}
+};
+
 </script>
 {% endblock %}

@@ -13,6 +13,19 @@ def user_list(request):
     })
 
 
+def _save_new_detail(user, attr, answer):
+    uiq, _ = UserInfoQ.objects.get_or_create(
+        user=user,
+        attr=attr
+    )
+    UserInfoA.objects.get_or_create(
+        user=user,
+        question=uiq,
+        answer=answer
+    )
+    return uiq
+
+
 @login_required
 def user_detail(request):
     uid = request.GET.get('uid')
@@ -23,34 +36,35 @@ def user_detail(request):
     if request.method == 'POST':
         questions = request.POST.getlist('tagQuestion')
         answers = request.POST.getlist('tagAnswer')
-        print(questions, len(questions))
-        print(answers, len(answers))
-        for question, answer in zip(questions, answers):
-            # 检验是否新增 UserAttr 或 AttrOption
-            if question in [attr.attr for attr in attrs]:
-                attr = get_object_or_404(UserAttr, attr=question)
-                if attr.is_option and answer not in [option.option for option in attr.options.all()]:
-                    AttrOption.objects.create(
-                        option=answer,
-                        attr=attr
-                    )
-            else:
-                attr = UserAttr.objects.create(
-                    attr=question
-                )
-            # 检验是否新增 UserInfoQ
-            uiq = UserInfoQ.objects.filter(user=user, attr=attr)[0]
-            if uiq is None:
-                uiq = UserInfoQ.objects.create(
-                    user=user,
+        # print(questions, len(questions))
+        # print(answers, len(answers))
+        info = dict(zip(questions, answers))
+        # 已存在有选项的属性
+        for question in set(questions) & {attr.attr for attr in attr_option}:
+            attr = get_object_or_404(UserAttr, attr=question)
+            if info[question] not in [option.option for option in attr.options.all()]:
+                AttrOption.objects.create(
+                    option=info[question],
                     attr=attr
                 )
-            # 检验新增 UserInfoA
-            UserInfoA.objects.create(
-                user=user,
-                question=uiq,
-                answer=answer
+            _save_new_detail(user, attr, info[question])
+        # 已存在无选项的属性
+        for question in set(questions) & {attr.attr for attr in attrs} - {attr.attr for attr in attr_option}:
+            attr = get_object_or_404(UserAttr, attr=question)
+            _save_new_detail(user, attr, info[question])
+        # 新属性
+        for question in set(questions) - {attr.attr for attr in attrs}:
+            attr = UserAttr.objects.create(
+                attr=question
             )
+            _save_new_detail(user, attr, info[question])
+        # 被删除的属性
+        for question in {question.attr.attr for question in user.questions.all()} - set(questions):
+            attr = get_object_or_404(UserAttr, attr=question)
+            uiq = get_object_or_404(UserInfoQ, user=user, attr=attr, is_del=False)
+            uiq.update(is_del=True)
+            uia = get_object_or_404(UserInfoA, user=user, question=uiq, is_del=False)
+            uia.update(is_del=True)
         attrs = UserAttr.objects.all()
         attr_option = attrs.filter(is_option=True)
         # POST

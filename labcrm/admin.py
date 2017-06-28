@@ -23,7 +23,6 @@ class LabUserAdmin(admin.ModelAdmin):
     inlines = [InfoQInline, InfoAInline, PaperInline]
     list_display = ('user', 'nickname', 'wechat')
     search_fields = ('user', 'nickname', 'wechat')
-    list_filter = ('user', 'nickname', 'wechat')
     fieldsets = (
         ['Main', {
             'fields': ('user', 'nickname', 'wechat')
@@ -33,7 +32,7 @@ class LabUserAdmin(admin.ModelAdmin):
 
 class PaperAdmin(admin.ModelAdmin):
     inlines = [InfoQInline]
-    list_filter = ('user', 'create_time', 'finished_time', 'is_del')
+    list_filter = ('create_time', 'finished_time', 'is_del')
     list_display = ('user', 'create_time', 'finished_time', 'is_del')
     search_fields = ('user',)
     fieldsets = (
@@ -58,7 +57,7 @@ class UserAttrAdmin(admin.ModelAdmin):
 class UserInfoQAdmin(admin.ModelAdmin):
     inlines = [InfoAInline]
     list_display = ('user', 'paper', 'attr', 'is_del')
-    list_filter = ('user', 'paper', 'attr', 'is_del')
+    list_filter = ('paper', 'attr', 'is_del')
     search_fields = ('user', 'paper', 'attr')
     fieldsets = (
         ['Main', {
@@ -69,7 +68,7 @@ class UserInfoQAdmin(admin.ModelAdmin):
 
 class UserInfoAAdmin(admin.ModelAdmin):
     list_display = ('user', 'question', 'answer', 'create_time', 'is_del')
-    list_filter = ('user', 'question', 'answer', 'is_del')
+    list_filter = ('question', 'answer', 'is_del')
     search_fields = ('user', 'question', 'answer')
     fieldsets = (
         ['Main', {
