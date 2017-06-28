@@ -35,8 +35,9 @@
 </div>
 <div class="btn-group btn-group-vertical" role="group">
 	<button class='btn btn-info'><h3>生成问卷</h3></button><hr />
-	<button class='btn btn-info' id='btnModify' onclick='info_modify(this)'><h3>修改资料</h3></button><hr />
-	<button class='btn btn-info'><h3>添加记录</h3></button>
+	<button class='btn btn-info' id='btnModify' onclick='infoModify(this)'><h3>修改资料</h3></button><hr />
+	<button class='btn btn-info'><h3>添加记录</h3></button><hr />
+	<button class='btn btn-danger hidden' id='tagCancel' onclick='modifyConcel()'><h3>取消修改</h3></button>
 </div>
 {% endblock %}
 {% block row-right %}
@@ -44,10 +45,10 @@
 {% endblock %}
 {% block script %}
 <script>
-function info_modify(e){
+function infoModify(e){
 	// 禁用按钮
 	e.setAttribute('disabled', 'true');
-	// 修改资料
+	// 开启编辑
 	var tagsAanswer = document.getElementsByClassName("tagAnswer");
 	for(var i=0;i<tagsAanswer.length;i++){
 		tagsAanswer[i].removeAttribute("readonly");
@@ -55,7 +56,7 @@ function info_modify(e){
 		tagQuestion.innerHTML = '\
 		<fieldset class="form-group">\
 			<input class="form-control form-control-lg" name="tagQuestion" type="text" placeholder="新属性名" list="attrOption"\
-			onblur="questionJudge(this)" value="' + tagQuestion.innerHTML + '">\
+			onfocus="this.select();" onblur="questionJudge(this)" value="' + tagQuestion.innerHTML + '">\
 			<datalist id="attrOption">\
 			{% for attr in attrs %}\
 				<option value="{{ attr.attr }}">\
@@ -68,6 +69,10 @@ function info_modify(e){
 	var classVal = tagBtnHidden.getAttribute("class");
 	classVal = classVal.replace('hidden', '');
 	tagBtnHidden.setAttribute("class", classVal);
+	var tagCancel = document.getElementById("tagCancel");
+	var classVal2 = tagCancel.getAttribute("class");
+	classVal2 = classVal2.replace('hidden', '');
+	tagCancel.setAttribute("class", classVal2);
 	// 新增删除列表头
 	var tagTrQuestion = document.getElementById('trQuestion');
 	var tagThNew = document.createElement('th');
@@ -94,7 +99,7 @@ function questionJudge(e){
 		if('{{ attr.attr }}'==e.value){
 			e.parentNode.parentNode.nextSibling.nextSibling.innerHTML='\
 			<fieldset class="form-group">\
-				<input class="form-control form-control-lg" name="tagAnswer" type="text" placeholder="属性值" list="valueOptions">\
+				<input class="form-control form-control-lg" name="tagAnswer" type="text" placeholder="属性值" list="valueOptions" onfocus="this.select();">\
 				<datalist id="valueOptions">\
 				{% for value in attr.options.all %}\
 					<option value="{{ value }}">\
@@ -103,7 +108,7 @@ function questionJudge(e){
 			</fieldset>'
 		}else{
 			e.parentNode.parentNode.nextSibling.nextSibling.innerHTML='\
-			<input class="form-control form-control-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值">'
+			<input class="form-control form-control-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值" onfocus="this.select();">'
 		};
 	{% endfor %}
 };
@@ -117,7 +122,8 @@ function tagInfoAdd(){
 	tagTrNew.innerHTML = '\
 	<td>\
 		<fieldset class="form-group">\
-			<input class="form-control form-control-lg" name="tagQuestion" type="text" placeholder="新属性名" list="attrOption" onblur="questionJudge(this)">\
+			<input class="form-control form-control-lg" name="tagQuestion" type="text" placeholder="新属性名" list="attrOption" \
+			onfocus="this.select();" onblur="questionJudge(this)">\
 			<datalist id="attrOption">\
 			{% for attr in attrs %}\
 				<option value="{{ attr.attr }}">\
@@ -125,7 +131,7 @@ function tagInfoAdd(){
 			</datalist>\
 		</fieldset>\
 	</td>\
-	<td><input class="form-control form-control-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值"></td>\
+	<td><input class="form-control form-control-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值" onfocus="this.select();"></td>\
 	<td><input class="form-control form-control-lg btn-danger btn" type="button" value="X"></td>'
 };
 
@@ -150,5 +156,21 @@ function modifyComfirm(){
 	};
 };
 
+function modifyConcel(){
+	var para = document.getElementById('row-right'),
+		xhr = new XMLHttpRequest(),
+		btnModify = document.getElementById('btnModify');
+		tagCancel = document.getElementById('tagCancel');
+	xhr.onreadystatechange=function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			var rowNew = xhr.responseText;
+			para.innerHTML = rowNew;
+		};
+	};
+	xhr.open("GET", '{% url "crm:detail" %}?uid={{ user.id }}&ajax=1', true);
+	xhr.send();
+	btnModify.removeAttribute('disabled');
+	tagCancel.setAttribute('class', 'hidden');
+};
 </script>
 {% endblock %}

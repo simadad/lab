@@ -76,21 +76,23 @@ def user_detail(request):
         attrs = UserAttr.objects.all()
         attr_option = attrs.filter(is_option=True)
         user_answers = UserInfoA.objects.filter(user=user, is_del=False)
-        # POST
-        return HttpResponse(render(request, 'labcrm/ajax_user_detail.html', {
+    elif request.method == 'GET' and request.GET.get('ajax') is None:
+        print(11111111111, request.GET.get('ajax'))
+        # GET
+        return render(request, 'labcrm/user_detail.html', {
             'user': user,
             'attrs': attrs,
             'attr_option': attr_option,
             'answers': user_answers
-        }))
-    # GET
-    print(1111111111111, attr_option)
-    return render(request, 'labcrm/user_detail.html', {
+        })
+    # POST
+    return HttpResponse(render(request, 'labcrm/ajax_user_detail.html', {
         'user': user,
         'attrs': attrs,
         'attr_option': attr_option,
         'answers': user_answers
-    })
+    }))
+
 
 
 @login_required

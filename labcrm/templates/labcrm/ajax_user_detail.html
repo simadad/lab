@@ -15,7 +15,7 @@
 		{% for answer in answers %}
 			<tr class='trAnswer'>
 				<td>{{ answer.question }}</td>
-				<td><input class="form-control form-control-lg tagAnswer" name='tagAnswer' placeholder='属性值' type="text" value="{{ answer }}" readonly></td>
+				<td><input class="form-control form-control-lg tagAnswer" name='tagAnswer' onfocus="this.select();" placeholder='属性值' type="text" value="{{ answer }}" readonly></td>
 			</tr>
 		{% endfor %}
 			<tr class='error'>
