@@ -12,10 +12,10 @@
 			</tr>
 		</thead>
 		<tbody id='tagTbInfo'>
-		{% for question in user.questions.all %}
+		{% for answer in answers %}
 			<tr class='trAnswer'>
-				<td>{{ question }}</td>
-				<td><input class="form-control form-control-lg tagAnswer" name='tagAnswer' placeholder='属性值' type="text" value="{{ question.answers.last }}" readonly></td>
+				<td>{{ answer.question }}</td>
+				<td><input class="form-control form-control-lg tagAnswer" name='tagAnswer' placeholder='属性值' type="text" value="{{ answer }}" readonly></td>
 			</tr>
 		{% endfor %}
 			<tr class='error'>

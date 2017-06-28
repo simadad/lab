@@ -15,14 +15,19 @@ def user_list(request):
 
 def _save_new_detail(user, attr, answer):
     uiq, _ = UserInfoQ.objects.get_or_create(
-        user=user,
-        attr=attr
+        user=user, attr=attr
     )
-    UserInfoA.objects.get_or_create(
-        user=user,
-        question=uiq,
-        answer=answer
+    uias = UserInfoA.objects.filter(
+        user=user, question=uiq, is_del=False
     )
+    for uia in uias:
+        uia.is_del = True
+        uia.save()
+    uia, _ = UserInfoA.objects.get_or_create(
+        user=user, question=uiq, answer=answer
+    )
+    uia.is_del = False
+    uia.save()
     return uiq
 
 
@@ -30,6 +35,7 @@ def _save_new_detail(user, attr, answer):
 def user_detail(request):
     uid = request.GET.get('uid')
     user = get_object_or_404(LabUser, id=uid)
+    user_answers = UserInfoA.objects.filter(user=user, is_del=False)
     attrs = UserAttr.objects.all()
     attr_option = attrs.filter(is_option=True)
 
@@ -62,23 +68,28 @@ def user_detail(request):
         for question in {question.attr.attr for question in user.questions.all()} - set(questions):
             attr = get_object_or_404(UserAttr, attr=question)
             uiq = get_object_or_404(UserInfoQ, user=user, attr=attr, is_del=False)
-            uiq.update(is_del=True)
+            uiq.is_del = True
+            uiq.save()
             uia = get_object_or_404(UserInfoA, user=user, question=uiq, is_del=False)
-            uia.update(is_del=True)
+            uia.is_del = True
+            uia.save()
         attrs = UserAttr.objects.all()
         attr_option = attrs.filter(is_option=True)
+        user_answers = UserInfoA.objects.filter(user=user, is_del=False)
         # POST
         return HttpResponse(render(request, 'labcrm/ajax_user_detail.html', {
             'user': user,
             'attrs': attrs,
-            'attr_option': attr_option
+            'attr_option': attr_option,
+            'answers': user_answers
         }))
     # GET
     print(1111111111111, attr_option)
     return render(request, 'labcrm/user_detail.html', {
         'user': user,
         'attrs': attrs,
-        'attr_option': attr_option
+        'attr_option': attr_option,
+        'answers': user_answers
     })
 
 
