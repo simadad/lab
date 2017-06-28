@@ -101,6 +101,9 @@ function questionJudge(e){
 				{% endfor %}\
 				</datalist>\
 			</fieldset>'
+		}else{
+			e.parentNode.parentNode.nextSibling.nextSibling.innerHTML='\
+			<input class="form-control form-control-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值">'
 		};
 	{% endfor %}
 };
