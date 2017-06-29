@@ -144,15 +144,18 @@ function modifyComfirm(){
 			xhr = new XMLHttpRequest(),
 			para = document.getElementById('row-right'),
 			btnModify = document.getElementById('btnModify');
+			tagCancel = document.getElementById('tagCancel');
 		xhr.open("POST", f.action, true);
 		xhr.onreadystatechange=function(){
 			if(xhr.readyState == 4 && xhr.status == 200){
 				var rowNew = xhr.responseText;
 				para.innerHTML = rowNew;
+				btnModify.removeAttribute('disabled');
+				tagCancel.setAttribute('class', 'hidden');
 			};
 		};
 		xhr.send(formData);
-		btnModify.removeAttribute('disabled');
+		
 	};
 };
 
@@ -165,12 +168,13 @@ function modifyConcel(){
 		if(xhr.readyState == 4 && xhr.status == 200){
 			var rowNew = xhr.responseText;
 			para.innerHTML = rowNew;
+			btnModify.removeAttribute('disabled');
+			tagCancel.setAttribute('class', 'hidden');
 		};
 	};
 	xhr.open("GET", '{% url "crm:detail" %}?uid={{ user.id }}&ajax=1', true);
 	xhr.send();
-	btnModify.removeAttribute('disabled');
-	tagCancel.setAttribute('class', 'hidden');
+	
 };
 </script>
 {% endblock %}

@@ -11,8 +11,8 @@
 </div>
 {% endblock %}
 {% block row-right %}
-<div class="row-fluid">
-	<div class="span9" id='box_preview'>
+<div class="row">
+	<div class="col-md-9" id='box_preview'>
 		<table class="table table-hover table-striped table-bordered">
 			<thead class='thead-inverse'>
 			<tr>
@@ -55,7 +55,7 @@
 		</table>
 		<input type='submit' form='ques_conf' value='问卷预览' onclick='ques_conf()'>
 	</div>
-	<div class="span3">
+	<div class="col-md-3">
 	{% for attr in attrs %}
 		<div class="collapse" id="collapse{{ attr.id }}">
 			<ul class='list-group'>

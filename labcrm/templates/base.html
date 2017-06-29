@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
 	{% load static %}
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css">
-	<link rel='stylesheet' type='text/css' href="{% static 'dist\css\bootstrap.min.css' %}" />
-	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap\css\bootstrap-responsive.min.css' %}" />
+	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap.min.css' %}" />
+	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap-theme.min.css' %}" />
+	<!--link rel='stylesheet' type='text/css' href="{% static 'bootstrap\css\bootstrap-responsive.min.css' %}" /-->
 	{% block link %}<link />{% endblock %}
     <title>{% block title %}标题{% endblock %}</title>
 </head>
@@ -23,7 +23,9 @@
 </footer>
 {% block script %}{% endblock %}
 <script src="http://code.jquery.com/jquery.js"></script>
-<script src="https://cdn.bootcss.com/jquery/1.12.3/jquery.min.js"></script>
-<script src="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js"></script>
+<!--script src="https://cdn.bootcss.com/jquery/1.12.3/jquery.min.js"></script-->
+<!--script src="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js"></script-->
+<script src="{% static 'bootstrap3\js\bootstrap.min.js' %}"></script>
+<script src="{% static 'bootstrap3\js\npm.js' %}"></script>
 </body>
 </html>
