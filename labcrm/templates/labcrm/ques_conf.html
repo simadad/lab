@@ -5,16 +5,16 @@
 {% endblock %} 
 {% block row-left %}
 <div class="btn-group btn-group-vertical">
-	<div class='btn'><h3>生成问卷</h3></div>
-	<div class='btn'><h3>提问修改</h3></div>
-	<div class='btn'><h3>添加提问</h3></div>
+	<div class='btn btn-info'><h3>生成问卷</h3></div><hr />
+	<div class='btn btn-info'><h3>提问修改</h3></div><hr />
+	<div class='btn btn-info'><h3>添加提问</h3></div>
 </div>
 {% endblock %}
 {% block row-right %}
 <div class="row-fluid">
 	<div class="span9" id='box_preview'>
-		<table class="table table-hover table-striped">
-			<thead>
+		<table class="table table-hover table-striped table-bordered">
+			<thead class='thead-inverse'>
 			<tr>
 				<th>问题</th>
 				<th>提供选项</th>
@@ -22,43 +22,47 @@
 			</tr>
 			</thead>
 			<form method='POST' id='ques_conf' enctype='multipart/form-data'>
-				{% csrf_token %}
-				<tbody>
+			{% csrf_token %}
+			<tbody>
 				{% for attr in attrs %}
+				<tr>
+					<td>{{ attr.attr }}</td>
 					{% if attr.is_option %}
-					<tr class='success panel-title' href="#collapse{{ attr.id }}" data-toggle="collapse" aria-controls="collapse{{ attr.id }}">
+					<td class='table-info' href="#collapse{{ attr.id }}" data-toggle="collapse">{{ attr.is_option }}</td>
 					{% else %}
-					<tr>
-				{% endif %}
-						<td class='span6'>{{ attr.attr }}</td>
-						<td class='span4'>{{ attr.is_option }}</td>
-						<td class='span2'>
-							<label class="c-input c-checkbox">
-								<input type="checkbox" name='is_check' value='{{ attr.id }}'>
-								<span class="c-indicator"></span>
-							</label>
-						</td>
-					</tr>
+					<td>{{ attr.is_option }}</td>
+					{% endif %}
+					<td>
+						<label class="c-input c-checkbox">
+							<input type="checkbox" name='is_check' value='{{ attr.id }}'>
+							<span class="c-indicator"></span>
+						</label>
+					</td>
+				</tr>
 				{% endfor %}
-					<tr class='error'>
-						<td>111</td>
-						<td>222</td>
-						<td>222</td>
-					</tr>
-					<tr>
-						<td>333</td>
-						<td>444</td>
-						<td>444</td>
-					</tr>
-				</tbody>
+				<tr class='table-info'>
+					<td>111</td>
+					<td>222</td>
+					<td>222</td>
+				</tr>
+				<tr>
+					<td>333</td>
+					<td>444</td>
+					<td>444</td>
+				</tr>
+			</tbody>
 			</form>
 		</table>
 		<input type='submit' form='ques_conf' value='问卷预览' onclick='ques_conf()'>
 	</div>
 	<div class="span3">
 	{% for attr in attrs %}
-		<div class="collapse in" id="collapse{{ attr.id }}">
-			{{ attr.options }}
+		<div class="collapse" id="collapse{{ attr.id }}">
+			<ul class='list-group'>
+			{% for option in attr.options.all %}
+				<li class="list-group-item list-group-item-success">{{ option }}</li>
+			{% endfor %}
+			</ul>
 		</div>
 	{% endfor %}
 	</div>

@@ -94,7 +94,6 @@ def user_detail(request):
     }))
 
 
-
 @login_required
 def ques_conf(request):
         attrs = UserAttr.objects.all()
