@@ -1,18 +1,17 @@
 {% extends 'base2.html' %}
 {% block title %}问卷配置{% endblock %}
-{% block header %}
-<li><a href='{% url "crm:add" %}'>添加提问</a></li>
-{% endblock %} 
+{% block quesConf %}active{% endblock %}
 {% block row-left %}
 <div class="btn-group btn-group-vertical">
-	<div class='btn btn-info'><h3>生成问卷</h3></div><hr />
-	<div class='btn btn-info'><h3>提问修改</h3></div><hr />
-	<div class='btn btn-info'><h3>添加提问</h3></div>
+	<a class='btn btn-success btn-lg btn-block hidden' id='btnCreate' href=''>生成问卷</a>
+	<input class='btn btn-info btn-lg btn-block' type='submit' form='quesConf' id='btnPreview' value='问卷预览' onclick='quesConfPre()'><hr />
+	<div class='btn btn-info btn-lg btn-block'>提问修改</div><hr />
+	<a class='btn btn-info btn-lg btn-block' href='{% url "crm:add" %}'>添加提问</a>
 </div>
 {% endblock %}
 {% block row-right %}
 <div class="row">
-	<div class="col-md-9" id='box_preview'>
+	<div class="col-md-9" id='boxPreview'>
 		<table class="table table-hover table-striped table-bordered">
 			<thead class='thead-inverse'>
 			<tr>
@@ -21,26 +20,26 @@
 				<th>选用</th>
 			</tr>
 			</thead>
-			<form method='POST' id='ques_conf' enctype='multipart/form-data'>
+			<form method='POST' id='quesConf' action='{% url "crm:ajax:preview" %}'>
 			{% csrf_token %}
 			<tbody>
 				{% for attr in attrs %}
 				<tr>
 					<td>{{ attr.attr }}</td>
 					{% if attr.is_option %}
-					<td class='table-info' href="#collapse{{ attr.id }}" data-toggle="collapse">{{ attr.is_option }}</td>
+					<td class='info' href="#collapse{{ attr.id }}" data-toggle="collapse">{{ attr.is_option }}</td>
 					{% else %}
 					<td>{{ attr.is_option }}</td>
 					{% endif %}
 					<td>
 						<label class="c-input c-checkbox">
-							<input type="checkbox" name='is_check' value='{{ attr.id }}'>
+							<input type="checkbox" name='attr_checked' value='{{ attr.id }}'>
 							<span class="c-indicator"></span>
 						</label>
 					</td>
 				</tr>
 				{% endfor %}
-				<tr class='table-info'>
+				<tr class='info'>
 					<td>111</td>
 					<td>222</td>
 					<td>222</td>
@@ -53,7 +52,6 @@
 			</tbody>
 			</form>
 		</table>
-		<input type='submit' form='ques_conf' value='问卷预览' onclick='ques_conf()'>
 	</div>
 	<div class="col-md-3">
 	{% for attr in attrs %}
@@ -68,24 +66,29 @@
 	</div>
 </div>
 <script>
-function ques_conf(){
-	var box = document.getElementById('box_preview');
-	var xmlhttp = new XMLHttpRequest();
-	xmlhttp.open('GET', '{% url "crm:ajax:preview" %}', true);
-	xmlhttp.onreadystatechange=function()
-	{
-		if(xmlhttp.readyState==4 && xmlhttp.status==200)
-		{
-			var tag_new = xmlhttp.responseText;
-			console.log(tag_new);
-			box.innerHTML = tag_new;
-		}
-	}
+function quesConfPre(){
+	document.getElementById("quesConf").onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest(),
+			para = document.getElementById('boxPreview'),
+			btnPreview = document.getElementById('btnPreview'),
+			btnCreate = document.getElementById('btnCreate'),
+			btnCreVal = btnCreate.getAttribute('class');
+		btnCreVal = btnCreVal.replace('hidden', '');
+		xhr.open("POST", f.action, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var rowNew = xhr.responseText;
+				para.innerHTML = rowNew;
+				btnPreview.setAttribute('class', 'hidden');
+				btnCreate.setAttribute('class', btnCreVal);
+			};
+		};
+		xhr.send(formData);
+	};
+};
 
-	//var csrftoken = getCookie('csrftoken');
-	//xmlhttp.setRequestHeader('X-CSRFToken',csrftoken);
-	//xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	xmlhttp.send();
-}
 </script>
 {% endblock %}

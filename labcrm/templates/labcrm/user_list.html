@@ -1,5 +1,6 @@
 {% extends 'base2.html' %}
 {% block title %}用户列表{% endblock %}
+{% block userList %}active{% endblock %}
 {% block row-left %}
 <ul class="navbar-nav nav-pills nav-stacked">
 	<li><a href='#'><h3>添加成员</h3></a></li>
@@ -18,18 +19,18 @@
 		</tr>
 		</thead>
 	<tbody>
-	{% for user in users %}
+	{% for lab_user in users %}
 		<tr>
-			<td><a href='{% url "crm:detail" %}?uid={{ user.id }}'>{{ user.nickname }}</a></td>
-			<td>{{ user.wechat }}</td>
+			<td><a href='{% url "crm:detail" %}?uid={{ lab_user.id }}'>{{ lab_user.nickname }}</a></td>
+			<td>{{ lab_user.wechat }}</td>
 			<td>
-			{% if user.papers %}
-				<a>{{ user.papers.last }}</a>
+			{% if lab_user.papers %}
+				<a>{{ lab_user.papers.last }}</a>
 			{% else %}
 				<a>None</a>
 			{% endif %}
 			</td>
-			<td>{{ user.user.date_joined }}</td>
+			<td>{{ lab_user.user.date_joined }}</td>
 		</tr>
 	{% endfor %}
 		<tr class='error'>

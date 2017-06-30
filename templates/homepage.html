@@ -1,12 +1,3 @@
 {% extends 'base.html' %}
 {% block title %}主页{% endblock %}
-{% block header %}
-<nav><ul>
-	<li><a href='{% url "crm:list" %}'>用户列表</a></li>
-	<li><a href='{% url "crm:conf" %}'>问卷设计</a></li>
-</ul></nav>
-<span><ul>
-	<li><a href='{% url "account:register" %}'>注册</a></li>
-	<li><a href='{% url "account:login" %}'>登录</a></li>
-</ul></span>
-{% endblock %}
+{% block content %}{% endblock %}

@@ -34,16 +34,22 @@ def _save_new_detail(user, attr, answer):
 @login_required
 def user_detail(request):
     uid = request.GET.get('uid')
-    user = get_object_or_404(LabUser, id=uid)
-    user_answers = UserInfoA.objects.filter(user=user, is_del=False)
+    lab_user = get_object_or_404(LabUser, id=uid)
+    user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
     attrs = UserAttr.objects.all()
     attr_option = attrs.filter(is_option=True)
 
-    if request.method == 'POST':
+    if request.method == 'GET' and request.GET.get('ajax') is None:
+        return render(request, 'labcrm/user_detail.html', {
+            'lab_user': lab_user,
+            'attrs': attrs,
+            'attr_option': attr_option,
+            'answers': user_answers
+        })
+
+    elif request.method == 'POST':
         questions = request.POST.getlist('tagQuestion')
         answers = request.POST.getlist('tagAnswer')
-        # print(questions, len(questions))
-        # print(answers, len(answers))
         info = dict(zip(questions, answers))
         # 已存在有选项的属性
         for question in set(questions) & {attr.attr for attr in attr_option}:
@@ -53,41 +59,32 @@ def user_detail(request):
                     option=info[question],
                     attr=attr
                 )
-            _save_new_detail(user, attr, info[question])
+            _save_new_detail(lab_user, attr, info[question])
         # 已存在无选项的属性
         for question in set(questions) & {attr.attr for attr in attrs} - {attr.attr for attr in attr_option}:
             attr = get_object_or_404(UserAttr, attr=question)
-            _save_new_detail(user, attr, info[question])
+            _save_new_detail(lab_user, attr, info[question])
         # 新属性
         for question in set(questions) - {attr.attr for attr in attrs}:
             attr = UserAttr.objects.create(
                 attr=question
             )
-            _save_new_detail(user, attr, info[question])
+            _save_new_detail(lab_user, attr, info[question])
         # 被删除的属性
-        for question in {question.attr.attr for question in user.questions.all()} - set(questions):
+        for question in {question.attr.attr for question in lab_user.questions.all()} - set(questions):
             attr = get_object_or_404(UserAttr, attr=question)
-            uiq = get_object_or_404(UserInfoQ, user=user, attr=attr, is_del=False)
+            uiq = get_object_or_404(UserInfoQ, user=lab_user, attr=attr, is_del=False)
             uiq.is_del = True
             uiq.save()
-            uia = get_object_or_404(UserInfoA, user=user, question=uiq, is_del=False)
+            uia = get_object_or_404(UserInfoA, user=lab_user, question=uiq, is_del=False)
             uia.is_del = True
             uia.save()
         attrs = UserAttr.objects.all()
         attr_option = attrs.filter(is_option=True)
-        user_answers = UserInfoA.objects.filter(user=user, is_del=False)
-    elif request.method == 'GET' and request.GET.get('ajax') is None:
-        print(11111111111, request.GET.get('ajax'))
-        # GET
-        return render(request, 'labcrm/user_detail.html', {
-            'user': user,
-            'attrs': attrs,
-            'attr_option': attr_option,
-            'answers': user_answers
-        })
-    # POST
+        user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
+    # POST and cancel
     return HttpResponse(render(request, 'labcrm/ajax_user_detail.html', {
-        'user': user,
+        'labUser': lab_user,
         'attrs': attrs,
         'attr_option': attr_option,
         'answers': user_answers
@@ -113,9 +110,11 @@ def ques_add(request):
 
 
 @login_required
-def ajax_conf_preview(request, ids):
+def ajax_conf_preview(request):
+    attr_ids = request.POST.getlist('attr_checked')
+    attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
     return HttpResponse(render(request, 'labcrm/ajax/preview.html', {
-        'ids': ids
+        'attrs': attrs
     }))
 
 

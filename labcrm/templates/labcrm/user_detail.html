@@ -55,7 +55,7 @@ function infoModify(e){
 		var tagQuestion = tagsAanswer[i].parentNode.previousSibling.previousSibling
 		tagQuestion.innerHTML = '\
 		<fieldset class="form-group">\
-			<input class="form-control form-control-lg" name="tagQuestion" type="text" placeholder="新属性名" list="attrOption"\
+			<input class="form-control input-lg" name="tagQuestion" type="text" placeholder="新属性名" list="attrOption"\
 			onfocus="this.select();" onblur="questionJudge(this)" value="' + tagQuestion.innerHTML + '">\
 			<datalist id="attrOption">\
 			{% for attr in attrs %}\
@@ -84,7 +84,7 @@ function infoModify(e){
 	for(var i=0;i<tagsTrAnswer.length;i++){
 		var tagTdNew = document.createElement('td');
 		tagsTrAnswer[i].appendChild(tagTdNew);
-		tagTdNew.innerHTML = '<input class="form-control form-control-lg btn-danger btn" type="button" value="X" onclick="infoDel(this)">';
+		tagTdNew.innerHTML = '<input class="form-control input-lg btn-danger btn" type="button" value="X" onclick="infoDel(this)">';
 	};
 };
 
@@ -99,7 +99,7 @@ function questionJudge(e){
 		if('{{ attr.attr }}'==e.value){
 			e.parentNode.parentNode.nextSibling.nextSibling.innerHTML='\
 			<fieldset class="form-group">\
-				<input class="form-control form-control-lg" name="tagAnswer" type="text" placeholder="属性值" list="valueOptions" onfocus="this.select();">\
+				<input class="form-control input-lg" name="tagAnswer" type="text" placeholder="属性值" list="valueOptions" onfocus="this.select();">\
 				<datalist id="valueOptions">\
 				{% for value in attr.options.all %}\
 					<option value="{{ value }}">\
@@ -108,7 +108,7 @@ function questionJudge(e){
 			</fieldset>'
 		}else{
 			e.parentNode.parentNode.nextSibling.nextSibling.innerHTML='\
-			<input class="form-control form-control-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值" onfocus="this.select();">'
+			<input class="form-control input-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值" onfocus="this.select();">'
 		};
 	{% endfor %}
 };
@@ -122,7 +122,7 @@ function tagInfoAdd(){
 	tagTrNew.innerHTML = '\
 	<td>\
 		<fieldset class="form-group">\
-			<input class="form-control form-control-lg" name="tagQuestion" type="text" placeholder="新属性名" list="attrOption" \
+			<input class="form-control input-lg" name="tagQuestion" type="text" placeholder="新属性名" list="attrOption" \
 			onfocus="this.select();" onblur="questionJudge(this)">\
 			<datalist id="attrOption">\
 			{% for attr in attrs %}\
@@ -131,8 +131,8 @@ function tagInfoAdd(){
 			</datalist>\
 		</fieldset>\
 	</td>\
-	<td><input class="form-control form-control-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值" onfocus="this.select();"></td>\
-	<td><input class="form-control form-control-lg btn-danger btn" type="button" value="X"></td>'
+	<td><input class="form-control input-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值" onfocus="this.select();"></td>\
+	<td><input class="form-control input-lg btn-danger btn" type="button" value="X"></td>'
 };
 
 function modifyComfirm(){
@@ -144,14 +144,16 @@ function modifyComfirm(){
 			xhr = new XMLHttpRequest(),
 			para = document.getElementById('row-right'),
 			btnModify = document.getElementById('btnModify');
-			tagCancel = document.getElementById('tagCancel');
+			tagCancel = document.getElementById('tagCancel'),
+			tagCancelVal = tagCancel.getAttribute('class');
+		tagCancelVal += ' hidden'
 		xhr.open("POST", f.action, true);
 		xhr.onreadystatechange=function(){
 			if(xhr.readyState == 4 && xhr.status == 200){
 				var rowNew = xhr.responseText;
 				para.innerHTML = rowNew;
 				btnModify.removeAttribute('disabled');
-				tagCancel.setAttribute('class', 'hidden');
+				tagCancel.setAttribute('class', tagCancelVal);
 			};
 		};
 		xhr.send(formData);
@@ -160,21 +162,23 @@ function modifyComfirm(){
 };
 
 function modifyConcel(){
+	// 取消修改
 	var para = document.getElementById('row-right'),
 		xhr = new XMLHttpRequest(),
 		btnModify = document.getElementById('btnModify');
-		tagCancel = document.getElementById('tagCancel');
+		tagCancel = document.getElementById('tagCancel'),
+		tagCancelVal = tagCancel.getAttribute('class');
+	tagCancelVal += ' hidden'
 	xhr.onreadystatechange=function(){
 		if(xhr.readyState == 4 && xhr.status == 200){
 			var rowNew = xhr.responseText;
 			para.innerHTML = rowNew;
 			btnModify.removeAttribute('disabled');
-			tagCancel.setAttribute('class', 'hidden');
+			tagCancel.setAttribute('class', tagCancelVal);
 		};
 	};
-	xhr.open("GET", '{% url "crm:detail" %}?uid={{ user.id }}&ajax=1', true);
+	xhr.open("GET", '{% url "crm:detail" %}?uid={{ lab_user.id }}&ajax=1', true);
 	xhr.send();
-	
 };
 </script>
 {% endblock %}

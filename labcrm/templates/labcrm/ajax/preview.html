@@ -1,2 +1,43 @@
-{{ ids }}
+<form>
+<table class="table table-hover table-striped table-bordered">
+	<caption>
+		<input class='text-muted form-control input-lg' type='text' name='ques_title' placeholder='标题'>
+		<div class='text-right'><small><em>for -- </em></small><mark>{{ user }}</mark></div>
+	</caption>
+	<thead class="thead-inverse">
+		<tr id='trHead'>
+			<th><input class='text-muted form-control input-lg' name='ques_head' onfocus="this.select();" placeholder='问'></th>
+			<th><input class='text-muted form-control input-lg' name='ques_head' onfocus="this.select();" placeholder='答'></th>
+		</tr>
+	</thead>
+	<tbody id='tbInfo'>
+	{% for attr in attrs %}
+		<tr class='trAttr rows'>
+			<td class='col-xs-3 success'><input class='form-control input-lg' name='ques_attr' onfocus="this.select();" placeholder='{{ attr }}' value='{{ attr }}'></td>
+		{% if attr.is_option %}
+			<td>
+				<select class="form-control input-lg" name='ques_value' placeholder='请选择' disabled>
+					{% for option in attr.options.all %}
+						<option>{{ option }}</option>
+					{% endfor %}
+				</select>
+			</td>
+		{% else %}
+			<td class='col-xs-9'><input class="form-control input-lg" name='ques_value' onfocus="this.select();" placeholder='请填写' disabled></td>
+		{% endif %}
+		</tr>
+	{% endfor %}
+		<tr class='error'>
+			<td>111</td>
+			<td>222</td>
+		</tr>
+		<tr>
+			<td>333</td>
+			<td>444</td>
+		</tr>
+	</tbody>
+</table>
+</form>
+{{ attrs }}
 aaaaaaaaa
+{{ user }}
