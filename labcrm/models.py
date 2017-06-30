@@ -31,6 +31,17 @@ class UserAttr(models.Model):
         return self.attr
 
 
+class Dialog(models.Model):
+    dialog = models.TextField(verbose_name='对话记录')
+    user = models.ForeignKey(LabUser, verbose_name='用户')
+    recorder = models.ForeignKey(User, verbose_name='记录员')
+    log_time = models.DateTimeField(verbose_name='记录时间', auto_now_add=True)
+
+    def __str__(self):
+        name = self.user.nickname + ' ' + self.log_time.strftime('%Y-%m-%d')
+        return name
+
+
 class AttrOption(models.Model):
     option = models.CharField(verbose_name='选项', max_length=255)
     attr = models.ForeignKey(UserAttr, verbose_name='属性', related_name='options')

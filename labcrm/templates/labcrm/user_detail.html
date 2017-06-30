@@ -36,12 +36,35 @@
 <div class="btn-group btn-block btn-group-xs btn-group-vertical" role="group">
 	<button class='btn btn-info'><h3>生成问卷</h3></button><hr />
 	<button class='btn btn-info' id='btnModify' onclick='infoModify(this)'><h3>修改资料</h3></button><hr />
-	<button class='btn btn-info'><h3>添加记录</h3></button><hr />
+	<button class='btn btn-info' data-toggle="modal" data-target="#dialogModal"><h3>添加记录</h3></button><hr />
 	<button class='btn btn-danger hidden' id='tagCancel' onclick='modifyConcel()'><h3>取消修改</h3></button>
 </div>
 {% endblock %}
 {% block row-right %}
 {% include 'labcrm/ajax_user_detail.html' %}
+{% endblock %}
+{% block modal %}
+<div class="modal fade" id='dialogModal' tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">沟通记录:</h4>
+			</div>
+			<div class="modal-body">
+				<form id='formDialog' action='' method='POST'>
+					{% csrf_token %}
+					<div class="form-group">
+						<textarea name='dialog' required=true class="form-control" id="dialog-text" rows=15></textarea>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" id='btn-modal-hide' data-dismiss="modal">取消</button>
+				<button type="submit" class="btn btn-primary" form='formDialog' onclick='dialogSave()'>保存</button>
+			</div>										
+		</div>
+	</div>
+</div>
 {% endblock %}
 {% block script %}
 <script>
@@ -84,7 +107,7 @@ function infoModify(e){
 	for(var i=0;i<tagsTrAnswer.length;i++){
 		var tagTdNew = document.createElement('td');
 		tagsTrAnswer[i].appendChild(tagTdNew);
-		tagTdNew.innerHTML = '<input class="form-control input-lg btn-danger btn" type="button" value="X" onclick="infoDel(this)">';
+		tagTdNew.innerHTML = '<input class="form-control btn-danger btn" type="button" value="X" onclick="infoDel(this)">';
 	};
 };
 
@@ -99,7 +122,7 @@ function questionJudge(e){
 		if('{{ attr.attr }}'==e.value){
 			e.parentNode.parentNode.nextSibling.nextSibling.innerHTML='\
 			<fieldset class="form-group">\
-				<input class="form-control input-lg" name="tagAnswer" type="text" placeholder="属性值" list="valueOptions" onfocus="this.select();">\
+				<input class="form-control input-lg" name="tagAnswer" type="text" placeholder="属性值" required=true list="valueOptions" onfocus="this.select();">\
 				<datalist id="valueOptions">\
 				{% for value in attr.options.all %}\
 					<option value="{{ value }}">\
@@ -108,7 +131,7 @@ function questionJudge(e){
 			</fieldset>'
 		}else{
 			e.parentNode.parentNode.nextSibling.nextSibling.innerHTML='\
-			<input class="form-control input-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值" onfocus="this.select();">'
+			<input class="form-control input-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值" required=true onfocus="this.select();">'
 		};
 	{% endfor %}
 };
@@ -131,7 +154,7 @@ function tagInfoAdd(){
 			</datalist>\
 		</fieldset>\
 	</td>\
-	<td><input class="form-control input-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值" onfocus="this.select();"></td>\
+	<td><input class="form-control input-lg tagAnswer" name="tagAnswer" type="text" placeholder="属性值" required=true onfocus="this.select();"></td>\
 	<td><input class="form-control input-lg btn-danger btn" type="button" value="X"></td>'
 };
 
@@ -157,7 +180,6 @@ function modifyComfirm(){
 			};
 		};
 		xhr.send(formData);
-		
 	};
 };
 
@@ -179,6 +201,26 @@ function modifyConcel(){
 	};
 	xhr.open("GET", '{% url "crm:detail" %}?uid={{ lab_user.id }}&ajax=1', true);
 	xhr.send();
+};
+
+function dialogSave(){
+	//保存沟通记录
+	document.getElementById("formDialog").onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest(),
+			para = document.getElementById('row-right');
+		xhr.open("POST", f.action, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var rowNew = xhr.responseText;
+				para.innerHTML = rowNew;
+				document.getElementById('btn-modal-hide').click();
+			};
+		};
+		xhr.send(formData);
+	};
 };
 </script>
 {% endblock %}

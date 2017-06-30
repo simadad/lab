@@ -1,16 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ
+from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ, Dialog
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 # Create your views here.
-
-
-@login_required
-def user_list(request):
-    users = LabUser.objects.all().order_by('user__date_joined')
-    return render(request, 'labcrm/user_list.html', {
-        'users': users
-    })
 
 
 def _save_new_detail(user, attr, answer):
@@ -32,9 +24,18 @@ def _save_new_detail(user, attr, answer):
 
 
 @login_required
+def user_list(request):
+    users = LabUser.objects.all().order_by('user__date_joined')
+    return render(request, 'labcrm/user_list.html', {
+        'users': users
+    })
+
+
+@login_required
 def user_detail(request):
     uid = request.GET.get('uid')
     lab_user = get_object_or_404(LabUser, id=uid)
+    dialogs = Dialog.objects.filter(user=lab_user)
     user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
     attrs = UserAttr.objects.all()
     attr_option = attrs.filter(is_option=True)
@@ -44,50 +45,69 @@ def user_detail(request):
             'lab_user': lab_user,
             'attrs': attrs,
             'attr_option': attr_option,
-            'answers': user_answers
+            'answers': user_answers,
+            'dialogs': dialogs
         })
 
     elif request.method == 'POST':
-        questions = request.POST.getlist('tagQuestion')
-        answers = request.POST.getlist('tagAnswer')
-        info = dict(zip(questions, answers))
-        # 已存在有选项的属性
-        for question in set(questions) & {attr.attr for attr in attr_option}:
-            attr = get_object_or_404(UserAttr, attr=question)
-            if info[question] not in [option.option for option in attr.options.all()]:
-                AttrOption.objects.create(
-                    option=info[question],
-                    attr=attr
-                )
-            _save_new_detail(lab_user, attr, info[question])
-        # 已存在无选项的属性
-        for question in set(questions) & {attr.attr for attr in attrs} - {attr.attr for attr in attr_option}:
-            attr = get_object_or_404(UserAttr, attr=question)
-            _save_new_detail(lab_user, attr, info[question])
-        # 新属性
-        for question in set(questions) - {attr.attr for attr in attrs}:
-            attr = UserAttr.objects.create(
-                attr=question
+        dialog = request.POST.get('dialog')
+        if dialog is not None:
+            user = request.user
+            Dialog.objects.create(
+                dialog=dialog,
+                user=lab_user,
+                recorder=user
             )
-            _save_new_detail(lab_user, attr, info[question])
-        # 被删除的属性
-        for question in {question.attr.attr for question in lab_user.questions.all()} - set(questions):
-            attr = get_object_or_404(UserAttr, attr=question)
-            uiq = get_object_or_404(UserInfoQ, user=lab_user, attr=attr, is_del=False)
-            uiq.is_del = True
-            uiq.save()
-            uia = get_object_or_404(UserInfoA, user=lab_user, question=uiq, is_del=False)
-            uia.is_del = True
-            uia.save()
-        attrs = UserAttr.objects.all()
-        attr_option = attrs.filter(is_option=True)
-        user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
+            dialogs = Dialog.objects.filter(user=lab_user)
+        else:
+            print(2222222)
+            questions = request.POST.getlist('tagQuestion')
+            answers = request.POST.getlist('tagAnswer')
+            info = dict(zip(questions, answers))
+            # 已存在有选项的属性
+            for question in set(questions) & {attr.attr for attr in attr_option}:
+                attr = get_object_or_404(UserAttr, attr=question)
+                print(33333)
+                if info[question] not in [option.option for option in attr.options.all()]:
+                    AttrOption.objects.create(
+                        option=info[question],
+                        attr=attr
+                    )
+                _save_new_detail(lab_user, attr, info[question])
+            # 已存在无选项的属性
+            for question in set(questions) & {attr.attr for attr in attrs} - {attr.attr for attr in attr_option}:
+                attr = get_object_or_404(UserAttr, attr=question)
+                print(44444)
+                _save_new_detail(lab_user, attr, info[question])
+            # 新属性
+            for question in set(questions) - {attr.attr for attr in attrs}:
+                attr = UserAttr.objects.create(
+                    attr=question
+                )
+                _save_new_detail(lab_user, attr, info[question])
+            # 被删除的属性
+            for question in {question.attr.attr for question in lab_user.questions.filter(is_del=False)} - set(questions):
+                attr = get_object_or_404(UserAttr, attr=question)
+                print(555555555)
+                print(question, attr)
+                uiq = get_object_or_404(UserInfoQ, user=lab_user, attr=attr, is_del=False)
+                print(66666)
+                uiq.is_del = True
+                uiq.save()
+                uia = get_object_or_404(UserInfoA, user=lab_user, question=uiq, is_del=False)
+                print(77777)
+                uia.is_del = True
+                uia.save()
+            attrs = UserAttr.objects.all()
+            attr_option = attrs.filter(is_option=True)
+            user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
     # POST and cancel
     return HttpResponse(render(request, 'labcrm/ajax_user_detail.html', {
         'labUser': lab_user,
         'attrs': attrs,
         'attr_option': attr_option,
-        'answers': user_answers
+        'answers': user_answers,
+        'dialogs': dialogs
     }))
 
 

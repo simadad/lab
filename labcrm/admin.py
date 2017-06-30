@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import LabUser, Paper, UserInfoQ, UserInfoA, UserAttr, AttrOption
+from .models import LabUser, Paper, UserInfoQ, UserInfoA, UserAttr, AttrOption, Dialog
 # Register your models here.
+
+
+class DialogInline(admin.TabularInline):
+    model = Dialog
 
 
 class AttrOptionInline(admin.TabularInline):
@@ -20,7 +24,7 @@ class PaperInline(admin.TabularInline):
 
 
 class LabUserAdmin(admin.ModelAdmin):
-    inlines = [InfoQInline, InfoAInline, PaperInline]
+    inlines = [InfoQInline, InfoAInline, PaperInline, DialogInline]
     list_display = ('user', 'nickname', 'wechat')
     search_fields = ('user', 'nickname', 'wechat')
     fieldsets = (
@@ -87,9 +91,20 @@ class AttrOptionAdmin(admin.ModelAdmin):
         }],
     )
 
+
+class DialogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recorder', 'log_time')
+    list_filter = ('user', 'recorder')
+    fieldsets = (
+        ['Main', {
+            'fields': ('user', 'recorder', 'dialog')
+        }],
+    )
+
 admin.site.register(LabUser, LabUserAdmin)
 admin.site.register(Paper, PaperAdmin)
 admin.site.register(UserInfoQ, UserInfoQAdmin)
 admin.site.register(UserInfoA, UserInfoAAdmin)
 admin.site.register(UserAttr, UserAttrAdmin)
 admin.site.register(AttrOption, AttrOptionAdmin)
+admin.site.register(Dialog, DialogAdmin)
