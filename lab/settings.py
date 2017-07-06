@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'rvld9)d_trea4zft3o9y(gs1szo_o7h&$^k+gdu96!aj!$&pef'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['47.93.61.70','127.0.0.1','lab.crossincode.com']
 
 
 # Application definition
@@ -80,7 +80,7 @@ DATABASES = {
         'NAME': 'crossin_lab',
         'USER': 'marklab',
         'PASSWORD': 'crossinlab2017',
-        'HOST': '',
+        'HOST': '127.0.0.1',
         'PORT': '',
     }
 }
@@ -110,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -123,10 +123,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-    '/static/',
-)
+#STATICFILES_DIRS = (
+#    os.path.join(BASE_DIR, "static"),
+#    '/static/',
+#)
