@@ -22,7 +22,7 @@ from django.conf import settings
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', index, name='homepage'),
-    url(r'^accounts/', include('account.urls', namespace='account')),
+    url(r'^accounts/', include('account.urls', namespace='accounts')),
     url(r'^crm/', include('labcrm.urls', namespace='crm')),
     url(r'^webot/', include('webotconf.urls', namespace='webot')),
 ]

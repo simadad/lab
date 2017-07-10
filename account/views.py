@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import logout, login, authenticate
@@ -10,7 +10,7 @@ def register(request):
 
 
 def log_in(request):
-    if request.methord == 'POST':
+    if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(username=username, password=password)
@@ -19,11 +19,12 @@ def log_in(request):
             login(request, user)
             return HttpResponse(render(request, 'account/logout.html'))
         else:
-            return HttpResponse()
+            print(11111111)
+            return HttpResponse('')
     else:
-        next_url = request.GET.get('next')
-
+        return redirect('/')
 
 
 def log_out(request):
-    pass
+    logout(request)
+    return redirect('/')
