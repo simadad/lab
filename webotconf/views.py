@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from .models import ChatRoom, RuleAddFriend
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 import re
 # Create your views here.
 
 
+@login_required
 def rule_conf(request):
     rooms = ChatRoom.objects.all().order_by('order')
     if request.method == 'POST':
@@ -35,6 +37,7 @@ def rule_conf(request):
     })
 
 
+@login_required
 def ajax_conf_modify(request):
     rooms = ChatRoom.objects.all().order_by('order')
     return HttpResponse(render(request, 'webotconf/ajax/modify.html', {
