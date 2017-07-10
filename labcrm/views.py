@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ, Dialog
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 # Create your views here.
 
 
@@ -25,7 +26,27 @@ def _save_new_detail(user, attr, answer):
 
 @login_required
 def user_list(request):
-    users = LabUser.objects.all().order_by('user__date_joined')
+    if request.method == 'POST':
+        username_list = request.POST.getlist('username')
+        nickname_list = request.POST.getlist('nickname')
+        wechat_list = request.POST.getlist('wechat')
+        new_users = zip(username_list, nickname_list, wechat_list)
+        # new_lab_users = []
+
+        def users():
+            for new_user in new_users:
+                user = User.objects.create_user(new_user[0])
+                new_lab_user = LabUser.objects.create(
+                    user=user,
+                    nickname=new_user[1],
+                    wechat=new_user[2]
+                )
+                yield new_lab_user
+            # new_lab_users.append(new_lab_user)
+        return HttpResponse(render(request, 'labcrm/ajax/user_add.html', {
+            'users': users()
+        }))
+    users = LabUser.objects.all().order_by('-user__date_joined')
     return render(request, 'labcrm/user_list.html', {
         'users': users
     })

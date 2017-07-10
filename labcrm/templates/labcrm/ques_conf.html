@@ -13,12 +13,13 @@
 <div class="row">
 	<div class="col-md-9" id='boxPreview'>
 		<table class="table table-hover table-striped table-bordered">
+			<caption>问卷配置</caption>
 			<thead class='thead-inverse'>
-			<tr>
-				<th>问题</th>
-				<th>提供选项</th>
-				<th>选用</th>
-			</tr>
+				<tr>
+					<th>问题</th>
+					<th>提供选项</th>
+					<th>选用</th>
+				</tr>
 			</thead>
 			<form method='POST' id='quesConf' action='{% url "crm:ajax:preview" %}'>
 			{% csrf_token %}

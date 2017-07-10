@@ -1,0 +1,43 @@
+<form id='tagForm' class='form' action='' method='POST'>
+{% csrf_token %}
+<table class="table table-hover table-striped table-bordered">
+	<caption>入群规则</caption>
+	<thead class='thead-inverse'>
+		<tr>
+			<th class='col-md-4 input-lg'>群名</th>
+			<th class='col-md-6 input-lg'>关键字集</th>
+			<th class='col-md-2 input-lg text-center'>匹配次序</th>
+		</tr>
+	</thead>
+	<tbody id='formRule'>
+		{% for room in rooms %}
+		<tr>
+			<td class='input-lg'>
+			<fieldset>
+				<input class="form-control input-lg" name="rooms" type="text" placeholder="群名" list="roomOption" onfocus="this.select();" value="{{ room }}">
+				<datalist id="roomOption">
+				{% for roomOpt in rooms %}
+					<option value="{{ roomOpt }}">
+				{% endfor %}
+				</datalist>
+			</fieldset>
+			</td>
+			<td class='input-lg'>
+				<input class="form-control input-lg" name="keywords" type='text' placeholder='关键字集' onfocus='this.select();' value='{% for rule in room.rules.all %}{{ rule.keyword }} {% endfor %}'>
+			</td>
+			<td class='input-lg text-center'>
+				<input class="form-control input-lg" name="orders" type='text' placeholder='匹配次序' onfocus='this.select();' value='{{ room.order }}'>
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+</form>
+<div class='row hidSwith unhid'>
+	<div class='col-md-10'>
+		<button type="button" class="btn btn-info btn-lg btn-block" onclick='ruleMore()'>新增规则</button>
+	</div>
+	<div class='col-md-2'>
+		<button type="button" class="btn btn-warning btn-lg btn-block" onclick='reset()'>重置</button>
+	</div>
+</div>

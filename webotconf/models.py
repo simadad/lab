@@ -13,7 +13,7 @@ class ChatRoom(models.Model):
 
 class RuleAddFriend(models.Model):
     keyword = models.CharField(verbose_name='关键字', max_length=20)
-    chatroom = models.ForeignKey(ChatRoom, verbose_name='群', on_delete=models.CASCADE)
+    chatroom = models.ForeignKey(ChatRoom, verbose_name='群', on_delete=models.CASCADE, related_name='rules')
 
     def __str__(self):
         return self.keyword + '-' + self.chatroom.nickname

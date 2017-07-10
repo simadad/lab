@@ -2,15 +2,48 @@
 {% block title %}用户列表{% endblock %}
 {% block userList %}active{% endblock %}
 {% block row-left %}
-<ul class="navbar-nav nav-pills nav-stacked">
-	<li><a href='#'><h3>添加成员</h3></a></li>
-	<li><a href='#'><h3>问卷设计</h3></a></li>
-</ul>
+<button class='btn btn-info btn-block btn-lg' data-toggle="modal" data-target="#dialogModal">添加成员</button>
+<div class="modal fade" id='dialogModal' tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">添加成员：</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal" id='formUserAdd' action='' method='POST'>
+					{% csrf_token %}
+					<div class="form-group">
+						<label for='username' class="col-sm-2 control-label">用户名：</label>
+						<div class="col-sm-10">
+							<input name='username' id='username' required=true class='form-control' onfocus='this.select();' placeholder='用户名'>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for='nickname' class="col-sm-2 control-label">昵称：</label>
+						<div class="col-sm-10">
+							<input name='nickname' id='nickname' required=true class='form-control' onfocus='this.select();' placeholder='昵称'>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for='wechat' class="col-sm-2 control-label">微信：</label>
+						<div class="col-sm-10">
+							<input name='wechat' id='wechat' required=true class='form-control' onfocus='this.select();' placeholder='微信'>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" id='btn-modal-hide' data-dismiss="modal">取消</button>
+				<button type="submit" class="btn btn-primary" form='formUserAdd' onclick='userSave()'>保存</button>
+			</div>										
+		</div>
+	</div>
+</div>
 {% endblock %}
 {% block row-right %}
-<table class="table table-hover table-striped">
+<table class="table table-hover table-striped table-bordered">
 	<caption>成员列表</caption>
-		<thead>
+		<thead class='thead-inverse'>
 		<tr>
 			<th>昵称</th>
 			<th>微信</th>
@@ -18,7 +51,7 @@
 			<th>入学日期</th>
 		</tr>
 		</thead>
-	<tbody>
+	<tbody id='userList'>
 	{% for lab_user in users %}
 		<tr>
 			<td><a href='{% url "crm:detail" %}?uid={{ lab_user.id }}'>{{ lab_user.nickname }}</a></td>
@@ -33,18 +66,30 @@
 			<td>{{ lab_user.user.date_joined }}</td>
 		</tr>
 	{% endfor %}
-		<tr class='error'>
-			<td>111</td>
-			<td>222</td>
-			<td>222</td>
-			<td>222</td>
-		</tr>
-		<tr>
-			<td>333</td>
-			<td>444</td>
-			<td>444</td>
-			<td>444</td>
-		</tr>
+		<div class='newUser'>
+		</div>
 	</tbody>
 </table>
+{% endblock %}
+{% block script %}
+<script>
+function userSave(){
+	document.getElementById("formUserAdd").onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest(),
+			para = document.getElementById('userList');
+		xhr.open("POST", f.action, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var rowNew = xhr.responseText;
+				para.insertAdjacentHTML('afterbegin', rowNew);
+				document.getElementById('btn-modal-hide').click();
+			};
+		};
+		xhr.send(formData);
+	};
+};
+</script>
 {% endblock %}

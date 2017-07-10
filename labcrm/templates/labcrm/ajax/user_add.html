@@ -1,0 +1,14 @@
+{% for lab_user in users %}
+<tr class='success'>
+	<td><a href='{% url "crm:detail" %}?uid={{ lab_user.id }}'>{{ lab_user.nickname }}</a></td>
+	<td>{{ lab_user.wechat }}</td>
+	<td>
+	{% if lab_user.papers %}
+		<a>{{ lab_user.papers.last }}</a>
+	{% else %}
+		<a>None</a>
+	{% endif %}
+	</td>
+	<td>{{ lab_user.user.date_joined }}</td>
+</tr>
+{% endfor %}
