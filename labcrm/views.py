@@ -27,22 +27,20 @@ def _save_new_detail(user, attr, answer):
 @login_required
 def user_list(request):
     if request.method == 'POST':
-        username_list = request.POST.getlist('username')
         nickname_list = request.POST.getlist('nickname')
         wechat_list = request.POST.getlist('wechat')
-        new_users = zip(username_list, nickname_list, wechat_list)
-        # new_lab_users = []
+        new_users = zip(nickname_list, wechat_list)
 
         def users():
             for new_user in new_users:
                 user = User.objects.create_user(new_user[0])
                 new_lab_user = LabUser.objects.create(
                     user=user,
-                    nickname=new_user[1],
-                    wechat=new_user[2]
+                    nickname=new_user[0],
+                    wechat=new_user[1]
                 )
                 yield new_lab_user
-            # new_lab_users.append(new_lab_user)
+
         return HttpResponse(render(request, 'labcrm/ajax/user_add.html', {
             'users': users()
         }))
