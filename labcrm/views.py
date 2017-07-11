@@ -27,23 +27,15 @@ def _save_new_detail(user, attr, answer):
 @login_required
 def user_list(request):
     if request.method == 'POST':
-        nickname_list = request.POST.getlist('nickname')
-        wechat_list = request.POST.getlist('wechat')
-        new_users = zip(nickname_list, wechat_list)
-
-        def users():
-            for new_user in new_users:
-                user = User.objects.create_user(new_user[0])
-                new_lab_user = LabUser.objects.create(
-                    user=user,
-                    nickname=new_user[0],
-                    wechat=new_user[1]
-                )
-                yield new_lab_user
-
-        return HttpResponse(render(request, 'labcrm/ajax/user_add.html', {
-            'users': users()
-        }))
+        nickname = request.POST.get('nickname')
+        wechat = request.POST.get('wechat')
+        user = User.objects.create_user(nickname)
+        new_lab_user = LabUser.objects.create(
+            user=user,
+            nickname=nickname,
+            wechat=wechat
+        )
+        return redirect('crm:detail2', new_id=new_lab_user.id)
     users = LabUser.objects.all().order_by('-user__date_joined')
     return render(request, 'labcrm/user_list.html', {
         'users': users
@@ -51,13 +43,26 @@ def user_list(request):
 
 
 @login_required
-def user_detail(request):
-    uid = request.GET.get('uid')
+def user_detail(request, new_id=None):
+    attrs = UserAttr.objects.all()
+    attr_option = attrs.filter(is_option=True)
+    if new_id:
+        # lab_user = get_object_or_404(LabUser, id=new_id)
+        uid = get_object_or_404(LabUser, id=new_id)
+    else:
+        uid = request.GET.get('uid')
+    #     return render(request, 'labcrm/user_detail.html', {
+    #         'labUser': lab_user,
+    #         'attrs': attrs,
+    #         'attr_option': attr_option,
+    #         'answers': False,
+    #         'dialogs': False,
+    #         'new': True
+    #     })
+    # uid = request.GET.get('uid')
     lab_user = get_object_or_404(LabUser, id=uid)
     dialogs = Dialog.objects.filter(user=lab_user)
     user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
-    attrs = UserAttr.objects.all()
-    attr_option = attrs.filter(is_option=True)
 
     if request.method == 'GET' and request.GET.get('ajax') is None:
         return render(request, 'labcrm/user_detail.html', {

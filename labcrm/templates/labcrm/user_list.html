@@ -16,24 +16,21 @@
 						<thead>
 							<tr>
 								<th class='col-md-6 text-center'>昵称</th>
-								<th class='col-md-5 text-center'>微信</th>
-								<th class='col-md-1 text-center'>删除</th>
+								<th class='col-md-6 text-center'>微信</th>
 							</tr>
 						</thead>
 						<tbody id='tagTbInfo'>
 							<tr>
 								<td><input class="form-control input-lg" name="nickname" onfocus="this.select();" required=true placeholder='昵称'></td>
 								<td><input class="form-control input-lg" name='wechat' onfocus="this.select();" required=true placeholder='微信'></td>
-								<td><input class="form-control input-lg btn btn-danger" type="button" value="X" onclick='delTR(this)'></td>
 							</tr>
 						</tbody>
 					</table>
 				</form>
-				<button class='btn btn-info btn-block btn-xs' onclick='userMore()'>▼</button>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" id='btn-modal-hide' data-dismiss="modal">取消</button>
-				<button type="submit" class="btn btn-primary" form='formUserAdd' onclick='userSave()'>保存</button>
+				<button type="submit" class="btn btn-primary" form='formUserAdd'>保存</button>
 			</div>										
 		</div>
 	</div>
@@ -69,42 +66,4 @@
 		</div>
 	</tbody>
 </table>
-{% endblock %}
-{% block script %}
-<script>
-function userSave(){
-	// 保存新用户
-	document.getElementById("formUserAdd").onsubmit = function(e){
-		e.preventDefault();
-		var f = e.target,
-			formData = new FormData(f),
-			xhr = new XMLHttpRequest(),
-			para = document.getElementById('userList');
-		xhr.open("POST", f.action, true);
-		xhr.onreadystatechange=function(){
-			if(xhr.readyState == 4 && xhr.status == 200){
-				var rowNew = xhr.responseText;
-				para.insertAdjacentHTML('afterbegin', rowNew);
-				document.getElementById('btn-modal-hide').click();
-			};
-		};
-		xhr.send(formData);
-	};
-};
-function userMore(){
-	// 更多新用户
-	var para = document.getElementById('tagTbInfo'),
-		tr = document.createElement('tr');
-	tr.innerHTML = '\
-	<td><input class="form-control input-lg" name="nickname" onfocus="this.select();" required=true placeholder="昵称"></td>\
-	<td><input class="form-control input-lg" name="wechat" onfocus="this.select();" required=true placeholder="微信"></td>\
-	<td><input class="form-control input-lg btn btn-danger" type="button" value="X" onclick="delTR(this)"></td>'
-	para.appendChild(tr);
-};
-function delTR(e){
-	var tr = e.parentElement.parentElement;
-	tr.parentElement.removeChild(tr);
-};
-
-</script>
 {% endblock %}

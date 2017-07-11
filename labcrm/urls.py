@@ -11,6 +11,7 @@ ajax_urls = [
 urlpatterns = [
     url(r'^ajax/', include(ajax_urls, namespace='ajax')),
     url(r'^users', views.user_list, name='list'),
+    url(r'^detail/(?P<new_id>.*)$', views.user_detail, name='detail2'),
     url(r'^detail', views.user_detail, name='detail'),
     url(r'^conf', views.ques_conf, name='conf'),
     url(r'^fill', views.ques_fill, name='fill'),

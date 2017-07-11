@@ -11,12 +11,21 @@
 			</tr>
 		</thead>
 		<tbody id='tagTbInfo'>
-		{% for answer in answers %}
+		{% if answers %}
+			{% for answer in answers %}
 			<tr class='trAnswer'>
 				<td>{{ answer.question }}</td>
 				<td><input class="form-control input-lg tagAnswer" name='tagAnswer' onfocus="this.select();" required=true placeholder='属性值' type="text" value="{{ answer }}" readonly></td>
 			</tr>
-		{% endfor %}
+			{% endfor %}
+		{% else %}
+			{% for attr in attrs %}
+			<tr class='trAnswer'>
+				<td>{{ attr.attr }}</td>
+				<td><input class="form-control input-lg tagAnswer" name='tagAnswer' onfocus="this.select();" required=true placeholder='属性值' type="text" readonly></td>
+			</tr>
+			{% endfor %}
+		{% endif %}
 		</tbody>
 	</table>
 	</form>
@@ -28,9 +37,11 @@
 </div>
 <div class='row' id='dialog'>
 	<div class='col-md-12 form-group'>
-	{% for dialog in dialogs %}
+	{% if dialogs %}
+		{% for dialog in dialogs %}
 		<label>{{ dialog.log_time }} | {{ dialog.recorder }}</label>
 		<textarea class='form-control' readonly='readonly' style='overflow:auto' rows=15>{{ dialog.dialog }}</textarea><hr />
-	{% endfor %}
+		{% endfor %}
+	{% endif %}
 	</div>
 </div>

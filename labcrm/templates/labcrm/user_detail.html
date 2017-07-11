@@ -223,4 +223,11 @@ function dialogSave(){
 	};
 };
 </script>
+{% if not answers %}
+<script>
+window.onload = function(){
+	document.getElementById('btnModify').click();
+};
+</script>
+{% endif %}
 {% endblock %}
