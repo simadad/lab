@@ -46,21 +46,9 @@ def user_list(request):
 def user_detail(request, new_id=None):
     attrs = UserAttr.objects.all()
     attr_option = attrs.filter(is_option=True)
-    if new_id:
-        # lab_user = get_object_or_404(LabUser, id=new_id)
-        uid = get_object_or_404(LabUser, id=new_id)
-    else:
-        uid = request.GET.get('uid')
-    #     return render(request, 'labcrm/user_detail.html', {
-    #         'labUser': lab_user,
-    #         'attrs': attrs,
-    #         'attr_option': attr_option,
-    #         'answers': False,
-    #         'dialogs': False,
-    #         'new': True
-    #     })
-    # uid = request.GET.get('uid')
-    lab_user = get_object_or_404(LabUser, id=uid)
+    if not new_id:
+        new_id = request.GET.get('uid')
+    lab_user = get_object_or_404(LabUser, id=new_id)
     dialogs = Dialog.objects.filter(user=lab_user)
     user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
 
