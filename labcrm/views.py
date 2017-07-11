@@ -61,7 +61,7 @@ def user_detail(request):
 
     if request.method == 'GET' and request.GET.get('ajax') is None:
         return render(request, 'labcrm/user_detail.html', {
-            'lab_user': lab_user,
+            'labUser': lab_user,
             'attrs': attrs,
             'attr_option': attr_option,
             'answers': user_answers,

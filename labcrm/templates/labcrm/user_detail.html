@@ -199,7 +199,7 @@ function modifyConcel(){
 			tagCancel.setAttribute('class', tagCancelVal);
 		};
 	};
-	xhr.open("GET", '{% url "crm:detail" %}?uid={{ lab_user.id }}&ajax=1', true);
+	xhr.open("GET", '{% url "crm:detail" %}?uid={{ labUser.id }}&ajax=1', true);
 	xhr.send();
 };
 
