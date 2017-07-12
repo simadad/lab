@@ -139,7 +139,7 @@ def ques_conf(request):
         print(22222, attr_ids)
         if request.POST.get('is_cre'):
             data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids)])
-            data_key = base64.a85encode(data.encode('utf8'))
+            data_key = base64.encodebytes(data.encode('utf8'))
             return redirect('crm:fill', data_key=data_key)
         else:
             attrs = UserAttr.objects.filter(id__in=attr_ids)
@@ -166,7 +166,7 @@ def ques_conf(request):
 
 
 def ques_fill(request, data_key=None):
-    data = base64.a85decode(data_key).decode('utf8')
+    data = base64.decodebytes(data_key.encode('utf8')).decode('utf8')
     title, lab_user, paper_desc, ques_desc_str, ques_ids_str = data.split('@@')
     ques_desc = ques_desc_str.split('##')
     attr_ids = ques_ids_str.split('##')
