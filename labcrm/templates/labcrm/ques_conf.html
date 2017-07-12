@@ -3,9 +3,9 @@
 {% block quesConf %}active{% endblock %}
 {% block row-left %}
 <div class="btn-group btn-group-vertical">
-	<a class='btn btn-success btn-lg btn-block hidden' id='btnCreate' href=''>生成问卷</a>
-	<input class='btn btn-info btn-lg btn-block' type='submit' form='quesConf' id='btnPreview' value='问卷预览' onclick='quesConfPre()'><hr />
-	<div class='btn btn-info btn-lg btn-block'>提问修改</div><hr />
+	<input class='btn btn-success btn-lg btn-block hidden' id='btnCre' type='submit' form='quesCre' value='生成'>
+	<input class='btn btn-warning btn-lg btn-block hidden' id='btnPre' type='submit' form='formToFill' onclick='quesPre()' value='预览'>
+	<input class='btn btn-info btn-lg btn-block' type='submit' form='quesConf' id='btnConf' value='配置' onclick='quesConf()'><hr />
 	<a class='btn btn-info btn-lg btn-block' href='{% url "crm:add" %}'>添加提问</a>
 </div>
 {% endblock %}
@@ -40,16 +40,6 @@
 					</td>
 				</tr>
 				{% endfor %}
-				<tr class='info'>
-					<td>111</td>
-					<td>222</td>
-					<td>222</td>
-				</tr>
-				<tr>
-					<td>333</td>
-					<td>444</td>
-					<td>444</td>
-				</tr>
 			</tbody>
 			</form>
 		</table>
@@ -66,30 +56,76 @@
 	{% endfor %}
 	</div>
 </div>
+{% endblock %}
+{% block modal %}
+<div class='hidden'>
+	<form action='' method='POST' id='quesCre'>
+	{% csrf_token %}
+		<input name='is_cre' value=true>
+		<input id='inputData' name='data'>
+		<input id='inputUsername' name='username'>
+	</form>
+</div>
+{% endblock %}
+{% block script %}
 <script>
-function quesConfPre(){
+function quesConf(){
+	// ajax 配置
 	document.getElementById("quesConf").onsubmit = function(e){
 		e.preventDefault();
 		var f = e.target,
 			formData = new FormData(f),
 			xhr = new XMLHttpRequest(),
 			para = document.getElementById('boxPreview'),
-			btnPreview = document.getElementById('btnPreview'),
-			btnCreate = document.getElementById('btnCreate'),
-			btnCreVal = btnCreate.getAttribute('class');
+			btnConf = document.getElementById('btnConf'),
+			btnPre = document.getElementById('btnPre'),
+			btnCreVal = btnPre.getAttribute('class');
 		btnCreVal = btnCreVal.replace('hidden', '');
 		xhr.open("POST", f.action, true);
 		xhr.onreadystatechange=function(){
 			if(xhr.readyState == 4 && xhr.status == 200){
 				var rowNew = xhr.responseText;
 				para.innerHTML = rowNew;
-				btnPreview.setAttribute('class', 'hidden');
-				btnCreate.setAttribute('class', btnCreVal);
+				btnConf.setAttribute('class', 'hidden');
+				btnPre.setAttribute('class', btnCreVal);
 			};
 		};
 		xhr.send(formData);
 	};
 };
 
+function quesPre(){
+	// ajax 预览
+	document.getElementById("formToFill").onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest(),
+			para = document.getElementById('boxPreview'),
+			btnPre = document.getElementById('btnPre'),
+			btnCre = document.getElementById('btnCre'),
+			btnCreVal = btnCre.getAttribute('class');
+		btnCreVal = btnCreVal.replace('hidden', '');
+		xhr.open("POST", f.action, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var rowNew = xhr.responseText;
+				para.innerHTML = rowNew;
+				btnPre.setAttribute('class', 'hidden');
+				btnCre.setAttribute('class', btnCreVal);
+				quesCrePre();
+			};
+		};
+		xhr.send(formData);
+	};
+};
+
+function quesCrePre(){
+	// 生成问卷信息表单
+	var data = document.getElementById('boxPreview').innerHTML,
+		username = document.getElementById('username').innerText;
+	document.getElementById('inputData').setAttribute('value', data);
+	document.getElementById('inputUsername').setAttribute('value', username);
+};
 </script>
 {% endblock %}

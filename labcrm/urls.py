@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^detail/(?P<new_id>.*)$', views.user_detail, name='detail2'),
     url(r'^detail', views.user_detail, name='detail'),
     url(r'^conf', views.ques_conf, name='conf'),
+    url(r'^fill/(?P<data>[\s\S]*)(?P<username>.*)$', views.ques_fill, name='to_fill'),
     url(r'^fill', views.ques_fill, name='fill'),
     url(r'^add', views.ques_add, name='add'),
 ]

@@ -3,7 +3,10 @@ from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ, Dialog
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from collections import namedtuple
 # Create your views here.
+
+QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
 
 
 def _save_new_detail(user, attr, answer):
@@ -125,14 +128,44 @@ def user_detail(request, new_id=None):
 
 @login_required
 def ques_conf(request):
-        attrs = UserAttr.objects.all()
-        return render(request, 'labcrm/ques_conf.html', {
-            'attrs': attrs
-        })
+    if request.method == 'POST' and not request.POST.get('is_cre'):
+        title = request.POST.get('paper_title')
+        lab_user = request.POST.get('labUser')
+        paper_desc = request.POST.get('paper_desc')
+        ques_desc = request.POST.getlist('ques_desc')
+        attr_ids = request.POST.getlist('attr_id')
+        attrs = UserAttr.objects.filter(id__in=attr_ids)
+        # ques_value = request.POST.getlist('ques_value')
+        quests = zip(ques_desc, attr_ids, attrs)
+        quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
+
+        def questions():
+            for ques in quests:
+                yield QuesTuple(*ques)
+
+        return HttpResponse(render(request, 'labcrm/ques_to_fill.html', {
+            'title': title,
+            'labUser': lab_user,
+            'paper_desc': paper_desc,
+            'questions': questions()
+        }))
+    elif request.POST.get('is_cre'):
+        username = request.POST.get('username')
+        data = request.POST.get('data')
+        print('username', username)
+        print(data)
+        return redirect('crm:to_fill', data=data, username=username)
+        # return HttpResponse(data)
+    attrs = UserAttr.objects.all()
+    return render(request, 'labcrm/ques_conf.html', {
+        'attrs': attrs,
+    })
 
 
 @login_required
-def ques_fill(request):
+def ques_fill(request, data=None, username=None):
+    if username:
+        return HttpResponse(data)
     return render(request, 'labcrm/ques_fill.html')
 
 
@@ -144,9 +177,11 @@ def ques_add(request):
 @login_required
 def ajax_conf_preview(request):
     attr_ids = request.POST.getlist('attr_checked')
-    attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
+    attrs = UserAttr.objects.filter(id__in=attr_ids).order_by('-is_option')
+    users = LabUser.objects.all().order_by('-user__date_joined')
     return HttpResponse(render(request, 'labcrm/ajax/preview.html', {
-        'attrs': attrs
+        'attrs': attrs,
+        'users': users
     }))
 
 
