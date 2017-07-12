@@ -56,7 +56,7 @@
 		</div>
 	</form>
 </div>
-{% if to_fill %}
+{% if not is_fill %}
 	{% block data %}
 	{% include 'labcrm/ques_data.html' %}
 	{% endblock %}
