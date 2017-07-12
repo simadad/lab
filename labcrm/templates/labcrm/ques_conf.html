@@ -57,16 +57,6 @@
 	</div>
 </div>
 {% endblock %}
-{% block modal %}
-<div class='hidden'>
-	<form action='' method='POST' id='quesCre'>
-	{% csrf_token %}
-		<input name='is_cre' value=true>
-		<input id='inputData' name='data'>
-		<input id='inputUsername' name='username'>
-	</form>
-</div>
-{% endblock %}
 {% block script %}
 <script>
 function quesConf(){
@@ -113,19 +103,11 @@ function quesPre(){
 				para.innerHTML = rowNew;
 				btnPre.setAttribute('class', 'hidden');
 				btnCre.setAttribute('class', btnCreVal);
-				quesCrePre();
 			};
 		};
 		xhr.send(formData);
 	};
 };
 
-function quesCrePre(){
-	// 生成问卷信息表单
-	var data = document.getElementById('boxPreview').innerHTML,
-		username = document.getElementById('username').innerText;
-	document.getElementById('inputData').setAttribute('value', data);
-	document.getElementById('inputUsername').setAttribute('value', username);
-};
 </script>
 {% endblock %}

@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from collections import namedtuple
+import base64
 # Create your views here.
 
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
@@ -128,45 +129,87 @@ def user_detail(request, new_id=None):
 
 @login_required
 def ques_conf(request):
-    if request.method == 'POST' and not request.POST.get('is_cre'):
+    if request.method == 'POST':
         title = request.POST.get('paper_title')
         lab_user = request.POST.get('labUser')
         paper_desc = request.POST.get('paper_desc')
         ques_desc = request.POST.getlist('ques_desc')
+        print(111111, ques_desc)
         attr_ids = request.POST.getlist('attr_id')
-        attrs = UserAttr.objects.filter(id__in=attr_ids)
-        # ques_value = request.POST.getlist('ques_value')
-        quests = zip(ques_desc, attr_ids, attrs)
-        quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
+        print(22222, attr_ids)
+        if request.POST.get('is_cre'):
+            data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids)])
+            data_key = base64.a85encode(data.encode('utf8'))
+            return redirect('crm:fill', data_key=data_key)
+        else:
+            attrs = UserAttr.objects.filter(id__in=attr_ids)
+            # ques_value = request.POST.getlist('ques_value')
+            quests = zip(ques_desc, attr_ids, attrs)
+            quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
 
-        def questions():
-            for ques in quests:
-                yield QuesTuple(*ques)
+            def questions():
+                for ques in quests:
+                    yield QuesTuple(*ques)
 
-        return HttpResponse(render(request, 'labcrm/ques_to_fill.html', {
-            'title': title,
-            'labUser': lab_user,
-            'paper_desc': paper_desc,
-            'questions': questions()
-        }))
-    elif request.POST.get('is_cre'):
-        username = request.POST.get('username')
-        data = request.POST.get('data')
-        print('username', username)
-        print(data)
-        return redirect('crm:to_fill', data=data, username=username)
-        # return HttpResponse(data)
+            return HttpResponse(render(request, 'labcrm/ques_to_fill.html', {
+                'title': title,
+                'labUser': lab_user,
+                'paper_desc': paper_desc,
+                'is_fill': False,
+                'questions': questions(),
+                'questions2': questions()
+            }))
     attrs = UserAttr.objects.all()
     return render(request, 'labcrm/ques_conf.html', {
         'attrs': attrs,
     })
 
 
-@login_required
-def ques_fill(request, data=None, username=None):
-    if username:
-        return HttpResponse(data)
-    return render(request, 'labcrm/ques_fill.html')
+def ques_fill(request, data_key=None):
+    data = base64.a85decode(data_key).decode('utf8')
+    title, lab_user, paper_desc, ques_desc_str, ques_ids_str = data.split('@@')
+    ques_desc = ques_desc_str.split('##')
+    attr_ids = ques_ids_str.split('##')
+    attrs = UserAttr.objects.filter(id__in=attr_ids)
+    if request.method == 'POST':
+        user = get_object_or_404(LabUser, nickname=lab_user)
+        ques_values = request.POST.getlist('ques_value')
+        quests = zip(attrs, ques_values)
+        for ques in quests:
+            attr, value = ques
+            info_q, _ = UserInfoQ.objects.get_or_create(
+                user=user,
+                attr=attr
+            )
+            info_a, is_new = UserInfoA.objects.get_or_create(
+                user=user,
+                question=info_q,
+                defaults={'answer': value}
+            )
+            if not is_new:
+                info_a.is_del = True
+                info_a.save()
+                UserInfoA.objects.create(
+                    user=user,
+                    question=info_q,
+                    answer=value
+                )
+        return render(request, 'labcrm/fill_success.html')
+
+    quests = zip(ques_desc, attr_ids, attrs)
+    quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
+
+    def questions():
+        for ques in quests:
+            yield QuesTuple(*ques)
+
+    return HttpResponse(render(request, 'labcrm/ques_to_fill.html', {
+        'title': title,
+        'labUser': lab_user,
+        'paper_desc': paper_desc,
+        'is_fill': True,
+        'questions': questions(),
+    }))
 
 
 @login_required

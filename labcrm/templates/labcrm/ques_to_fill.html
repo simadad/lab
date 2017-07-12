@@ -10,11 +10,11 @@
 </head>
 <body>
 <header>
-	<h1 class='text-center'><a href='{% url "homepage" %}'>crossin编程实战训练营</a></h1>
+	<h1 class='text-center'><a href=''>crossin编程实战训练营</a></h1>
 </header>
 <content class='row'>
 <div class='col-md-12'>
-	<form action='{% url "crm:fill" %}' method='POST' id='formResult'>
+	<form action='' method='POST' id='formResult'>
 	{% csrf_token %}
 		<h3 class='text text-center'>{{ title }}</h3>
 		<p class='text text-right'><em><b>TO -- </b></em><span id='username'>{{ labUser }}</span></p>
@@ -29,7 +29,7 @@
 					{% for option in ques.attr.options.all %}
 					<div class='radio'>
 						<label>
-							<input type="radio" name="ques_value" value="{{ option.id }}">
+							<input type="radio" name="ques_value" value="{{ option.option }}">
 							{{ option.option }}
 						</label>
 					</div>
@@ -38,14 +38,29 @@
 					<input type='text' id='labUser{{ ques.aid }}' class='form-control' name='ques_value' onfocus="this.select()" placeholder='请填写'>
 				{% endif %}
 				</div>
-				<div class='hidden'>
+				<!--div class='hidden'>
 					<input name='attr_id' value='{{ ques.aid }}'>
-				</div>
+				</div-->
 			</div>
 		</div>
 		{% endfor %}
+		<hr />
+		<div class='row'>
+			<div class='col-lg-10 col-lg-offset-1'>
+			{% if is_fill %}
+				<button class='btn form-group btn-lg btn-block btn-success' form='formResult' type='submit'>提交</button>
+			{% else %}
+				<a class='btn form-group btn-lg btn-block btn-success'>提交</a>
+			{% endif %}
+			</div>
+		</div>
 	</form>
 </div>
+{% if to_fill %}
+	{% block data %}
+	{% include 'labcrm/ques_data.html' %}
+	{% endblock %}
+{% endif %}
 </content>
 <footer>
 	<p class='text-center'><b><a>***感谢访问***</a></b></p>
