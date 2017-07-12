@@ -19,9 +19,9 @@
 		{% block homeLink %}{% endblock %}
 		<ul class="nav navbar-nav">
 			<li class='{% block userList %}{% endblock %}'><a href='{% url "crm:list" %}'>用户列表</a></li>
-			<li><a>|</a></li>
+			<li class='visible-lg-inline visible-sm-inline visible-md-inline'><a>|</a></li>
 			<li class='{% block quesConf %}{% endblock %}'><a href='{% url "crm:conf" %}'>问卷设计</a></li>
-			<li><a>|</a></li>
+			<li class='visible-lg-inline visible-sm-inline visible-md-inline'><a>|</a></li>
 			<li class='{% block webotConf %}{% endblock %}'><a href='{% url "webot:rule" %}'>微信配置</a></li>
 		</ul>
 		<form class="navbar-form navbar-right" action='{% url "accounts:login" %}' id='fromNavbar' method='POST'>

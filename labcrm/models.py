@@ -16,7 +16,6 @@ class Paper(models.Model):
     user = models.ForeignKey(LabUser, verbose_name='用户', related_name='papers')
     create_time = models.DateTimeField(verbose_name='建表时间', auto_now_add=True)
     finished_time = models.DateTimeField(verbose_name='填写时间', null=True)
-    is_fill = models.BooleanField(verbose_name='是否填写', default=False)
     is_del = models.BooleanField(verbose_name='是否删除', default=False)
 
     def __str__(self):
