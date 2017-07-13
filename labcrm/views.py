@@ -201,7 +201,7 @@ def ques_fill(request, data_key=None):
 
 
 @login_required
-def ques_add(request):
+def ajax_conf_add(request):
     return render(request, 'labcrm/ques_add.html')
 
 

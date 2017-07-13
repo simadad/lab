@@ -2,11 +2,11 @@
 {% block title %}问卷配置{% endblock %}
 {% block quesConf %}active{% endblock %}
 {% block row-left %}
-<div class="btn-group btn-group-vertical">
-	<input class='btn btn-success btn-lg btn-block hidden' id='btnCre' type='submit' form='quesCre' value='生成'>
-	<input class='btn btn-warning btn-lg btn-block hidden' id='btnPre' type='submit' form='formToFill' onclick='quesPre()' value='预览'>
-	<input class='btn btn-info btn-lg btn-block' type='submit' form='quesConf' id='btnConf' value='配置' onclick='quesConf()'><hr />
-	<a class='btn btn-info btn-lg btn-block' href='{% url "crm:add" %}'>添加提问</a>
+<div class="btn-group btn-group-vertical btn-block">
+	<input class='btn btn-success btn-lg hidden' id='btnCre' type='submit' form='quesCre' value='生成'>
+	<input class='btn btn-warning btn-lg hidden' id='btnPre' type='submit' form='formToFill' onclick='quesPre()' value='预览'>
+	<input class='btn btn-info btn-lg' type='submit' form='quesConf' id='btnConf' value='配置' onclick='quesConf()'><hr />
+	<button class='btn btn-info btn-lg' data-toggle="modal" data-target="#quesAddModal">添加提问</button>
 </div>
 {% endblock %}
 {% block row-right %}
@@ -54,6 +54,29 @@
 			</ul>
 		</div>
 	{% endfor %}
+	</div>
+</div>
+{% endblock %}
+{% block modal %}
+<div class="modal fade" id='quesAddModal' tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">添加提问:</h4>
+			</div>
+			<div class="modal-body">
+				<form id='formQuesAdd' action='{% url "crm:ajax:add" %}' method='POST'>
+					{% csrf_token %}
+					<div class="form-group">
+						<textarea name='dialog' required=true class="form-control" id="dialog-text" rows=15></textarea>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" id='btn-modal-hide' data-dismiss="modal">取消</button>
+				<button type="submit" class="btn btn-primary" form='formQuesAdd' onclick='quesAddSave()'>保存</button>
+			</div>										
+		</div>
 	</div>
 </div>
 {% endblock %}
