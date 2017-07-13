@@ -10,21 +10,24 @@ import base64
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
 
 
-def _save_new_detail(user, attr, answer):
+def _save_uiq_uia(user, attr, answer):
     uiq, _ = UserInfoQ.objects.get_or_create(
         user=user, attr=attr
     )
-    uias = UserInfoA.objects.filter(
-        user=user, question=uiq, is_del=False
+    uia, is_new = UserInfoA.objects.get_or_create(
+        user=user,
+        question=uiq,
+        is_del=False,
+        defaults={'answer': answer}
     )
-    for uia in uias:
+    if not is_new:
         uia.is_del = True
         uia.save()
-    uia, _ = UserInfoA.objects.get_or_create(
-        user=user, question=uiq, answer=answer
-    )
-    uia.is_del = False
-    uia.save()
+        UserInfoA.objects.create(
+            user=user,
+            question=uiq,
+            answer=answer
+        )
     return uiq
 
 
@@ -84,23 +87,24 @@ def user_detail(request, new_id=None):
             for question in set(questions) & {attr.attr for attr in attr_option}:
                 attr = get_object_or_404(UserAttr, attr=question)
                 print(33333)
+                # 保存新选项
                 if info[question] not in [option.option for option in attr.options.all()]:
                     AttrOption.objects.create(
                         option=info[question],
                         attr=attr
                     )
-                _save_new_detail(lab_user, attr, info[question])
+                _save_uiq_uia(lab_user, attr, info[question])
             # 已存在无选项的属性
             for question in set(questions) & {attr.attr for attr in attrs} - {attr.attr for attr in attr_option}:
                 attr = get_object_or_404(UserAttr, attr=question)
                 print(44444)
-                _save_new_detail(lab_user, attr, info[question])
+                _save_uiq_uia(lab_user, attr, info[question])
             # 新属性
             for question in set(questions) - {attr.attr for attr in attrs}:
                 attr = UserAttr.objects.create(
                     attr=question
                 )
-                _save_new_detail(lab_user, attr, info[question])
+                _save_uiq_uia(lab_user, attr, info[question])
             # 被删除的属性
             for question in {question.attr.attr for question in lab_user.questions.filter(is_del=False)} - set(questions):
                 attr = get_object_or_404(UserAttr, attr=question)
@@ -177,23 +181,7 @@ def ques_fill(request, data_key=None):
         quests = zip(attrs, ques_values)
         for ques in quests:
             attr, value = ques
-            info_q, _ = UserInfoQ.objects.get_or_create(
-                user=user,
-                attr=attr
-            )
-            info_a, is_new = UserInfoA.objects.get_or_create(
-                user=user,
-                question=info_q,
-                defaults={'answer': value}
-            )
-            if not is_new:
-                info_a.is_del = True
-                info_a.save()
-                UserInfoA.objects.create(
-                    user=user,
-                    question=info_q,
-                    answer=value
-                )
+            _save_uiq_uia(user, attr, value)
         return render(request, 'labcrm/fill_success.html')
 
     quests = zip(ques_desc, attr_ids, attrs)
