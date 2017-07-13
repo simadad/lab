@@ -23,7 +23,7 @@
 			</thead>
 			<form method='POST' id='quesConf' action='{% url "crm:ajax:preview" %}'>
 			{% csrf_token %}
-			<tbody>
+			<tbody id='tbOptions'>
 				{% for attr in attrs %}
 				<tr>
 					<td>{{ attr.attr }}</td>
@@ -59,22 +59,36 @@
 {% endblock %}
 {% block modal %}
 <div class="modal fade" id='quesAddModal' tabindex="-1" role="dialog">
-	<div class="modal-dialog modal-lg" role="document">
+	<div class="modal-dialog modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h4 class="modal-title">添加提问:</h4>
 			</div>
 			<div class="modal-body">
-				<form id='formQuesAdd' action='{% url "crm:ajax:add" %}' method='POST'>
+				<form class="form-horizontal" id='formQuesAdd' action='{% url "crm:ajax:add" %}' method='POST'>
 					{% csrf_token %}
 					<div class="form-group">
-						<textarea name='dialog' required=true class="form-control" id="dialog-text" rows=15></textarea>
+						<label class='col-md-2 control-label' for='attr'>属性名：</label>
+						<div class='col-md-4'>
+							<input class='text form-control' id='attr' name='attr' placeholder='属性名' onfocus='this.select()' required>
+						</div>
+						<label class='col-md-4 control-label' for='check'>是否提供选项：</label>
+						<div class='col-md-2'>
+							<input class='form-control' id='check' name='is_option' type='checkbox' value=true onchange='optionChange(this)'>
+						</div>
 					</div>
+					<hr />
+					<div id='optionGroup'></div>
 				</form>
+			</div>
+			<div class='hidden' id='btnMore'>
+				<div class='col-xs-4 col-xs-offset-4'>
+					<button class='btn btn-block btn-xs btn-primary' onclick='optionMore()'>▼</button>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" id='btn-modal-hide' data-dismiss="modal">取消</button>
-				<button type="submit" class="btn btn-primary" form='formQuesAdd' onclick='quesAddSave()'>保存</button>
+				<button type="submit" class="btn btn-primary" form='formQuesAdd' onclick='quesAddSave()'>提交</button>
 			</div>										
 		</div>
 	</div>
@@ -131,6 +145,62 @@ function quesPre(){
 		xhr.send(formData);
 	};
 };
+optionId = 0
 
+function optionMore(){
+	var para = document.getElementById('optionGroup');
+		newDiv = document.createElement('div');
+	optionId += 1
+	newDiv.innerHTML = '\
+		<div class="form-group">\
+			<label class="col-md-2 control-label" for="option' + optionId + '">选项名：</label>\
+			<div class="col-md-8">\
+				<input class="text form-control" id="option' + optionId + '" name="options" placeholder="选项名" onfocus="this.select()" required>\
+			</div>\
+			<div class="col-md-2">\
+				<input class="form-control btn btn-block btn-danger" type="button" value="X" onclick="optionDel(this)">\
+			</div>\
+		</div>'
+	para.appendChild(newDiv);
+}
+
+function optionChange(e){
+	if(e.checked){
+		document.getElementById('btnMore').setAttribute('class', 'form-group');
+		optionMore();
+		optionMore();
+	}else{
+		document.getElementById('optionGroup').innerHTML='';
+		document.getElementById('btnMore').setAttribute('class', 'hidden');
+	};
+};
+
+function optionDel(e){
+	var divToDel = e.parentElement.parentElement;
+	divToDel.parentElement.removeChild(divToDel);
+};
+
+function quesAddSave(){
+	document.getElementById("formQuesAdd").onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest(),
+			btnConf = document.getElementById('btnConf');
+		xhr.open("POST", f.action, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var rowNew = xhr.responseText;
+				if(btnConf.className=='hidden'){
+					para = document.getElementById('formToFill');
+				}else{
+					para = document.getElementById('tbOptions');
+				};
+				para.innerHTML = rowNew;
+			};
+		};
+		xhr.send(formData);
+	};
+};
 </script>
 {% endblock %}
