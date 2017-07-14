@@ -2,9 +2,15 @@
 {% block title %}微信配置{% endblock %}
 {% block webotConf %}active{% endblock %}
 {% block row-left %}
-<ul class="nav nav-pills nav-stacked nav-justified">
-  <li role="presentation" class="active"><a href="#">入群规则配置</a></li>
-  <li role="presentation"><a href="#">自动问答配置</a></li>
+<ul class="nav nav-pills nav-stacked nav-stacked text-center">
+{% if is_strict == 'True' %}
+	<li role="presentation" class="nav"><a href='{% url "webot:rule" %}?strict='>宽松入群规则</a></li>
+	<li role="presentation" class="nav active"><a href='{% url "webot:rule" %}?strict=1'>严格入群规则</a></li>
+{% else %}
+	<li role="presentation" class="nav active"><a href='{% url "webot:rule" %}?strict='>宽松入群规则</a></li>
+	<li role="presentation" class="nav"><a href='{% url "webot:rule" %}?strict=1'>严格入群规则</a></li>
+{% endif %}
+	<li role="presentation"><a href="#">自动问答配置</a></li>
 </ul>
 <hr />
 <button type="button" class="btn btn-info btn-lg btn-block unhid hidSwith" onclick='ruleConf()'>更改配置</button>
@@ -120,7 +126,7 @@ function reset(func){
 			};
 		};
 	};
-	xhr.open("GET", '{% url "webot:ajax:modify" %}', true);
+	xhr.open("GET", '{% url "webot:ajax:modify" %}?strict={{ is_strict }}', true);
 	xhr.send();
 };
 </script>

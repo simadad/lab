@@ -8,11 +8,15 @@ import re
 
 @login_required
 def rule_conf(request):
-    rooms = ChatRoom.objects.all().order_by('order')
     if request.method == 'POST':
-        list_room = request.POST.getlist('rooms')
+        is_strict = request.POST.get('is_strict')
         list_keywords = request.POST.getlist('keywords')
-        list_orders = request.POST.getlist('orders')
+        if is_strict == 'True':
+            list_orders = [int(order) + 100 for order in request.POST.getlist('orders')]
+            list_room = ['#' + room for room in request.POST.getlist('rooms')]
+        else:
+            list_orders = request.POST.getlist('orders')
+            list_room = request.POST.getlist('rooms')
         rules = zip(list_room, list_orders, list_keywords)
         print(len(list_keywords), len(list_orders), len(list_room))
         if len(set(list_room)) < len(list_room):
@@ -28,18 +32,35 @@ def rule_conf(request):
                     keyword=keyword,
                     chatroom=room
                 )
-        rooms = ChatRoom.objects.all().order_by('order')
+        if is_strict == 'True':
+            rooms = ChatRoom.objects.all().filter(order__gt=100).order_by('order')
+        else:
+            rooms = ChatRoom.objects.all().filter(order__lt=100).order_by('order')
         return HttpResponse(render(request, 'webotconf/ajax/rules.html', {
-            'rooms': rooms
+            'rooms': rooms,
+            'is_strict': is_strict
         }))
+    elif request.GET.get('strict'):
+        rooms = ChatRoom.objects.all().filter(order__gt=100).order_by('order')
+        is_strict = 'True'
+    else:
+        rooms = ChatRoom.objects.all().filter(order__lt=100).order_by('order')
+        is_strict = 'False'
     return render(request, 'webotconf/webot.html', {
-        'rooms': rooms
+        'rooms': rooms,
+        'is_strict': is_strict
     })
 
 
 @login_required
 def ajax_conf_modify(request):
-    rooms = ChatRoom.objects.all().order_by('order')
+    is_strict = request.GET.get('strict')
+    print('is_strict: ', is_strict, type(is_strict), is_strict==False)
+    if is_strict == 'True':
+        rooms = ChatRoom.objects.all().filter(order__gt=100).order_by('order')
+    else:
+        rooms = ChatRoom.objects.all().filter(order__lt=100).order_by('order')
     return HttpResponse(render(request, 'webotconf/ajax/modify.html', {
-        'rooms': rooms
+        'rooms': rooms,
+        'is_strict': is_strict
     }))
