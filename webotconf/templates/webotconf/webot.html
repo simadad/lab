@@ -78,13 +78,25 @@ function confCancel(){
 	formRule.innerHTML = '\
 		{% for room in rooms %}\
 		<tr>\
-			<td class="input-lg">{{ room }}</td>\
+			<td class="input-lg">\
+			{% if is_strict == "True" %}\
+				{{ room|cut:"#" }}\
+			{% else %}\
+				{{ room }}\
+			{% endif %}\
+			</td>\
 			<td class="input-lg">\
 			{% for rule in room.rules.all %}\
 				{{ rule.keyword }}\
 			{% endfor %}\
 			</td>\
-			<td class="input-lg text-center">{{ room.order }}</td>\
+			<td class="input-lg text-center">\
+			{% if is_strict == "True" %}\
+				{{ room.order|add:-100 }}\
+			{% else %}\
+				{{ room.order }}\
+			{% endif %}\
+			</td>\
 		</tr>\
 		{% endfor %}'
 };
@@ -109,7 +121,7 @@ function ruleMore(){
 			<input class="form-control input-lg" name="keywords" type="text" placeholder="关键字集" onfocus="this.select();">\
 		</td>\
 		<td class="input-lg text-center">\
-			<input class="form-control input-lg" name="orders" type="text" placeholder="匹配次序" onfocus="this.select();">\
+			<input class="form-control input-lg" name="orders" type="text" placeholder="< 100" onfocus="this.select();">\
 		</td>'
 };
 

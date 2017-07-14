@@ -35,9 +35,9 @@
 			</td>
 			<td class='input-lg text-center'>
 			{% if is_strict == 'True' %}
-				<input class="form-control input-lg" name="orders" type='text' placeholder='匹配次序' onfocus='this.select()' value='{{room.order|add:-100}}'>
+				<input class="form-control input-lg" name="orders" type='text' placeholder='< 100' onfocus='this.select()' value='{{room.order|add:-100}}'>
 			{% else %}
-				<input class="form-control input-lg" name="orders" type='text' placeholder='匹配次序' onfocus='this.select()' value='{{ room.order }}'>
+				<input class="form-control input-lg" name="orders" type='text' placeholder='< 100' onfocus='this.select()' value='{{ room.order }}'>
 			{% endif %}
 			</td>
 		</tr>
