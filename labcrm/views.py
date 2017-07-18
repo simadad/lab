@@ -236,7 +236,9 @@ def ajax_conf_add(request):
 
 @login_required
 def ajax_conf_preview(request):
+    print('aaaaaaaaaaaaaa', request.POST.getlist('aaa'))
     attr_ids = request.POST.getlist('attr_checked')
+    print(attr_ids)
     attrs = UserAttr.objects.filter(id__in=attr_ids).order_by('-is_option')
     users = LabUser.objects.all().order_by('-user__date_joined')
     return HttpResponse(render(request, 'labcrm/ajax/preview.html', {
