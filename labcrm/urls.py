@@ -4,7 +4,8 @@ from labcrm import views
 
 ajax_urls = [
     url(r'^preview', views.ajax_conf_preview, name='preview'),
-    url(r'^modify', views.ajax_detail_modify, name='modify')
+    url(r'^modify', views.ajax_detail_modify, name='modify'),
+    url(r'^add', views.ajax_conf_add, name='add'),
 ]
 
 
@@ -15,5 +16,4 @@ urlpatterns = [
     url(r'^detail', views.user_detail, name='detail'),
     url(r'^conf', views.ques_conf, name='conf'),
     url(r'^fill/(?P<data_key>[\s\S]*)$', views.ques_fill, name='fill'),
-    url(r'^add', views.ques_add, name='add'),
 ]
