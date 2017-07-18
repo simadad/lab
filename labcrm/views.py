@@ -202,7 +202,36 @@ def ques_fill(request, data_key=None):
 
 @login_required
 def ajax_conf_add(request):
-    return render(request, 'labcrm/ques_add.html')
+    attr = request.POST.get('attr')
+    is_option = request.POST.get('is_option')
+    # is_preview = request.POST.get('is_preview')
+    # print('attr-option-preview: ', attr, is_option, is_preview)
+    print('attr-option: ', attr, is_option)
+    if is_option:
+        attr, _ = UserAttr.objects.update_or_create(attr=attr, defaults={
+            'is_option': True
+        })
+        options = request.POST.getlist('options')
+        print('options: ', options)
+        for option in options:
+            print('attr-option: ', attr, option)
+            AttrOption.objects.get_or_create(
+                attr=attr,
+                option=option
+            )
+    else:
+        attr, _ = UserAttr.objects.update_or_create(attr=attr, defaults={
+            'is_option': False
+        })
+    # attr_ids = request.POST.getlist('attr_checked')
+    # attr_ids.append(attr.id)
+    # print('attr_ids: ', attr_ids)
+    # attrs = UserAttr.objects.filter(id__in=attr_ids).order_by('-is_option')
+    return render(request, 'labcrm/ques_add.html', {
+        # 'attrs': attrs,
+        'attr': attr,
+        # 'is_preview': is_preview
+    })
 
 
 @login_required

@@ -6,7 +6,7 @@
 	<input class='btn btn-success btn-lg hidden' id='btnCre' type='submit' form='quesCre' value='生成'>
 	<input class='btn btn-warning btn-lg hidden' id='btnPre' type='submit' form='formToFill' onclick='quesPre()' value='预览'>
 	<input class='btn btn-info btn-lg' type='submit' form='quesConf' id='btnConf' value='配置' onclick='quesConf()'><hr />
-	<button class='btn btn-info btn-lg' data-toggle="modal" data-target="#quesAddModal">添加提问</button>
+	<button class='btn btn-info btn-lg' id='btnQuesAdd' data-toggle="modal" data-target="#quesAddModal">添加提问</button>
 </div>
 {% endblock %}
 {% block row-right %}
@@ -44,7 +44,7 @@
 			</form>
 		</table>
 	</div>
-	<div class="col-md-3">
+	<div class="col-md-3" id='optionDisplay'>
 	{% for attr in attrs %}
 		<div class="collapse" id="collapse{{ attr.id }}">
 			<ul class='list-group'>
@@ -67,6 +67,7 @@
 			<div class="modal-body">
 				<form class="form-horizontal" id='formQuesAdd' action='{% url "crm:ajax:add" %}' method='POST'>
 					{% csrf_token %}
+					<!--input class='hidden' id='inputPreview' name='is_preview'-->
 					<div class="form-group">
 						<label class='col-md-2 control-label' for='attr'>属性名：</label>
 						<div class='col-md-4'>
@@ -74,11 +75,12 @@
 						</div>
 						<label class='col-md-4 control-label' for='check'>是否提供选项：</label>
 						<div class='col-md-2'>
-							<input class='form-control' id='check' name='is_option' type='checkbox' value=true onchange='optionChange(this)'>
+							<input class='form-control' id='check' name='is_option' type='checkbox' value=1 onchange='optionChange(this)'>
 						</div>
 					</div>
 					<hr />
 					<div id='optionGroup'></div>
+					<!--div class='hidden' id='checkedDivsBox'></div-->
 				</form>
 			</div>
 			<div class='hidden' id='btnMore'>
@@ -106,15 +108,25 @@ function quesConf(){
 			para = document.getElementById('boxPreview'),
 			btnConf = document.getElementById('btnConf'),
 			btnPre = document.getElementById('btnPre'),
+			btnQuesAdd = document.getElementById('btnQuesAdd'),
+			//inputPreview = document.getElementById('inputPreview'),
+			//checkedDivsBox = document.getElementById('checkedDivsBox'),
+			checkedDivs = document.getElementsByName('attr_checked'),
 			btnCreVal = btnPre.getAttribute('class');
 		btnCreVal = btnCreVal.replace('hidden', '');
 		xhr.open("POST", f.action, true);
 		xhr.onreadystatechange=function(){
 			if(xhr.readyState == 4 && xhr.status == 200){
+				//for(var i=0;i<checkedDivs.length;i++){
+					//checkedDivsBox.appendChild(checkedDivs[0]);
+				//};
 				var rowNew = xhr.responseText;
 				para.innerHTML = rowNew;
+				btnQuesAdd.setAttribute('disabled', true);
 				btnConf.setAttribute('class', 'hidden');
 				btnPre.setAttribute('class', btnCreVal);
+				document.getElementById('optionDisplay').setAttribute('class', 'hidden');
+				//inputPreview.setAttribute('value', 1);
 			};
 		};
 		xhr.send(formData);
@@ -145,9 +157,11 @@ function quesPre(){
 		xhr.send(formData);
 	};
 };
-optionId = 0
+
+optionId = 0 //  选项 id 计数， 全局变量
 
 function optionMore(){
+	// 更多选项
 	var para = document.getElementById('optionGroup');
 		newDiv = document.createElement('div');
 	optionId += 1
@@ -165,6 +179,7 @@ function optionMore(){
 }
 
 function optionChange(e){
+	// 是否提供选项
 	if(e.checked){
 		document.getElementById('btnMore').setAttribute('class', 'form-group');
 		optionMore();
@@ -176,27 +191,39 @@ function optionChange(e){
 };
 
 function optionDel(e){
+	// 删除选项
 	var divToDel = e.parentElement.parentElement;
 	divToDel.parentElement.removeChild(divToDel);
 };
 
 function quesAddSave(){
+	// 添加提问提交
 	document.getElementById("formQuesAdd").onsubmit = function(e){
 		e.preventDefault();
 		var f = e.target,
 			formData = new FormData(f),
 			xhr = new XMLHttpRequest(),
-			btnConf = document.getElementById('btnConf');
+			divNew = document.createElement('div');
 		xhr.open("POST", f.action, true);
 		xhr.onreadystatechange=function(){
 			if(xhr.readyState == 4 && xhr.status == 200){
-				var rowNew = xhr.responseText;
+				var rowNew = xhr.responseText.split('<!--optionDisplay-->');
+				/*
 				if(btnConf.className=='hidden'){
-					para = document.getElementById('formToFill');
+					var para = document.getElementById('checkedDivsBox');
+						newInput = document.createElement('input');
+					para.appendChild(newInput);
+					newInput = 
+					document.getElementById('previewAttrs').innerHTML = (rowNew);
+					
 				}else{
-					para = document.getElementById('tbOptions');
+					document.getElementById('tbOptions').insertRow(0).innerHTML = rowNew;
 				};
-				para.innerHTML = rowNew;
+				*/
+				document.getElementById('tbOptions').insertRow(0).innerHTML = rowNew[0];
+				document.getElementById('optionDisplay').appendChild(divNew);
+				divNew.innerHTML = rowNew[1];
+				document.getElementById('btn-modal-hide').click();
 			};
 		};
 		xhr.send(formData);
