@@ -3,6 +3,7 @@ from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ, Dialog
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db.utils import IntegrityError
 from collections import namedtuple
 import base64
 # Create your views here.
@@ -36,14 +37,21 @@ def user_list(request):
     if request.method == 'POST':
         nickname = request.POST.get('nickname')
         wechat = request.POST.get('wechat')
-        user = User.objects.create_user(nickname)
+        try:
+            user = User.objects.create_user(nickname)
+        except IntegrityError as e:
+            users = LabUser.objects.all().filter(is_del=False).order_by('-user__date_joined')
+            return render(request, 'labcrm/user_list.html', {
+                'users': users,
+                'repeat': True
+            })
         new_lab_user = LabUser.objects.create(
             user=user,
             nickname=nickname,
-            wechat=wechat
+            wechat=wechat,
         )
         return redirect('crm:detail2', new_id=new_lab_user.id)
-    users = LabUser.objects.all().order_by('-user__date_joined')
+    users = LabUser.objects.all().filter(is_del=False).order_by('-user__date_joined')
     return render(request, 'labcrm/user_list.html', {
         'users': users
     })
@@ -55,7 +63,7 @@ def user_detail(request, new_id=None):
     attr_option = attrs.filter(is_option=True)
     if not new_id:
         new_id = request.GET.get('uid')
-    lab_user = get_object_or_404(LabUser, id=new_id)
+    lab_user = get_object_or_404(LabUser, id=new_id, is_del=False)
     dialogs = Dialog.objects.filter(user=lab_user)
     user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
 
@@ -176,7 +184,7 @@ def ques_fill(request, data_key=None):
     attr_ids = ques_ids_str.split('##')
     attrs = UserAttr.objects.filter(id__in=attr_ids)
     if request.method == 'POST':
-        user = get_object_or_404(LabUser, nickname=lab_user)
+        user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
         ques_values = request.POST.getlist('ques_value')
         quests = zip(attrs, ques_values)
         for ques in quests:
@@ -240,7 +248,7 @@ def ajax_conf_preview(request):
     attr_ids = request.POST.getlist('attr_checked')
     print(attr_ids)
     attrs = UserAttr.objects.filter(id__in=attr_ids).order_by('-is_option')
-    users = LabUser.objects.all().order_by('-user__date_joined')
+    users = LabUser.objects.all().filter(is_del=False).order_by('-user__date_joined')
     return HttpResponse(render(request, 'labcrm/ajax/preview.html', {
         'attrs': attrs,
         'users': users
@@ -251,7 +259,7 @@ def ajax_conf_preview(request):
 def ajax_detail_modify(request):
     uid = request.GET.get('uid')
     attrs = UserAttr.objects.all()
-    user = get_object_or_404(LabUser, id=uid)
+    user = get_object_or_404(LabUser, id=uid, is_del=False)
     attrs = UserAttr.objects.all()
     attr_option = attrs.filter(is_option=True)
     # if request.method == 'POST':
@@ -261,3 +269,17 @@ def ajax_detail_modify(request):
     #         if item[0] in [attr.attr for attr in attrs]:
 
     return HttpResponse('aaaa')
+
+
+@login_required
+def ajax_user_del(request):
+    userId = request.POST.getlist('userId')
+    print('userId: ', userId)
+    users = LabUser.objects.filter(id__in=userId)
+    for user in users:
+        user.is_del = True
+        user.save()
+    users = LabUser.objects.all().filter(is_del=False).order_by('-user__date_joined')
+    return render(request, 'labcrm/ajax/user_del.html', {
+        'users': users
+    })

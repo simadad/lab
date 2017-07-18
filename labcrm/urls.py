@@ -6,6 +6,7 @@ ajax_urls = [
     url(r'^preview', views.ajax_conf_preview, name='preview'),
     url(r'^modify', views.ajax_detail_modify, name='modify'),
     url(r'^add', views.ajax_conf_add, name='add'),
+    url(r'^del', views.ajax_user_del, name='del'),
 ]
 
 

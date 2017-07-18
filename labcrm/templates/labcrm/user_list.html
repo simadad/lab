@@ -2,7 +2,47 @@
 {% block title %}用户列表{% endblock %}
 {% block userList %}active{% endblock %}
 {% block row-left %}
-<button class='btn btn-info btn-block btn-lg' data-toggle="modal" data-target="#dialogModal">添加成员</button>
+<button id='btnUserAdd' class='btn btn-info btn-block btn-lg' data-toggle="modal" data-target="#dialogModal">添加成员</button>
+<button id='btnUserDel' class='btn btn-warning btn-block btn-lg' onclick='userDel()'>删除成员</button>
+<button id='btnDelSure' class='btn btn-danger btn-block btn-lg hidden' form='formUserDel' type='submit' onclick='delSure()'>确认删除</button>
+{% endblock %}
+{% block row-right %}
+<table class="table table-hover table-striped table-bordered">
+	<caption>成员列表</caption>
+		<thead class='thead-inverse'>
+		<tr>
+			<th class='col-lg-3'>昵称</th>
+			<th class='col-lg-2'>微信</th>
+			<th class='col-lg-2'>问卷</th>
+			<th class='col-lg-2'>入学日期</th>
+			<th class='col-lg-2'>学习记录</th>
+			<th class='col-lg-1 hidden tbHid'>删除</th>
+		</tr>
+		</thead>
+	<tbody id='userList'>
+	{% for lab_user in users %}
+		<tr id='user{{ lab_user.id }}'>
+			<td><a href='{% url "crm:detail" %}?uid={{ lab_user.id }}'>{{ lab_user.nickname }}</a></td>
+			<td>{{ lab_user.wechat }}</td>
+			<td>
+			{% if lab_user.papers %}
+				<a>{{ lab_user.papers.last }}</a>
+			{% else %}
+				<a>None</a>
+			{% endif %}
+			</td>
+			<td>{{ lab_user.user.date_joined|date:"Y-m-d H:i:s" }}</td>
+			<td><a href='#'>记录</a></td>
+			<td class='hidden tbHid'>
+				<input form='formUserDel' type='checkbox' name='userId' value='{{ lab_user.id }}'>
+			</td>
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
+{% block modal %}
+<form class='hidden' id='formUserDel' action='{% url "crm:ajax:del" %}' method='POST'>{% csrf_token %}</form>
 <div class="modal fade" id='dialogModal' tabindex="-1" role="dialog">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
@@ -36,34 +76,49 @@
 	</div>
 </div>
 {% endblock %}
-{% block row-right %}
-<table class="table table-hover table-striped table-bordered">
-	<caption>成员列表</caption>
-		<thead class='thead-inverse'>
-		<tr>
-			<th>昵称</th>
-			<th>微信</th>
-			<th>问卷</th>
-			<th>入学日期</th>
-		</tr>
-		</thead>
-	<tbody id='userList'>
-	{% for lab_user in users %}
-		<tr>
-			<td><a href='{% url "crm:detail" %}?uid={{ lab_user.id }}'>{{ lab_user.nickname }}</a></td>
-			<td>{{ lab_user.wechat }}</td>
-			<td>
-			{% if lab_user.papers %}
-				<a>{{ lab_user.papers.last }}</a>
-			{% else %}
-				<a>None</a>
-			{% endif %}
-			</td>
-			<td>{{ lab_user.user.date_joined }}</td>
-		</tr>
-	{% endfor %}
-		<div class='newUser'>
-		</div>
-	</tbody>
-</table>
+{% block script %}
+<script>
+{% if repeat %}
+window.onload = function(){
+	alert('用户名重复');
+};
+{% endif %}
+function userDel(){
+	// js 删除成员
+	var tbHid = document.getElementsByClassName('tbHid'),
+		btnDelSure = document.getElementById('btnDelSure'),
+		btnUserAdd = document.getElementById('btnUserAdd'),
+		attrDelSure = btnDelSure.getAttribute('class'),
+		attrUserDel = btnUserDel.getAttribute('class');
+	for(var i=0;i<tbHid.length;i++){
+		tbHid[i].setAttribute('class', 'tbHid col-lg-1');
+	};
+	attrDelSure = attrDelSure.replace('hidden', '');
+	attrUserDel = attrUserDel + ' hidden';
+	btnUserDel.setAttribute('class', attrUserDel);
+	btnDelSure.setAttribute('class', attrDelSure);
+	btnUserAdd.setAttribute('disabled', true);
+};
+
+function delSure(){
+	// form 删除成员
+	document.getElementById("formUserDel").onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest(),
+			para = document.getElementById('userList');
+		xhr.open("POST", f.action, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var rowNew = xhr.responseText;
+				para.innerHTML = rowNew;
+				document.getElementsByClassName('tbHid')[0].setAttribute('class', 'tbHid hidden col-lg-1');
+			};
+		};
+		xhr.send(formData);
+	};
+};
+
+</script>
 {% endblock %}

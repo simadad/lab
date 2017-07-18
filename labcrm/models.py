@@ -7,6 +7,7 @@ class LabUser(models.Model):
     user = models.OneToOneField(User, verbose_name='用户', on_delete=models.CASCADE, related_name='labuser')
     nickname = models.CharField(max_length=30, verbose_name='昵称')
     wechat = models.CharField(max_length=30, verbose_name='微信号')
+    is_del = models.BooleanField(verbose_name='是否删除', default=False)
 
     def __str__(self):
         return self.nickname

@@ -1,0 +1,18 @@
+{% for lab_user in users %}
+	<tr id='user{{ lab_user.id }}'>
+		<td><a href='{% url "crm:detail" %}?uid={{ lab_user.id }}'>{{ lab_user.nickname }}</a></td>
+		<td>{{ lab_user.wechat }}</td>
+		<td>
+		{% if lab_user.papers %}
+			<a>{{ lab_user.papers.last }}</a>
+		{% else %}
+			<a>None</a>
+		{% endif %}
+		</td>
+		<td>{{ lab_user.user.date_joined|date:"Y-m-d H:i:s" }}</td>
+		<td><a href='#'>记录</a></td>
+		<td class='hidden tbHid'>
+			<input form='formUserDel' type='checkbox' name='userId' value='{{ lab_user.id }}'>
+		</td>
+	</tr>
+{% endfor %}
