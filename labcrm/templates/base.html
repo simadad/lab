@@ -51,7 +51,7 @@
 </footer>
 {% block modal %}{% endblock %}
 <!--script src="http://code.jquery.com/jquery.js"></script-->
-<script src="{% static 'bootstrap3\js\jquery.js' %}"></script>
+<script src="{% static 'bootstrap3\js\jquery.min.js' %}"></script>
 <script src="{% static 'bootstrap3\js\bootstrap.min.js' %}"></script>
 <script src="{% static 'bootstrap3\js\npm.js' %}"></script>
 <script>
@@ -76,6 +76,20 @@ function navbarLogin(){
 		xhr.send(formData);
 	};
 };
+
+function h(e) {
+	// textarea 高度自增长
+	if(e.scrollHeight<80){
+		$(e).css({'height':'auto','overflow-y':'hidden'}).height(84);
+	}else{
+		$(e).css({'height':'auto','overflow-y':'hidden'}).height(e.scrollHeight);
+	};
+};
+$('textarea').each(function () {
+	h(this);
+}).on('input', function () {
+	h(this);
+});
 </script>
 {% block script %}{% endblock %}
 </body>

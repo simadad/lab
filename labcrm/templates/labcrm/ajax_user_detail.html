@@ -40,7 +40,7 @@
 	{% if dialogs %}
 		{% for dialog in dialogs %}
 		<label>{{ dialog.log_time }} | {{ dialog.recorder }}</label>
-		<textarea class='form-control' readonly='readonly' style='overflow:auto' rows=15>{{ dialog.dialog }}</textarea><hr />
+		<textarea class='form-control' readonly='readonly' rows=3>{{ dialog.dialog }}</textarea><hr />
 		{% endfor %}
 	{% endif %}
 	</div>
