@@ -216,7 +216,7 @@ def link_to_class(request):
     if user.class_id:
         cid = user.class_id
     else:
-        db = pymysql.connect('23.83.235.63', 'markdev', 'mark2017', 'codeclass', charset="utf8")
+        db = pymysql.connect('47.93.61.70', 'markdev', 'mark2017', 'codeclass', charset="utf8")
         cur = db.cursor()
         cur.execute('''
             SELECT id FROM auth_user user
