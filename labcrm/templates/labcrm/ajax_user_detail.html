@@ -39,7 +39,7 @@
 	<div class='col-md-12 form-group'>
 	{% if dialogs %}
 		{% for dialog in dialogs %}
-		<label>{{ dialog.log_time }} | {{ dialog.recorder }}</label>
+		<label>{{ dialog.log_time|date:"Y-m-d H:i:s" }} | {{ dialog.recorder }}</label>
 		<textarea class='form-control' readonly='readonly' rows=3>{{ dialog.dialog }}</textarea><hr />
 		{% endfor %}
 	{% endif %}
