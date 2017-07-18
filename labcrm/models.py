@@ -8,6 +8,7 @@ class LabUser(models.Model):
     nickname = models.CharField(max_length=30, verbose_name='昵称')
     wechat = models.CharField(max_length=30, verbose_name='微信号')
     is_del = models.BooleanField(verbose_name='是否删除', default=False)
+    class_id = models.IntegerField(verbose_name='教室ID', blank=True, null=True)
 
     def __str__(self):
         return self.nickname

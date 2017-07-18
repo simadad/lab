@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from collections import namedtuple
 import base64
+import pymysql
 # Create your views here.
 
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
@@ -63,7 +64,7 @@ def user_detail(request, new_id=None):
     attr_option = attrs.filter(is_option=True)
     if not new_id:
         new_id = request.GET.get('uid')
-    lab_user = get_object_or_404(LabUser, id=new_id, is_del=False)
+    lab_user = get_object_or_404(LabUser, id=new_id)
     dialogs = Dialog.objects.filter(user=lab_user)
     user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
 
@@ -209,6 +210,30 @@ def ques_fill(request, data_key=None):
 
 
 @login_required
+def link_to_class(request):
+    uid = request.GET.get('uid')
+    user = get_object_or_404(LabUser, id=uid)
+    if user.class_id:
+        cid = user.class_id
+    else:
+        db = pymysql.connect('23.83.235.63', 'markdev', 'mark2017', 'codeclass', charset="utf8")
+        cur = db.cursor()
+        cur.execute('''
+            SELECT id FROM auth_user user
+            WHERE user.username = '{username}'
+        '''.format(username=user.nickname))
+        cid = cur.fetchone()
+        if cid:
+            cid = cid[0]
+            user.class_id = cid
+            user.save()
+        else:
+            return redirect('crm:list')
+    url = 'http://crossincode.com/crm/info/?sid=' + str(cid)
+    return redirect(url)
+
+
+@login_required
 def ajax_conf_add(request):
     attr = request.POST.get('attr')
     is_option = request.POST.get('is_option')
@@ -254,7 +279,7 @@ def ajax_conf_preview(request):
         'users': users
     }))
 
-
+'''
 @login_required
 def ajax_detail_modify(request):
     uid = request.GET.get('uid')
@@ -269,6 +294,7 @@ def ajax_detail_modify(request):
     #         if item[0] in [attr.attr for attr in attrs]:
 
     return HttpResponse('aaaa')
+'''
 
 
 @login_required

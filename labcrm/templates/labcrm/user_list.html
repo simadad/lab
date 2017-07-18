@@ -32,7 +32,7 @@
 			{% endif %}
 			</td>
 			<td>{{ lab_user.user.date_joined|date:"Y-m-d H:i:s" }}</td>
-			<td><a href='#'>记录</a></td>
+			<td><a href='{% url "crm:class" %}?uid={{ lab_user.id }}'>记录</a></td>
 			<td class='hidden tbHid'>
 				<input form='formUserDel' type='checkbox' name='userId' value='{{ lab_user.id }}'>
 			</td>
