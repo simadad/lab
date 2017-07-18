@@ -88,13 +88,14 @@ function userDel(){
 	var tbHid = document.getElementsByClassName('tbHid'),
 		btnDelSure = document.getElementById('btnDelSure'),
 		btnUserAdd = document.getElementById('btnUserAdd'),
+		btnUserDel = document.getElementById('btnUserDel'),
 		attrDelSure = btnDelSure.getAttribute('class'),
 		attrUserDel = btnUserDel.getAttribute('class');
 	for(var i=0;i<tbHid.length;i++){
 		tbHid[i].setAttribute('class', 'tbHid col-lg-1');
 	};
 	attrDelSure = attrDelSure.replace('hidden', '');
-	attrUserDel = attrUserDel + ' hidden';
+	attrUserDel += ' hidden';
 	btnUserDel.setAttribute('class', attrUserDel);
 	btnDelSure.setAttribute('class', attrDelSure);
 	btnUserAdd.setAttribute('disabled', true);
@@ -107,6 +108,11 @@ function delSure(){
 		var f = e.target,
 			formData = new FormData(f),
 			xhr = new XMLHttpRequest(),
+			btnDelSure = document.getElementById('btnDelSure'),
+			btnUserAdd = document.getElementById('btnUserAdd'),
+			btnUserDel = document.getElementById('btnUserDel'),
+			attrDelSure = btnDelSure.getAttribute('class'),
+			attrUserDel = btnUserDel.getAttribute('class'),
 			para = document.getElementById('userList');
 		xhr.open("POST", f.action, true);
 		xhr.onreadystatechange=function(){
@@ -114,6 +120,11 @@ function delSure(){
 				var rowNew = xhr.responseText;
 				para.innerHTML = rowNew;
 				document.getElementsByClassName('tbHid')[0].setAttribute('class', 'tbHid hidden col-lg-1');
+				attrDelSure += ' hidden';
+				attrUserDel = attrUserDel.replace('hidden', '');
+				btnUserDel.setAttribute('class', attrUserDel);
+				btnDelSure.setAttribute('class', attrDelSure);
+				btnUserAdd.removeAttribute('disabled');
 			};
 		};
 		xhr.send(formData);
