@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ, Dialog
+from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ, Dialog, Paper
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -7,6 +7,7 @@ from django.db.utils import IntegrityError
 from collections import namedtuple
 import base64
 import pymysql
+import random
 # Create your views here.
 
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
@@ -143,6 +144,7 @@ def user_detail(request, new_id=None):
 @login_required
 def ques_conf(request):
     if request.method == 'POST':
+        # 预览 or 生成
         title = request.POST.get('paper_title')
         lab_user = request.POST.get('labUser')
         paper_desc = request.POST.get('paper_desc')
@@ -151,10 +153,19 @@ def ques_conf(request):
         attr_ids = request.POST.getlist('attr_id')
         print(22222, attr_ids)
         if request.POST.get('is_cre'):
+            # 生成
             data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids)])
-            data_key = base64.encodebytes(data.encode('utf8'))
+            key = random.randint(1000000000, 9999999999)
+            user = get_object_or_404(LabUser, nickname=lab_user)
+            Paper.objects.create(
+                user=user,
+                key=key,
+                data=data
+            )
+            data_key = str(key) + str(user.id)
             return redirect('crm:fill', data_key=data_key)
         else:
+            # 预览
             attrs = UserAttr.objects.filter(id__in=attr_ids)
             # ques_value = request.POST.getlist('ques_value')
             quests = zip(ques_desc, attr_ids, attrs)
@@ -179,8 +190,10 @@ def ques_conf(request):
 
 
 def ques_fill(request, data_key=None):
-    data = base64.decodebytes(data_key.encode('utf8')).decode('utf8')
-    title, lab_user, paper_desc, ques_desc_str, ques_ids_str = data.split('@@')
+    key = data_key[:10]
+    uid = data_key[10:]
+    paper = get_object_or_404(Paper, user=uid, key=key)
+    title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
     ques_desc = ques_desc_str.split('##')
     attr_ids = ques_ids_str.split('##')
     attrs = UserAttr.objects.filter(id__in=attr_ids)
