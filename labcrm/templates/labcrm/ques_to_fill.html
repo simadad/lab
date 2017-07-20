@@ -30,18 +30,18 @@
 					{% for option in ques.attr.options.all %}
 					<div class='radio'>
 						<label>
-							<input type="radio" name="ques_value" value="{{ option.option }}">
+							<input type="radio" name="ques_value{{ ques.aid }}" value="{{ option.option }}">
 							{{ option.option }}
 						</label>
 					</div>
 					{% endfor %}
 				{% else %}
-					<input type='text' id='labUser{{ ques.aid }}' class='form-control' name='ques_value' onfocus="this.select()" placeholder='请填写'>
+					<input type='text' id='labUser{{ ques.aid }}' class='form-control' name='ques_value{{ ques.aid }}' onfocus="this.select()" placeholder='请填写'>
 				{% endif %}
 				</div>
-				<!--div class='hidden'>
+				<div class='hidden'>
 					<input name='attr_id' value='{{ ques.aid }}'>
-				</div-->
+				</div>
 			</div>
 		</div>
 		{% endfor %}

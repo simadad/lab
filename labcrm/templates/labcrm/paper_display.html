@@ -15,8 +15,6 @@
 <content class='row'>
 <div class='col-md-12'>
 	<form>
-	{% csrf_token %}
-		<input class='hidden' name='data_key' value='{{ data_key }}'>
 		<h3 class='text text-center'>{{ title }}</h3>
 		<p class='text text-right'><em><b>TO -- </b></em><span id='username'>{{ labUser }}</span></p>
 		<p class='text'>{{ paper_desc }}</p>
@@ -31,9 +29,9 @@
 					<div class='radio' id='labUser{{ ques.aid }}'>
 						<label>
 						{% if option.option == ques.value %}
-							<input type="radio" name="ques_value" value="{{ option.option }}" checked disabled>
+							<input type="radio" value="{{ option.option }}" checked disabled>
 						{% else %}
-							<input type="radio" name="ques_value" value="{{ option.option }}" disabled>
+							<input type="radio" value="{{ option.option }}" disabled>
 						{% endif %}
 							{{ option.option }}
 						</label>

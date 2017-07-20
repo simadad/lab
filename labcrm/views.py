@@ -167,7 +167,8 @@ def ques_conf(request):
             return redirect('crm:fill', data_key=data_key)
         else:
             # 预览
-            attrs = UserAttr.objects.filter(id__in=attr_ids)
+            # attrs = UserAttr.objects.filter(id__in=attr_ids)
+            attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
             # ques_value = request.POST.getlist('ques_value')
             quests = zip(ques_desc, attr_ids, attrs)
             quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
@@ -197,7 +198,8 @@ def ques_fill(request, data_key=None):
     title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
     ques_desc = ques_desc_str.split('##')
     attr_ids = ques_ids_str.split('##')
-    attrs = UserAttr.objects.filter(id__in=attr_ids)
+    # attrs = UserAttr.objects.filter(id__in=attr_ids)
+    attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
     if request.method == 'POST':
         print('POST: ques_fill')
         user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
@@ -226,34 +228,36 @@ def ques_fill(request, data_key=None):
 
 
 def paper_display(request):
+    print('POST: paper_display')
     data_key = request.POST.get('data_key')
+    # attr_ids = request.POST.getlist('attr_id')
     key = data_key[:9]
     uid = data_key[9:]
     paper = get_object_or_404(Paper, user=uid, key=key)
     title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
     ques_desc = ques_desc_str.split('##')
     attr_ids = ques_ids_str.split('##')
-    attrs = UserAttr.objects.filter(id__in=attr_ids)
-    if request.method == 'POST':
-        print('POST: paper_display')
-        user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
-        ques_values = request.POST.getlist('ques_value')
-        quests = zip(ques_desc, attr_ids, attrs, ques_values)
-        quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
+    # attrs = UserAttr.objects.filter(id__in=attr_ids)
+    attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
+    user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
+    # ques_values = request.POST.getlist('ques_value')
+    ques_values = [request.POST.get('ques_value'+aid) for aid in attr_ids]
+    quests = zip(ques_desc, attr_ids, attrs, ques_values)
+    quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
 
-        def questions():
-            for ques in quests:
-                print('paper-ques: ', ques)
-                yield QuesTuple2(*ques)
+    def questions():
+        for ques in quests:
+            print('paper-ques: ', ques)
+            yield QuesTuple2(*ques)
 
-        return HttpResponse(render(request, 'labcrm/paper_display.html', {
-            'title': title,
-            'labUser': lab_user,
-            'paper_desc': paper_desc,
-            'data_key': data_key,
-            'is_fill': True,
-            'questions': questions(),
-        }))
+    return HttpResponse(render(request, 'labcrm/paper_display.html', {
+        'title': title,
+        'labUser': lab_user,
+        'paper_desc': paper_desc,
+        'data_key': data_key,
+        'is_fill': True,
+        'questions': questions(),
+    }))
 
 
 @login_required

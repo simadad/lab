@@ -1,3 +1,4 @@
+<!-- 配置页面 para: ques_cond boxPreview -->
 <form method='POST' class="form-horizontal" action='' id='formToFill'>
 {% csrf_token %}
 	<div class="form-group has-warning">
@@ -29,9 +30,9 @@
 		<div class='col-lg-9 col-lg-offset-1'>
 		{% if attr.is_option %}
 			{% for option in attr.options.all %}
-			<div class='radio disabled'>
+			<div class='radio'>
 				<label>
-					<input type="radio" name="ques_value" value="{{ option.id }}">
+					<input type="radio" name="ques_value" value="{{ option.id }}" disabled>
 					{{ option.option }}
 				</label>
 			</div>
@@ -47,6 +48,3 @@
 	{% endfor %}
 	</div>
 </form>
-{{ attrs }}
-aaaaaaaaa
-{{ user }}
