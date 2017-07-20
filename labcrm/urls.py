@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^users', views.user_list, name='list'),
     url(r'^detail/(?P<new_id>.*)$', views.user_detail, name='detail2'),
     url(r'^detail', views.user_detail, name='detail'),
+    url(r'^paper', views.paper_display, name='paper'),
     url(r'^conf', views.ques_conf, name='conf'),
     url(r'^fill/(?P<data_key>[\s\S]*)$', views.ques_fill, name='fill'),
     url(r'^class', views.link_to_class, name='class'),

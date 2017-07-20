@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+	{% load static %}
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap.min.css' %}" />
+	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap-theme.min.css' %}" />
+    <title>{{ title }}</title>
+</head>
+<body>
+<header>
+	<h1 class='text-center'><a href=''>crossin编程实战训练营</a></h1>
+</header>
+<content class='row'>
+<div class='col-md-12'>
+	<form>
+	{% csrf_token %}
+		<input class='hidden' name='data_key' value='{{ data_key }}'>
+		<h3 class='text text-center'>{{ title }}</h3>
+		<p class='text text-right'><em><b>TO -- </b></em><span id='username'>{{ labUser }}</span></p>
+		<p class='text'>{{ paper_desc }}</p>
+		{% for ques in questions %}
+		<hr />
+		<div class='row'>
+			<div class="form-group has-success col-lg-12">
+				<label class="col-lg-2 text-center" for='labUser{{ ques.aid }}'>{{ ques.desc }}</label>
+				<div class='col-lg-10'>
+				{% if ques.attr.is_option %}
+					{% for option in ques.attr.options.all %}
+					<div class='radio' id='labUser{{ ques.aid }}'>
+						<label>
+						{% if option.option == ques.value %}
+							<input type="radio" name="ques_value" value="{{ option.option }}" checked disabled>
+						{% else %}
+							<input type="radio" name="ques_value" value="{{ option.option }}" disabled>
+						{% endif %}
+							{{ option.option }}
+						</label>
+					</div>
+					{% endfor %}
+				{% else %}
+					<input type='text' id='labUser{{ ques.aid }}' class='form-control' placeholder='请填写' value='{{ ques.value }}' disabled>
+				{% endif %}
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</form>
+</div>
+</content>
+
+<footer>
+	<p class='text-center'><b><a>***感谢访问***</a></b></p>
+</footer>
+<script src="{% static 'bootstrap3\js\jquery.min.js' %}"></script>
+<script src="{% static 'bootstrap3\js\bootstrap.min.js' %}"></script>
+<script src="{% static 'bootstrap3\js\npm.js' %}"></script>
+
+</body>
+</html>

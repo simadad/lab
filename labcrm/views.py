@@ -11,6 +11,7 @@ import random
 # Create your views here.
 
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
+QuesTuple2 = namedtuple('QuesTuple', ['desc', 'aid', 'attr', 'value'])
 
 
 def _save_uiq_uia(user, attr, answer):
@@ -155,7 +156,7 @@ def ques_conf(request):
         if request.POST.get('is_cre'):
             # 生成
             data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids)])
-            key = random.randint(1000000000, 9999999999)
+            key = random.randint(100000000, 999999999)
             user = get_object_or_404(LabUser, nickname=lab_user)
             Paper.objects.create(
                 user=user,
@@ -190,14 +191,15 @@ def ques_conf(request):
 
 
 def ques_fill(request, data_key=None):
-    key = data_key[:10]
-    uid = data_key[10:]
+    key = data_key[:9]
+    uid = data_key[9:]
     paper = get_object_or_404(Paper, user=uid, key=key)
     title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
     ques_desc = ques_desc_str.split('##')
     attr_ids = ques_ids_str.split('##')
     attrs = UserAttr.objects.filter(id__in=attr_ids)
     if request.method == 'POST':
+        print('POST: ques_fill')
         user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
         ques_values = request.POST.getlist('ques_value')
         quests = zip(attrs, ques_values)
@@ -217,9 +219,41 @@ def ques_fill(request, data_key=None):
         'title': title,
         'labUser': lab_user,
         'paper_desc': paper_desc,
+        'data_key': data_key,
         'is_fill': True,
         'questions': questions(),
     }))
+
+
+def paper_display(request):
+    data_key = request.POST.get('data_key')
+    key = data_key[:9]
+    uid = data_key[9:]
+    paper = get_object_or_404(Paper, user=uid, key=key)
+    title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
+    ques_desc = ques_desc_str.split('##')
+    attr_ids = ques_ids_str.split('##')
+    attrs = UserAttr.objects.filter(id__in=attr_ids)
+    if request.method == 'POST':
+        print('POST: paper_display')
+        user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
+        ques_values = request.POST.getlist('ques_value')
+        quests = zip(ques_desc, attr_ids, attrs, ques_values)
+        quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
+
+        def questions():
+            for ques in quests:
+                print('paper-ques: ', ques)
+                yield QuesTuple2(*ques)
+
+        return HttpResponse(render(request, 'labcrm/paper_display.html', {
+            'title': title,
+            'labUser': lab_user,
+            'paper_desc': paper_desc,
+            'data_key': data_key,
+            'is_fill': True,
+            'questions': questions(),
+        }))
 
 
 @login_required
