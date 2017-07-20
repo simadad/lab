@@ -47,7 +47,7 @@
 	</form>
 </div>
 </content>
-{% if user.is_staff %}
+{% if user.is_staff and not modal_display %}
 <div class='row'>
 	<nav class="col-md-12 navbar navbar-default navbar-fixed-bottom">
 		<div class='container-fluid'>

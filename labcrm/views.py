@@ -16,6 +16,7 @@ QuesTuple2 = namedtuple('QuesTuple', ['desc', 'aid', 'attr', 'value'])
 
 
 def _save_uiq_uia(user, attr, answer):
+    # 保存用户属性、值
     uiq, _ = UserInfoQ.objects.get_or_create(
         user=user, attr=attr
     )
@@ -151,11 +152,9 @@ def ques_conf(request):
         lab_user = request.POST.get('labUser')
         paper_desc = request.POST.get('paper_desc')
         ques_desc = request.POST.getlist('ques_desc')
-        print(111111, ques_desc)
         attr_ids = request.POST.getlist('attr_id')
-        print(22222, attr_ids)
         if request.POST.get('is_cre'):
-            # 生成
+            print('POST: ques_conf 生成问卷')
             data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids)])
             key = random.randint(100000000, 999999999)
             user = get_object_or_404(LabUser, nickname=lab_user)
@@ -165,9 +164,11 @@ def ques_conf(request):
                 data=data
             )
             data_key = str(key) + str(user.id)
+            print('data: ', data)
+            print('--------------')
             return redirect('crm:fill', data_key=data_key)
         else:
-            # 预览
+            print('POST: ques_conf 预览问卷')
             # attrs = UserAttr.objects.filter(id__in=attr_ids)
             attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
             # ques_value = request.POST.getlist('ques_value')
@@ -176,7 +177,9 @@ def ques_conf(request):
 
             def questions():
                 for ques in quests:
+                    print('ques: ', ques)
                     yield QuesTuple(*ques)
+                print('===================')
 
             return HttpResponse(render(request, 'labcrm/ques_to_fill.html', {
                 'title': title,
@@ -186,7 +189,9 @@ def ques_conf(request):
                 'questions': questions(),
                 'questions2': questions()
             }))
+    print('GET: ques_conf 配置页面')
     attrs = UserAttr.objects.all()
+    print('=================')
     return render(request, 'labcrm/ques_conf.html', {
         'attrs': attrs,
     })
@@ -204,16 +209,31 @@ def ques_fill(request, data_key=None):
     if request.method == 'POST':
         print('POST: ques_fill')
         user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
-        ques_values = request.POST.getlist('ques_value')
+        ques_values = [request.POST.get('ques_value' + aid) for aid in attr_ids]
+        data = '@@'.join(
+            [title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
+        key = random.randint(100000000, 999999999)
+        paper_time = datetime.datetime.now()
+        print('data: ', data)
+        Paper.objects.create(
+            user=user,
+            key=key,
+            data=data,
+            is_fill=True,
+            finished_time=paper_time
+        )
         quests = zip(attrs, ques_values)
         for ques in quests:
             attr, value = ques
             _save_uiq_uia(user, attr, value)
+        print('====================')
         return render(request, 'labcrm/fill_success.html')
 
     quests = zip(ques_desc, attr_ids, attrs)
     quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
-
+    print('GET: ques_fill')
+    print('data: ', paper.data)
+    print('====================')
     def questions():
         for ques in quests:
             yield QuesTuple(*ques)
@@ -235,6 +255,7 @@ def paper_display(request):
         key = data_key[:9]
         uid = data_key[9:]
         paper = get_object_or_404(Paper, user=uid, key=key)
+        modal_display = False
         # title, lab_user, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = paper.data.split('@@')
         data = paper.data.split('@@')
         if len(data) == 6:
@@ -263,16 +284,17 @@ def paper_display(request):
         ques_desc = ques_desc_str.split('##')
         attr_ids = ques_ids_str.split('##')
         ques_values = [request.POST.get('ques_value'+aid) for aid in attr_ids]
-        data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
-        key = random.randint(100000000, 999999999)
-        paper_time = datetime.datetime.now()
-        Paper.objects.create(
-            user=user,
-            key=key,
-            data=data,
-            is_fill=True,
-            finished_time=paper_time
-        )
+        # data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
+        # key = random.randint(100000000, 999999999)
+        paper_time = False
+        modal_display = True
+        # Paper.objects.create(
+        #     user=user,
+        #     key=key,
+        #     data=data,
+        #     is_fill=True,
+        #     finished_time=paper_time
+        # )
     attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
     quests = zip(ques_desc, attr_ids, attrs, ques_values)
     quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
@@ -281,13 +303,14 @@ def paper_display(request):
         for ques in quests:
             print('paper-ques: ', ques)
             yield QuesTuple2(*ques)
+        print('====================')
 
     return HttpResponse(render(request, 'labcrm/paper_display.html', {
         'title': title,
         'labUser': lab_user,
         'paper_desc': paper_desc,
         'data_key': data_key,
-        'is_fill': True,
+        'modal_display': modal_display,
         'questions': questions(),
         'paper_time': paper_time
     }))
