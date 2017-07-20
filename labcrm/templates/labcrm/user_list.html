@@ -26,7 +26,7 @@
 			<td>{{ lab_user.wechat }}</td>
 			<td>
 			{% if lab_user.papers %}
-				<a>{{ lab_user.papers.last }}</a>
+				<a href='{% url "crm:paper" %}?data_key={{ lab_user.papers.last.key }}{{ lab_user.id }}'>{{ lab_user.papers.last }}</a>
 			{% else %}
 				<a>None</a>
 			{% endif %}

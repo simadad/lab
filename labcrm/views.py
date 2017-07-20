@@ -228,20 +228,47 @@ def ques_fill(request, data_key=None):
 
 
 def paper_display(request):
-    print('POST: paper_display')
-    data_key = request.POST.get('data_key')
-    # attr_ids = request.POST.getlist('attr_id')
-    key = data_key[:9]
-    uid = data_key[9:]
-    paper = get_object_or_404(Paper, user=uid, key=key)
-    title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
-    ques_desc = ques_desc_str.split('##')
-    attr_ids = ques_ids_str.split('##')
-    # attrs = UserAttr.objects.filter(id__in=attr_ids)
+    if request.method == 'GET':
+        print('GET: paper_display')
+        data_key = request.GET.get('data_key')
+        key = data_key[:9]
+        uid = data_key[9:]
+        paper = get_object_or_404(Paper, user=uid, key=key)
+        # title, lab_user, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = paper.data.split('@@')
+        data = paper.data.split('@@')
+        if len(data) == 6:
+            title, lab_user, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = data
+            ques_values = ques_values_str.split('##')
+        else:
+            title, lab_user, paper_desc, ques_desc_str, ques_ids_str = data
+            ques_values = None
+        ques_desc = ques_desc_str.split('##')
+        attr_ids = ques_ids_str.split('##')
+        if not ques_values:
+            ques_values = ['']*len(attr_ids)
+    else:
+        print('POST: paper_display')
+        data_key = request.POST.get('data_key')
+        # attr_ids = request.POST.getlist('attr_id')
+        key = data_key[:9]
+        uid = data_key[9:]
+        paper = get_object_or_404(Paper, user=uid, key=key)
+        title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
+        # attrs = UserAttr.objects.filter(id__in=attr_ids)
+        user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
+        # ques_values = request.POST.getlist('ques_value')
+        ques_desc = ques_desc_str.split('##')
+        attr_ids = ques_ids_str.split('##')
+        ques_values = [request.POST.get('ques_value'+aid) for aid in attr_ids]
+        data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
+        key = random.randint(100000000, 999999999)
+        Paper.objects.create(
+            user=user,
+            key=key,
+            data=data,
+            is_fill=True
+        )
     attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
-    user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
-    # ques_values = request.POST.getlist('ques_value')
-    ques_values = [request.POST.get('ques_value'+aid) for aid in attr_ids]
     quests = zip(ques_desc, attr_ids, attrs, ques_values)
     quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
 
