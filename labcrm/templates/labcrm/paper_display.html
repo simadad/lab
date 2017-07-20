@@ -51,6 +51,7 @@
 <div class='row'>
 	<nav class="col-md-12 navbar navbar-default navbar-fixed-bottom">
 		<div class='container-fluid'>
+			<p class='navbar-text navbar-left'><b>管理员菜单</b></p>
 			<p class='navbar-text navbar-center'><a class='navbar-link' href='{% url "homepage" %}'>crossin编程实战训练营</a></p>
 			<ul class="nav navbar-nav">
 				<li class='{% block userList %}{% endblock %}'><a href='{% url "crm:list" %}'>用户列表</a></li>

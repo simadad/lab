@@ -49,7 +49,7 @@
 		<div class='row'>
 			<div class='col-lg-10 col-lg-offset-1'>
 			{% if is_fill %}
-				<button class='btn form-group btn-lg btn-block btn-primary' form='formResult' type='submit' data-toggle="modal" data-target="#paperModal" onclick='paperPreview(this)'>预览/提交</button>
+				<button class='btn form-group btn-lg btn-block btn-primary' form='formResult' type='submit' onclick='paperPreview(this)'>预览/提交</button>
 			{% else %}
 				<a class='btn form-group btn-lg btn-block btn-primary'>预览/提交</a>
 			{% endif %}
@@ -98,6 +98,9 @@ function paperPreview(tt){
 			if(xhr.readyState == 4 && xhr.status == 200){
 				var rowNew = xhr.responseText;
 				para.innerHTML = rowNew;
+				if(para.innerHTML.length>0){
+					$('#paperModal').modal('show');
+				};
 			};
 		};
 		xhr.send(formData);
