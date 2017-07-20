@@ -8,6 +8,7 @@ from collections import namedtuple
 import base64
 import pymysql
 import random
+import datetime
 # Create your views here.
 
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
@@ -239,9 +240,11 @@ def paper_display(request):
         if len(data) == 6:
             title, lab_user, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = data
             ques_values = ques_values_str.split('##')
+            paper_time = paper.finished_time
         else:
             title, lab_user, paper_desc, ques_desc_str, ques_ids_str = data
             ques_values = None
+            paper_time = paper.create_time
         ques_desc = ques_desc_str.split('##')
         attr_ids = ques_ids_str.split('##')
         if not ques_values:
@@ -262,11 +265,13 @@ def paper_display(request):
         ques_values = [request.POST.get('ques_value'+aid) for aid in attr_ids]
         data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
         key = random.randint(100000000, 999999999)
+        paper_time = datetime.datetime.now()
         Paper.objects.create(
             user=user,
             key=key,
             data=data,
-            is_fill=True
+            is_fill=True,
+            finished_time=paper_time
         )
     attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
     quests = zip(ques_desc, attr_ids, attrs, ques_values)
@@ -284,6 +289,7 @@ def paper_display(request):
         'data_key': data_key,
         'is_fill': True,
         'questions': questions(),
+        'paper_time': paper_time
     }))
 
 
