@@ -42,21 +42,43 @@ def user_list(request):
     if request.method == 'POST':
         nickname = request.POST.get('nickname')
         wechat = request.POST.get('wechat')
-        try:
-            user = User.objects.create_user(nickname)
-        except IntegrityError as e:
+        username = request.POST.get('username')
+        user, is_new = User.objects.get_or_create(username=nickname)
+        print('POST: user_list')
+        print('nickname wechat username is_new: ', nickname, wechat, username, is_new)
+        if username:
+            print('@添加用户名')
+            LabUser.objects.filter(user__username=nickname).update(nickname=username)
             users = LabUser.objects.all().filter(is_del=False).order_by('-user__date_joined')
-            return render(request, 'labcrm/user_list.html', {
-                'users': users,
-                'repeat': True
+            return render(request, 'labcrm/ajax/user_del.html', {
+                'users': users
             })
-        new_lab_user = LabUser.objects.create(
-            user=user,
-            nickname=nickname,
-            wechat=wechat,
-        )
-        return redirect('crm:detail2', new_id=new_lab_user.id)
+        elif not is_new:
+            print('@昵称重复')
+        # try:
+        #     user = User.objects.create_user(nickname)
+        # except IntegrityError as e:
+        #     users = LabUser.objects.all().filter(is_del=False).order_by('-user__date_joined')
+            print('====================')
+            # return render(request, 'labcrm/user_list.html', {
+            #     'users': users,
+            #     'repeat': True
+            # })
+            return HttpResponse()
+        else:
+            print('@添加新用户')
+            new_lab_user = LabUser.objects.create(
+                user=user,
+                # nickname=nickname,
+                wechat=wechat,
+            )
+            print('========================')
+            # return redirect('crm:detail2', new_id=new_lab_user.id)
+            return HttpResponse(render(request, 'labcrm/ajax/user_add.html', {
+                'lab_user': new_lab_user,
+            }))
     users = LabUser.objects.all().filter(is_del=False).order_by('-user__date_joined')
+    print('==================')
     return render(request, 'labcrm/user_list.html', {
         'users': users
     })
@@ -157,7 +179,8 @@ def ques_conf(request):
             print('POST: ques_conf 生成问卷')
             data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids)])
             key = random.randint(100000000, 999999999)
-            user = get_object_or_404(LabUser, nickname=lab_user)
+            # user = get_object_or_404(LabUser, nickname=lab_user)
+            user = get_object_or_404(LabUser, user__username=lab_user)
             Paper.objects.create(
                 user=user,
                 key=key,
@@ -208,7 +231,8 @@ def ques_fill(request, data_key=None):
     attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
     if request.method == 'POST':
         print('POST: ques_fill')
-        user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
+        # user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
+        user = get_object_or_404(LabUser, user__username=lab_user, is_del=False)
         ques_values = [request.POST.get('ques_value' + aid) for aid in attr_ids]
         data = '@@'.join(
             [title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
@@ -279,7 +303,8 @@ def paper_display(request):
         paper = get_object_or_404(Paper, user=uid, key=key)
         title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
         # attrs = UserAttr.objects.filter(id__in=attr_ids)
-        user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
+        # user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
+        user = get_object_or_404(LabUser, user__username=lab_user, is_del=False)
         # ques_values = request.POST.getlist('ques_value')
         ques_desc = ques_desc_str.split('##')
         attr_ids = ques_ids_str.split('##')

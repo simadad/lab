@@ -4,14 +4,16 @@ from django.contrib.auth.models import User
 
 
 class LabUser(models.Model):
+    # user.username 本站“昵称”
     user = models.OneToOneField(User, verbose_name='用户', on_delete=models.CASCADE, related_name='labuser')
-    nickname = models.CharField(max_length=30, verbose_name='昵称')
+    # nickname 为学习站 user.username 本站“用户名”
+    nickname = models.CharField(max_length=30, verbose_name='用户名', null=True, blank=True)
     wechat = models.CharField(max_length=30, verbose_name='微信号')
     is_del = models.BooleanField(verbose_name='是否删除', default=False)
     class_id = models.IntegerField(verbose_name='教室ID', blank=True, null=True)
 
     def __str__(self):
-        return self.nickname
+        return self.user.username
 
 
 class Paper(models.Model):

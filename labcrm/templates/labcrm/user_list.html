@@ -2,7 +2,7 @@
 {% block title %}用户列表{% endblock %}
 {% block userList %}active{% endblock %}
 {% block row-left %}
-<button id='btnUserAdd' class='btn btn-info btn-block btn-lg' data-toggle="modal" data-target="#dialogModal">添加成员</button>
+<button id='btnUserAdd' class='btn btn-info btn-block btn-lg' data-toggle="modal" data-target="#userAddModal" onclick='userAdd()'>添加成员</button>
 <button id='btnUserDel' class='btn btn-warning btn-block btn-lg' onclick='userDel()'>删除成员</button>
 <button id='btnDelSure' class='btn btn-danger btn-block btn-lg hidden' form='formUserDel' type='submit' onclick='delSure()'>确认删除</button>
 {% endblock %}
@@ -11,39 +11,23 @@
 	<caption>成员列表</caption>
 		<thead class='thead-inverse'>
 		<tr>
-			<th class='col-lg-3'>昵称</th>
+			<th class='col-lg-2'>昵称</th><!-- 昵称为本站 user.username -->
+			<th class='col-lg-2'>用户名</th><!-- 用户名为学习站 user.username 本站 lab_user.nickname -->
 			<th class='col-lg-2'>微信</th>
 			<th class='col-lg-2'>问卷</th>
 			<th class='col-lg-2'>入学日期</th>
-			<th class='col-lg-2'>学习记录</th>
+			<th class='col-lg-1'>学习记录</th>
 			<th class='col-lg-1 hidden tbHid'>删除</th>
 		</tr>
 		</thead>
 	<tbody id='userList'>
-	{% for lab_user in users %}
-		<tr id='user{{ lab_user.id }}'>
-			<td><a href='{% url "crm:detail" %}?uid={{ lab_user.id }}'>{{ lab_user.nickname }}</a></td>
-			<td>{{ lab_user.wechat }}</td>
-			<td>
-			{% if lab_user.papers %}
-				<a href='{% url "crm:paper" %}?data_key={{ lab_user.papers.last.key }}{{ lab_user.id }}'>{{ lab_user.papers.last }}</a>
-			{% else %}
-				<a>None</a>
-			{% endif %}
-			</td>
-			<td>{{ lab_user.user.date_joined|date:"Y-m-d H:i:s" }}</td>
-			<td><a href='{% url "crm:class" %}?uid={{ lab_user.id }}' target='_blank'>记录</a></td>
-			<td class='hidden tbHid'>
-				<input form='formUserDel' type='checkbox' name='userId' value='{{ lab_user.id }}'>
-			</td>
-		</tr>
-	{% endfor %}
+	{% include 'labcrm/ajax/user_del.html' %}
 	</tbody>
 </table>
 {% endblock %}
 {% block modal %}
 <form class='hidden' id='formUserDel' action='{% url "crm:ajax:del" %}' method='POST'>{% csrf_token %}</form>
-<div class="modal fade" id='dialogModal' tabindex="-1" role="dialog">
+<div class="modal fade" id='userAddModal' tabindex="-1" role="dialog">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -52,7 +36,7 @@
 			<div class="modal-body">
 				<form class="form-horizontal" id='formUserAdd' action='' method='POST'>
 					{% csrf_token %}
-					<table class="table table-hover table-striped">
+					<!--table class="table table-hover table-striped">
 						<thead>
 							<tr>
 								<th class='col-md-6 text-center'>昵称</th>
@@ -65,12 +49,30 @@
 								<td><input class="form-control input-lg" name='wechat' onfocus="this.select();" required=true placeholder='微信'></td>
 							</tr>
 						</tbody>
-					</table>
+					</table-->
+					<div class="form-group">
+						<label class='col-lg-2 control-label' for='addNickname'>昵称：</label>
+						<div class=' col-lg-10'>
+							<input id='addNickname' class='form-control' name='nickname' onfocus="this.select()" required=true placeholder='昵称'>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class='col-lg-2 control-label' for='addWechat'>微信：</label>
+						<div class='col-lg-10'>
+							<input id='addWechat' class='form-control' name='wechat' onfocus="this.select()" required=true placeholder='微信'>
+						</div>
+					</div>
+					<div class="form-group hidden" id='divAddUsername'>
+						<label class='col-lg-2 control-label' for='addUsername'>用户名：</label>
+						<div class='col-lg-10'>
+							<input id='addUsername' class='form-control' name='username' onfocus="this.select()" placeholder='学习站用户名'>
+						</div>
+					</div>
 				</form>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" id='btn-modal-hide' data-dismiss="modal">取消</button>
-				<button type="submit" class="btn btn-primary" form='formUserAdd'>保存</button>
+				<button type="submit" class="btn btn-primary" form='formUserAdd' onclick='userAddSure()'>添加</button>
 			</div>										
 		</div>
 	</div>
@@ -78,11 +80,11 @@
 {% endblock %}
 {% block script %}
 <script>
-{% if repeat %}
-window.onload = function(){
-	alert('用户名重复');
-};
-{% endif %}
+//{% if repeat %}
+//window.onload = function(){
+	//alert('昵称重复');
+//};
+//{% endif %}
 function userDel(){
 	// js 删除成员
 	var tbHid = document.getElementsByClassName('tbHid'),
@@ -102,7 +104,7 @@ function userDel(){
 };
 
 function delSure(){
-	// form 删除成员
+	// form 确认删除成员
 	document.getElementById("formUserDel").onsubmit = function(e){
 		e.preventDefault();
 		var f = e.target,
@@ -131,5 +133,61 @@ function delSure(){
 	};
 };
 
+function usernameAdd(e){
+	// 增加用户名
+	document.getElementById('divAddUsername').setAttribute('class', 'form-group');
+	document.getElementById('addNickname').setAttribute('value', e.parentElement.previousElementSibling.innerText);
+	document.getElementById('addNickname').setAttribute('readonly', true);
+	document.getElementById('addWechat').setAttribute('value', e.parentElement.nextElementSibling.innerText);
+	document.getElementById('addWechat').setAttribute('readonly', true);
+	$('#userAddModal').modal('show');
+};
+
+$('#userAddModal').on('hidden.bs.modal', function (e) {
+	document.getElementById('formUserAdd').reset();
+	//document.getElementById('addUsername').removeAttribute('value');
+	//document.getElementById('addNickname').removeAttribute('value');
+	document.getElementById('addNickname').removeAttribute('readonly');
+	//document.getElementById('addWechat').removeAttribute('value');
+	document.getElementById('addWechat').removeAttribute('readonly');
+	document.getElementById('divAddUsername').setAttribute('class', 'form-group hidden');
+});
+
+function userAddSure(){
+	// 添加用户/用户名
+	<!-- if(document.getElementById('divAddUsername').getAttribute('class')=='form-group'){ -->
+		<!-- document.getElementById("formUserAdd").onsubmit = ''; -->
+	<!-- }else{ -->
+	document.getElementById("formUserAdd").onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest();
+		if(document.getElementById('divAddUsername').getAttribute('class')=='form-group'){
+			para = document.getElementById('userList');
+		}else{
+			para = document.getElementById('userList').insertRow(0);
+		};
+		$('#userAddModal').modal('hide');
+		xhr.open("POST", f.action, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var rowNew = xhr.responseText;
+				if(rowNew){
+					para.innerHTML = rowNew;
+				}else{
+					alert('昵称重复');
+				};
+			};
+		};
+		xhr.send(formData);
+	};
+};
+
+function userAdd(){
+	//document.getElementById('formUserAdd').reset();
+	document.getElementById('addNickname').removeAttribute('value');
+	document.getElementById('addWechat').removeAttribute('value');
+};
 </script>
 {% endblock %}
