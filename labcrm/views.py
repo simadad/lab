@@ -1,16 +1,22 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ, Dialog, Paper
+# from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ, Dialog, Paper
+from .models import *
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
+from django import forms
 from collections import namedtuple
+from PIL import Image
 import base64
 import pymysql
 import random
 import datetime
 # Create your views here.
 
+picType = {
+    'dialog': 'Dialog'
+}
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
 QuesTuple2 = namedtuple('QuesTuple', ['desc', 'aid', 'attr', 'value'])
 
@@ -62,6 +68,10 @@ def user_list(request):
     })
 
 
+class ImgForm(forms.Form):
+    pic = forms.ImageField()
+
+
 @login_required
 def user_detail(request, new_id=None):
     attrs = UserAttr.objects.all()
@@ -69,29 +79,66 @@ def user_detail(request, new_id=None):
     if not new_id:
         new_id = request.GET.get('uid')
     lab_user = get_object_or_404(LabUser, id=new_id)
-    dialogs = Dialog.objects.filter(user=lab_user)
+    dialogs = Dialog.objects.filter(user=lab_user).order_by('-log_time')
+    pics = UserPic.objects.filter(user=lab_user, pic_type=picType['dialog'])
     user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
 
     if request.method == 'GET' and request.GET.get('ajax') is None:
+        print('GET: user_detail')
+        print('labUser: ', lab_user)
+        print('attrs: ', attrs)
+        print('attr_option: ', attr_option)
+        print('answers: ',  user_answers)
+        print('dialogs-len: ', len(dialogs))
+        print('pics-len: ', len(pics))
+        print('===================')
         return render(request, 'labcrm/user_detail.html', {
             'labUser': lab_user,
             'attrs': attrs,
             'attr_option': attr_option,
             'answers': user_answers,
-            'dialogs': dialogs
+            'dialogs': dialogs,
+            'pics': pics,
         })
 
     elif request.method == 'POST':
         dialog = request.POST.get('dialog')
-        if dialog is not None:
+        pic_post = request.POST.get('pic')
+        pic_name = request.POST.get('pic_name')
+        print('pic: ', pic_post)
+        print('dialog is not None: ', dialog is not None)
+        print('dialog: ', dialog)
+        print('dialog is True: ', dialog is True)
+        if dialog:
+            print('POST: user_detail-dialog')
             user = request.user
             Dialog.objects.create(
                 dialog=dialog,
                 user=lab_user,
                 recorder=user
             )
-            dialogs = Dialog.objects.filter(user=lab_user)
-        else:
+            dialogs = Dialog.objects.filter(user=lab_user).order_by('-log_time')
+            pic_form = ImgForm(request.POST, request.FILES)
+            print('pic_form: ', pic_form)
+            if pic_form.is_valid():
+                pic = pic_form.cleaned_data['pic']
+                print('pic: ', pic)
+                image = Image.open(pic)
+                print('image: ', image)
+                name = picType['dialog'] + '-' + lab_user.nickname + '-' +\
+                       datetime.datetime.now().strftime('%Y-%m-%d') + '.' + pic_name.split('.')[-1]
+                image.save('media/img/gallery/%s' % name)
+                pic_obj, _ = PicData.objects.get_or_create(pic=pic, defaults={
+                    'name': name
+                })
+                print('pic_obj: ', pic_obj)
+                UserPic.objects.create(
+                    user=lab_user,
+                    pic=pic_obj,
+                    pic_type=picType['dialog']
+                )
+                pics = UserPic.objects.filter(user=lab_user, pic_type=picType['dialog'])
+        if not dialog and not pic_post:
             print(2222222)
             questions = request.POST.getlist('tagQuestion')
             answers = request.POST.getlist('tagAnswer')
@@ -134,13 +181,17 @@ def user_detail(request, new_id=None):
             attrs = UserAttr.objects.all()
             attr_option = attrs.filter(is_option=True)
             user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
+    else:
+        print('GET-ajax: modify_cancel')
     # POST and cancel
+    print('====================')
     return HttpResponse(render(request, 'labcrm/ajax_user_detail.html', {
         'labUser': lab_user,
         'attrs': attrs,
         'attr_option': attr_option,
         'answers': user_answers,
-        'dialogs': dialogs
+        'dialogs': dialogs,
+        'pics': pics
     }))
 
 

@@ -75,6 +75,25 @@ class UserInfoA(models.Model):
     def __str__(self):
         return self.answer
 
+
+class PicData(models.Model):
+    pic = models.ImageField(verbose_name='地址', upload_to='img/gallery', unique=True)
+    create_time = models.DateTimeField(verbose_name='上传时间', auto_now_add=True)
+    name = models.CharField(verbose_name='图片名', max_length=30)
+
+    def __str__(self):
+        return self.name
+
+
+class UserPic(models.Model):
+    pic = models.ForeignKey(PicData, verbose_name='图片', on_delete=models.CASCADE, related_name='upic')
+    user = models.ForeignKey(LabUser, verbose_name='用户', on_delete=models.CASCADE, related_name='upic')
+    pic_type = models.CharField(verbose_name='图片类型', max_length=30, default='NoType')
+
+    def __str__(self):
+        return self.pic.name
+
+
 # GENDER_CHOICES = (
 #     ('S', '保密'),
 #     ('M', '男'),

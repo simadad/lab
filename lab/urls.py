@@ -25,4 +25,4 @@ urlpatterns = [
     url(r'^accounts/', include('account.urls', namespace='accounts')),
     url(r'^crm/', include('labcrm.urls', namespace='crm')),
     url(r'^webot/', include('webotconf.urls', namespace='webot')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
