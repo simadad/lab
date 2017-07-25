@@ -8,7 +8,7 @@ class LabUser(models.Model):
     user = models.OneToOneField(User, verbose_name='用户', on_delete=models.CASCADE, related_name='labuser')
     # nickname 为学习站 user.username 本站“用户名”
     nickname = models.CharField(max_length=30, verbose_name='用户名', null=True, blank=True)
-    wechat = models.CharField(max_length=30, verbose_name='微信号')
+    wechat = models.CharField(max_length=30, verbose_name='微信号', blank=True, null=True)
     is_del = models.BooleanField(verbose_name='是否删除', default=False)
     class_id = models.IntegerField(verbose_name='教室ID', blank=True, null=True)
 
@@ -26,7 +26,7 @@ class Paper(models.Model):
     data = models.TextField(verbose_name='问卷数据')
 
     def __str__(self):
-        name = self.user.nickname + ' ' + self.create_time.strftime('%Y-%m-%d')
+        name = self.user.user.username + ' ' + self.create_time.strftime('%Y-%m-%d')
         return name
 
 

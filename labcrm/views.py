@@ -240,7 +240,11 @@ def ques_conf(request):
             data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids)])
             key = random.randint(100000000, 999999999)
             # user = get_object_or_404(LabUser, nickname=lab_user)
-            user = get_object_or_404(LabUser, user__username=lab_user)
+            # user = get_object_or_404(LabUser, user__username=lab_user)
+            user0, _ = User.objects.get_or_create(username=lab_user)
+            user, _ = LabUser.objects.get_or_create(
+                user=user0
+            )
             Paper.objects.create(
                 user=user,
                 key=key,
