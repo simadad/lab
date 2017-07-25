@@ -5,6 +5,7 @@ __pycache__/
 */migrations/*
 # C extensions
 *.so
+media/*
 .idea/
 # Distribution / packaging
 .Python
