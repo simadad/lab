@@ -18,5 +18,6 @@ urlpatterns = [
     url(r'^paper', views.paper_display, name='paper'),
     url(r'^conf', views.ques_conf, name='conf'),
     url(r'^fill/(?P<data_key>[\s\S]*)$', views.ques_fill, name='fill'),
+    url(r'^fill', views.ques_fill, name='fill2'),
     url(r'^class', views.link_to_class, name='class'),
 ]

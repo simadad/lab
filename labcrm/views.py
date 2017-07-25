@@ -350,7 +350,9 @@ def paper_display(request):
             title, lab_user, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = data
             ques_values = ques_values_str.split('##')
             paper_time = paper.finished_time
+            filled = True
         else:
+            filled = False
             title, lab_user, paper_desc, ques_desc_str, ques_ids_str = data
             ques_values = None
             paper_time = paper.create_time
@@ -377,6 +379,7 @@ def paper_display(request):
         # key = random.randint(100000000, 999999999)
         paper_time = False
         modal_display = True
+        filled = False
         # Paper.objects.create(
         #     user=user,
         #     key=key,
@@ -401,7 +404,8 @@ def paper_display(request):
         'data_key': data_key,
         'modal_display': modal_display,
         'questions': questions(),
-        'paper_time': paper_time
+        'paper_time': paper_time,
+        'filled': filled
     }))
 
 
