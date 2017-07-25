@@ -131,7 +131,9 @@ def user_detail(request, new_id=None):
         dialog = request.POST.get('dialog')
         pic_post = request.POST.get('pic')
         pic_name = request.POST.get('pic_name')
-        print('pic: ', pic_post)
+        questions = request.POST.getlist('tagQuestion')
+        answers = request.POST.getlist('tagAnswer')
+        print('pic_name is-dialog is-ques is-answ: ', pic_name, dialog is True, questions is True, answers is True)
         if dialog:
             print('POST: user_detail-dialog')
             user = request.user
@@ -165,10 +167,8 @@ def user_detail(request, new_id=None):
             )
             pics = UserPic.objects.filter(user=lab_user, pic_type=picType['dialog'])
             print('---------------------')
-        if not dialog and not pic_post:
+        if questions and answers:
             print('POST: user_detial-modify')
-            questions = request.POST.getlist('tagQuestion')
-            answers = request.POST.getlist('tagAnswer')
             info = dict(zip(questions, answers))
             print('info: ', info)
             # 已存在有选项的属性

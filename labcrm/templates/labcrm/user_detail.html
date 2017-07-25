@@ -232,6 +232,7 @@ function dialogSave(){
 			if(xhr.readyState == 4 && xhr.status == 200){
 				var rowNew = xhr.responseText;
 				para.innerHTML = rowNew;
+				document.getElementById('formDialog').reset();
 				document.getElementById('btn-modal-hide').click();
 			};
 		};
