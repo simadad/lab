@@ -54,7 +54,12 @@
 				<form id='formDialog' action='' method='POST'>
 					{% csrf_token %}
 					<div class="form-group">
-						<textarea name='dialog' required=true class="form-control" id="dialog-text" rows=3 placeholder='添加记录'></textarea>
+						<textarea name='dialog' class="form-control" id="dialog-text" rows=3 placeholder='添加记录'></textarea>
+					</div>
+					<div class="form-group input-group" id='picDiv'>
+						<span class="input-group-addon" id='addonPic'><label for='inpPic' class='glyphicon glyphicon-cloud-upload'></label></span>
+						<input type='text' class="form-control" id='inpPicShow' placeholder="上传图片" aria-describedby="addonPic" name='pic_name'>
+						<input type="file" class='btn btn-md btn-block' name="pic" id="inpPic" accept="image/*" style='display:none'/>
 					</div>
 				</form>
 			</div>
@@ -68,6 +73,17 @@
 {% endblock %}
 {% block script %}
 <script>
+var inpPic = document.getElementById('inpPic'),
+	inpPicShow = document.getElementById('inpPicShow');
+
+inpPic.onchange = function(){
+	inpPicShow.value=inpPic.value;
+};
+inpPicShow.onfocus = function(){
+	inpPic.click();
+	document.getElementById('dialog-text').focus();
+};
+
 function infoModify(e){
 	// 禁用按钮
 	e.setAttribute('disabled', 'true');

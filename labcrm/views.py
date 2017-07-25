@@ -1,22 +1,29 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ, Dialog, Paper
+# from .models import LabUser, UserAttr, AttrOption, UserInfoA, UserInfoQ, Dialog, Paper
+from .models import *
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
+from django import forms
 from collections import namedtuple
+from PIL import Image
 import base64
 import pymysql
 import random
 import datetime
 # Create your views here.
 
+picType = {
+    'dialog': 'Dialog'
+}
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
 QuesTuple2 = namedtuple('QuesTuple', ['desc', 'aid', 'attr', 'value'])
 
 
 def _save_uiq_uia(user, attr, answer):
     # 保存用户属性、值
+    print('MODE: save')
     uiq, _ = UserInfoQ.objects.get_or_create(
         user=user, attr=attr
     )
@@ -26,6 +33,7 @@ def _save_uiq_uia(user, attr, answer):
         is_del=False,
         defaults={'answer': answer}
     )
+    print('uiq-uia-is_new_uia: ', uiq, uia, is_new)
     if not is_new:
         uia.is_del = True
         uia.save()
@@ -34,6 +42,7 @@ def _save_uiq_uia(user, attr, answer):
             question=uiq,
             answer=answer
         )
+    print('---------------')
     return uiq
 
 
@@ -84,6 +93,10 @@ def user_list(request):
     })
 
 
+class ImgForm(forms.Form):
+    pic = forms.ImageField()
+
+
 @login_required
 def user_detail(request, new_id=None):
     attrs = UserAttr.objects.all()
@@ -91,39 +104,81 @@ def user_detail(request, new_id=None):
     if not new_id:
         new_id = request.GET.get('uid')
     lab_user = get_object_or_404(LabUser, id=new_id)
-    dialogs = Dialog.objects.filter(user=lab_user)
+    dialogs = Dialog.objects.filter(user=lab_user).order_by('-log_time')
+    pics = UserPic.objects.filter(user=lab_user, pic_type=picType['dialog'])
     user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
 
     if request.method == 'GET' and request.GET.get('ajax') is None:
+        print('GET: user_detail')
+        print('labUser: ', lab_user)
+        print('attrs: ', attrs)
+        print('attr_option: ', attr_option)
+        print('answers: ',  user_answers)
+        print('dialogs-len: ', len(dialogs))
+        print('pics-len: ', len(pics))
+        print('===================')
         return render(request, 'labcrm/user_detail.html', {
             'labUser': lab_user,
             'attrs': attrs,
             'attr_option': attr_option,
             'answers': user_answers,
-            'dialogs': dialogs
+            'dialogs': dialogs,
+            'pics': pics,
         })
 
     elif request.method == 'POST':
+        print('\nPOST: user_detail')
         dialog = request.POST.get('dialog')
-        if dialog is not None:
+        pic_post = request.POST.get('pic')
+        pic_name = request.POST.get('pic_name')
+        print('pic: ', pic_post)
+        if dialog:
+            print('POST: user_detail-dialog')
             user = request.user
             Dialog.objects.create(
                 dialog=dialog,
                 user=lab_user,
                 recorder=user
             )
-            dialogs = Dialog.objects.filter(user=lab_user)
-        else:
-            print(2222222)
+            print('dialog-len: ', len(dialog))
+            dialogs = Dialog.objects.filter(user=lab_user).order_by('-log_time')
+            print('-------------')
+        pic_form = ImgForm(request.POST, request.FILES)
+        print('pic_form.is_valid(): ', pic_form.is_valid())
+        if pic_form.is_valid():
+            print('POST: user_detail-pic')
+            pic = pic_form.cleaned_data['pic']
+            print('pic: ', pic)
+            image = Image.open(pic)
+            print('image: ', image)
+            name = picType['dialog'] + '-' + lab_user.nickname + '-' +\
+                   datetime.datetime.now().strftime('%Y-%m-%d') + '.' + pic_name.split('.')[-1]
+            image.save('media/img/gallery/%s' % name)
+            pic_obj, _ = PicData.objects.get_or_create(pic=pic, defaults={
+                'name': name
+            })
+            print('pic_obj: ', pic_obj)
+            UserPic.objects.create(
+                user=lab_user,
+                pic=pic_obj,
+                pic_type=picType['dialog']
+            )
+            pics = UserPic.objects.filter(user=lab_user, pic_type=picType['dialog'])
+            print('---------------------')
+        if not dialog and not pic_post:
+            print('POST: user_detial-modify')
             questions = request.POST.getlist('tagQuestion')
             answers = request.POST.getlist('tagAnswer')
             info = dict(zip(questions, answers))
+            print('info: ', info)
             # 已存在有选项的属性
             for question in set(questions) & {attr.attr for attr in attr_option}:
+                print('MODE: option-ques')
                 attr = get_object_or_404(UserAttr, attr=question)
-                print(33333)
+                print('question: ', question)
                 # 保存新选项
                 if info[question] not in [option.option for option in attr.options.all()]:
+                    print('new-question-option: ', question, info[question])
                     AttrOption.objects.create(
                         option=info[question],
                         attr=attr
@@ -131,38 +186,43 @@ def user_detail(request, new_id=None):
                 _save_uiq_uia(lab_user, attr, info[question])
             # 已存在无选项的属性
             for question in set(questions) & {attr.attr for attr in attrs} - {attr.attr for attr in attr_option}:
+                print('MODE: no-option')
                 attr = get_object_or_404(UserAttr, attr=question)
-                print(44444)
+                print('question: ', question)
                 _save_uiq_uia(lab_user, attr, info[question])
             # 新属性
             for question in set(questions) - {attr.attr for attr in attrs}:
+                print('MODE: new-attr')
                 attr = UserAttr.objects.create(
                     attr=question
                 )
+                print('question: ', question)
                 _save_uiq_uia(lab_user, attr, info[question])
             # 被删除的属性
             for question in {question.attr.attr for question in lab_user.questions.filter(is_del=False)} - set(questions):
+                print('MODE: ques-del')
                 attr = get_object_or_404(UserAttr, attr=question)
-                print(555555555)
-                print(question, attr)
                 uiq = get_object_or_404(UserInfoQ, user=lab_user, attr=attr, is_del=False)
-                print(66666)
                 uiq.is_del = True
                 uiq.save()
                 uia = get_object_or_404(UserInfoA, user=lab_user, question=uiq, is_del=False)
-                print(77777)
                 uia.is_del = True
                 uia.save()
+                print('ques-uiq-uia: ', question, uiq, uia)
             attrs = UserAttr.objects.all()
             attr_option = attrs.filter(is_option=True)
             user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
+    else:
+        print('GET-ajax: modify_cancel')
     # POST and cancel
+    print('====================')
     return HttpResponse(render(request, 'labcrm/ajax_user_detail.html', {
         'labUser': lab_user,
         'attrs': attrs,
         'attr_option': attr_option,
         'answers': user_answers,
-        'dialogs': dialogs
+        'dialogs': dialogs,
+        'pics': pics
     }))
 
 
