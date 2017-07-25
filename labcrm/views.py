@@ -86,6 +86,12 @@ def user_list(request):
             return HttpResponse(render(request, 'labcrm/ajax/user_add.html', {
                 'lab_user': new_lab_user,
             }))
+    else:
+        print('GET: user_list')
+        wechat = request.GET.get('wechat')
+        uid = request.GET.get('uid')
+        print('wechat-uid: ', wechat, uid)
+        LabUser.objects.filter(id=uid).update(wechat=wechat)
     users = LabUser.objects.all().filter(is_del=False).order_by('-user__date_joined')
     print('==================')
     return render(request, 'labcrm/user_list.html', {

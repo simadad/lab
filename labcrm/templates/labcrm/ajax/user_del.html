@@ -1,16 +1,33 @@
 {% for lab_user in users %}
 <tr id='user{{ lab_user.id }}'>
-	<td><a href='{% url "crm:detail" %}?uid={{ lab_user.id }}'>{{ lab_user }}</a></td>
+	<td>
+		<a href='{% url "crm:detail" %}?uid={{ lab_user.id }}'>{{ lab_user }}</a>
+	</td>
 	{% if lab_user.nickname %}
-	<td><a href='{% url "crm:class" %}?uid={{ lab_user.id }}' target='_blank'>{{ lab_user.nickname }}</a></td>
+	<td>
+		<a href='{% url "crm:class" %}?uid={{ lab_user.id }}' target='_blank'>{{ lab_user.nickname }}</a>
+	</td>
 	{% else %}
-	<td class='info'><a href='#' style='color:red' onclick='usernameAdd(this)'>添加用户名</a></td>
+	<td class='info'>
+		<a href='#' style='color:red' onclick='usernameAdd(this)'>添加用户名</a>
+	</td>
 	{% endif %}
+	{% if lab_user.wechat %}
 	<td>{{ lab_user.wechat }}</td>
-	{% if lab_user.papers.last %}
-	<td><a href='{% url "crm:paper" %}?data_key={{ lab_user.papers.last.key }}{{ lab_user.id }}'>{{ lab_user.papers.last }}</a></td>
 	{% else %}
-	<td class='info'><a href='{% url "crm:conf" %}' style='color:red'>添加问卷</a></td>
+	<td class='info'>
+		<a href='#' style='color:red' onclick='wechatAdd(this)'>添加微信号</a>
+		<span class='hidden'>{{ lab_user.id }}</span>
+	</td>
+	{% endif %}
+	{% if lab_user.papers.last %}
+	<td>
+		<a href='{% url "crm:paper" %}?data_key={{ lab_user.papers.last.key }}{{ lab_user.id }}'>{{ lab_user.papers.last }}</a>
+	</td>
+	{% else %}
+	<td class='info'>
+		<a href='{% url "crm:conf" %}' style='color:red'>添加问卷</a>
+	</td>
 	{% endif %}
 	<td>{{ lab_user.user.date_joined|date:"Y-m-d H:i:s" }}</td>
 	<td><a href='{% url "crm:class" %}?uid={{ lab_user.id }}' target='_blank'>记录</a></td>

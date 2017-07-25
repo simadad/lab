@@ -36,20 +36,6 @@
 			<div class="modal-body">
 				<form class="form-horizontal" id='formUserAdd' action='' method='POST'>
 					{% csrf_token %}
-					<!--table class="table table-hover table-striped">
-						<thead>
-							<tr>
-								<th class='col-md-6 text-center'>昵称</th>
-								<th class='col-md-6 text-center'>微信</th>
-							</tr>
-						</thead>
-						<tbody id='tagTbInfo'>
-							<tr>
-								<td><input class="form-control input-lg" name="nickname" onfocus="this.select();" required=true placeholder='昵称'></td>
-								<td><input class="form-control input-lg" name='wechat' onfocus="this.select();" required=true placeholder='微信'></td>
-							</tr>
-						</tbody>
-					</table-->
 					<div class="form-group">
 						<label class='col-lg-2 control-label' for='addNickname'>昵称：</label>
 						<div class=' col-lg-10'>
@@ -185,9 +171,31 @@ function userAddSure(){
 };
 
 function userAdd(){
+	// 添加成员 清除 modal 数据
 	//document.getElementById('formUserAdd').reset();
 	document.getElementById('addNickname').removeAttribute('value');
 	document.getElementById('addWechat').removeAttribute('value');
+};
+
+function wechatAdd(e){
+	var para = e.parentElement,
+		uid = e.nextElementSibling.innerText;
+	para.innerHTML = '<input class="form-control" placeholder="微信号" onblur="wechatAddSure(this, ' + uid + ')">';
+	para.children[0].focus();
+};
+
+function wechatAddSure(e, uid){
+	//alert(e.parentElement.nodeName);
+	if(e.value.length > 0){					// 后台判断是否为空 TODO
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "?wechat="+e.value+"&uid="+uid, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				e.parentElement.innerHTML = e.value;
+			};
+		};
+		xhr.send();
+	};
 };
 </script>
 {% endblock %}
