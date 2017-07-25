@@ -153,7 +153,7 @@ def user_detail(request, new_id=None):
             print('pic: ', pic)
             image = Image.open(pic)
             print('image: ', image)
-            name = picType['dialog'] + '-' + lab_user.nickname + '-' +\
+            name = picType['dialog'] + '-' + lab_user.user.username + '-' +\
                    datetime.datetime.now().strftime('%Y-%m-%d') + '.' + pic_name.split('.')[-1]
             image.save('media/img/gallery/%s' % name)
             pic_obj, _ = PicData.objects.get_or_create(pic=pic, defaults={

@@ -81,7 +81,7 @@ class UserInfoA(models.Model):
 class PicData(models.Model):
     pic = models.ImageField(verbose_name='地址', upload_to='img/gallery', unique=True)
     create_time = models.DateTimeField(verbose_name='上传时间', auto_now_add=True)
-    name = models.CharField(verbose_name='图片名', max_length=30)
+    name = models.CharField(verbose_name='图片名', max_length=50)
 
     def __str__(self):
         return self.name
