@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap.min.css' %}" />
 	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap-theme.min.css' %}" />
-    <title>{{ title }}</title>
+    <title>问卷</title>
 </head>
 <body>
 <header>
@@ -17,6 +17,7 @@
 	<form action='{% url "crm:paper" %}' method='POST' id='formResult'>
 	{% csrf_token %}
 		<input class='hidden' name='data_key' value='{{ data_key }}'>
+		<input class='hidden' name='mark' value='{{ mark }}'>
 		<h3 class='text text-center'>{{ title }}</h3>
 		<p class='text text-right'><em><b>TO -- </b></em><span id='username'>{{ labUser }}</span></p>
 		<p class='text'>{{ paper_desc }}</p>

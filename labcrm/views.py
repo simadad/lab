@@ -17,6 +17,9 @@ import datetime
 picType = {
     'dialog': 'Dialog'
 }
+markPaper = {
+    'tofill': 'TF'
+}
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
 QuesTuple2 = namedtuple('QuesTuple', ['desc', 'aid', 'attr', 'value'])
 
@@ -241,25 +244,42 @@ def ques_conf(request):
         paper_desc = request.POST.get('paper_desc')
         ques_desc = request.POST.getlist('ques_desc')
         attr_ids = request.POST.getlist('attr_id')
+        mark = request.POST.get('mark')     # TODO 增加返回字段 Mark
+        if not mark:
+            mark = '默认'
         if request.POST.get('is_cre'):
             print('POST: ques_conf 生成问卷')
-            data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids)])
+            # data = '@@'.join([title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids)])
+            data = '@@'.join([title, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids)])
             key = random.randint(100000000, 999999999)
             # user = get_object_or_404(LabUser, nickname=lab_user)
             # user = get_object_or_404(LabUser, user__username=lab_user)
-            user0, _ = User.objects.get_or_create(username=lab_user)
-            user, _ = LabUser.objects.get_or_create(
-                user=user0
-            )
-            Paper.objects.create(
-                user=user,
-                key=key,
-                data=data
-            )
-            data_key = str(key) + str(user.id)
-            print('data: ', data)
-            print('--------------')
-            return redirect('crm:fill', data_key=data_key)
+            print('lab_user-data-key: ', lab_user, data, key)
+            if lab_user:
+                user0, _ = User.objects.get_or_create(username=lab_user)
+                user, _ = LabUser.objects.get_or_create(
+                    user=user0
+                )
+                Paper.objects.create(
+                    user=user,
+                    key=key,
+                    data=data,
+                    mark=mark
+                )
+                data_key = str(key) + str(user.id)
+                print('data_key: ', data_key)
+                print('===========================')
+                return redirect('crm:fill', data_key=data_key)
+            else:
+                Paper.objects.create(
+                    key=key,
+                    data=data,
+                    mark=mark
+                )
+                data_key = str(key)
+                print('data_key: ', data_key)
+                print('=============================')
+                return redirect('crm:paper2', data_key=data_key)
         else:
             print('POST: ques_conf 预览问卷')
             # attrs = UserAttr.objects.filter(id__in=attr_ids)
@@ -279,14 +299,17 @@ def ques_conf(request):
                 'labUser': lab_user,
                 'paper_desc': paper_desc,
                 'is_fill': False,
+                'mark': mark,
                 'questions': questions(),
                 'questions2': questions()
             }))
     print('GET: ques_conf 配置页面')
     attrs = UserAttr.objects.all()
+    papers = Paper.objects.filter(is_fill=False, is_del=False).order_by('-create_time')
     print('=================')
     return render(request, 'labcrm/ques_conf.html', {
         'attrs': attrs,
+        'papers': papers[:10]
     })
 
 
@@ -294,18 +317,20 @@ def ques_fill(request, data_key=None):
     key = data_key[:9]
     uid = data_key[9:]
     paper = get_object_or_404(Paper, user=uid, key=key)
-    title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
+    # title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
+    title, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
     ques_desc = ques_desc_str.split('##')
     attr_ids = ques_ids_str.split('##')
     # attrs = UserAttr.objects.filter(id__in=attr_ids)
     attrs = [get_object_or_404(UserAttr, id=aid) for aid in attr_ids]
+    user = get_object_or_404(LabUser, id=uid)
     if request.method == 'POST':
         print('POST: ques_fill')
         # user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
-        user = get_object_or_404(LabUser, user__username=lab_user, is_del=False)
         ques_values = [request.POST.get('ques_value' + aid) for aid in attr_ids]
         data = '@@'.join(
-            [title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
+            # [title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
+            [title, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
         key = random.randint(100000000, 999999999)
         paper_time = datetime.datetime.now()
         print('data: ', data)
@@ -334,7 +359,7 @@ def ques_fill(request, data_key=None):
 
     return HttpResponse(render(request, 'labcrm/ques_to_fill.html', {
         'title': title,
-        'labUser': lab_user,
+        'labUser': user,
         'paper_desc': paper_desc,
         'data_key': data_key,
         'is_fill': True,
@@ -342,24 +367,31 @@ def ques_fill(request, data_key=None):
     }))
 
 
-def paper_display(request):
+def paper_display(request, data_key=None):
     if request.method == 'GET':
-        print('GET: paper_display')
-        data_key = request.GET.get('data_key')
-        key = data_key[:9]
-        uid = data_key[9:]
-        paper = get_object_or_404(Paper, user=uid, key=key)
         modal_display = False
-        # title, lab_user, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = paper.data.split('@@')
+        if not data_key:
+            data_key = request.GET.get('data_key')
+        print('GET: paper_display')
+        print(data_key)
+        key = data_key[:9]
+        if len(data_key) > 9:
+            uid = data_key[9:]
+            lab_user = get_object_or_404(LabUser, id=uid)
+        else:
+            lab_user = None
+        paper = get_object_or_404(Paper, key=key)
         data = paper.data.split('@@')
-        if len(data) == 6:
-            title, lab_user, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = data
+        if len(data) == 5:
+            # title, lab_user, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = data
+            title, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = data
             ques_values = ques_values_str.split('##')
             paper_time = paper.finished_time
             filled = True
         else:
             filled = False
-            title, lab_user, paper_desc, ques_desc_str, ques_ids_str = data
+            # title, lab_user, paper_desc, ques_desc_str, ques_ids_str = data
+            title, paper_desc, ques_desc_str, ques_ids_str = data
             ques_values = None
             paper_time = paper.create_time
         ques_desc = ques_desc_str.split('##')
@@ -371,12 +403,17 @@ def paper_display(request):
         data_key = request.POST.get('data_key')
         # attr_ids = request.POST.getlist('attr_id')
         key = data_key[:9]
-        uid = data_key[9:]
+        if len(data_key) > 9:
+            uid = data_key[9:]
+            lab_user = get_object_or_404(LabUser, id=uid)
+        else:
+            lab_user = None
         paper = get_object_or_404(Paper, user=uid, key=key)
-        title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
+        # title, lab_user, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
+        title, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
         # attrs = UserAttr.objects.filter(id__in=attr_ids)
         # user = get_object_or_404(LabUser, nickname=lab_user, is_del=False)
-        user = get_object_or_404(LabUser, user__username=lab_user, is_del=False)
+        # user = get_object_or_404(LabUser, user__username=lab_user, is_del=False)
         # ques_values = request.POST.getlist('ques_value')
         ques_desc = ques_desc_str.split('##')
         attr_ids = ques_ids_str.split('##')
@@ -403,6 +440,7 @@ def paper_display(request):
             yield QuesTuple2(*ques)
         print('====================')
 
+    users = LabUser.objects.all().filter(is_del=False).order_by('-user__date_joined')
     return HttpResponse(render(request, 'labcrm/paper_display.html', {
         'title': title,
         'labUser': lab_user,
@@ -411,8 +449,31 @@ def paper_display(request):
         'modal_display': modal_display,
         'questions': questions(),
         'paper_time': paper_time,
-        'filled': filled
+        'filled': filled,
+        'users': users
     }))
+
+
+@login_required
+def papers_create(request):
+    if request.method == 'GET':
+        papers = Paper.objects.filter(is_fill=False, is_del=False).order_by('-create_time')
+    else:
+        print('POST: paper_creaete')
+        data_key = request.POST.get('data_key')
+        uid_list = request.POST.getlist('userId')
+        users = (get_object_or_404(LabUser, id=uid) for uid in uid_list)
+        paper = get_object_or_404(Paper, key=data_key)
+        papers = (Paper.objects.create(
+            key=random.randint(100000000, 999999999),
+            data=paper.data,
+            mark=markPaper['tofill'],
+            user=user
+        ) for user in users)
+        print('data_key-uid_list: ', data_key, uid_list)
+    return render(request, 'labcrm/paper_list.html', {
+        'papers': papers
+    })
 
 
 @login_required

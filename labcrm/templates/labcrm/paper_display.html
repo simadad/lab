@@ -66,7 +66,11 @@
 			<p class='navbar-text navbar-right'>问卷提交时间</p>
 			{% else %}
 			<form class='navbar-form navbar-right'>
-				<a class="btn btn-default btn-success" href='{% url "crm:fill2" %}/{{ data_key }}'>生成问卷</a>
+				{% if labUser %}
+				<a class="btn btn-success" href='{% url "crm:fill2" %}/{{ data_key }}'>生成问卷</a>
+				{% else %}
+				<a class="btn btn-success" data-toggle="modal" data-target="#userListModal">生成问卷</a>
+				{% endif %}
 			</form>
 			<p class='navbar-text navbar-right'>{{ paper_time|date:"Y-m-d H:i:s" }}</p>
 			<p class='navbar-text navbar-right'>问卷创建时间</p>
@@ -74,6 +78,43 @@
 		</div>
 	</nav>
 </div>
+{% if not labUser %}
+<div class="modal fade" id='userListModal' tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">生成问卷：</h4>
+			</div>
+			<div class="modal-body">
+				<form id='formPaperCre' method='POST' action='{% url "crm:papers" %}'>
+				{% csrf_token %}
+				<input class='hidden' name='data_key' value='{{ data_key }}'>
+				<table class="table table-hover table-striped table-bordered">
+					<caption>成员列表</caption>
+						<thead class='thead-inverse'>
+						<tr>
+							<th class='col-lg-2'>昵称</th><!-- 昵称为本站 user.username -->
+							<th class='col-lg-2'>用户名</th><!-- 用户名为学习站 user.username 本站 lab_user.nickname -->
+							<th class='col-lg-2'>微信</th>
+							<th class='col-lg-2'>问卷</th>
+							<th class='col-lg-2'>入学日期</th>
+							<th class='col-lg-1'>是否生成</th>
+						</tr>
+						</thead>
+					<tbody id='userList'>
+					{% include 'labcrm/ajax/user_del.html' %}
+					</tbody>
+				</table>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" id='btn-modal-hide' data-dismiss="modal">取消</button>
+				<button type="submit" class="btn btn-success" form='formPaperCre'>生成</button>
+			</div>										
+		</div>
+	</div>
+</div>
+{% endif %}
 {% endif %}
 <footer>
 	<p class='text-center'><b><a>***感谢访问***</a></b></p>
@@ -83,6 +124,8 @@
 <script src="{% static 'bootstrap3\js\jquery.min.js' %}"></script>
 <script src="{% static 'bootstrap3\js\bootstrap.min.js' %}"></script>
 <script src="{% static 'bootstrap3\js\npm.js' %}"></script>
+<script>
 
+</script>
 </body>
 </html>

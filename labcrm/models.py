@@ -17,16 +17,17 @@ class LabUser(models.Model):
 
 
 class Paper(models.Model):
-    user = models.ForeignKey(LabUser, verbose_name='用户', related_name='papers')
+    user = models.ForeignKey(LabUser, verbose_name='用户', related_name='papers', null=True, blank=True)
     create_time = models.DateTimeField(verbose_name='建表时间', auto_now_add=True)
     finished_time = models.DateTimeField(verbose_name='填写时间', null=True, blank=True)
     is_del = models.BooleanField(verbose_name='是否删除', default=False)
     is_fill = models.BooleanField(verbose_name='是否填写', default=False)
     key = models.IntegerField(verbose_name='秘钥')
     data = models.TextField(verbose_name='问卷数据')
+    mark = models.CharField(verbose_name='标记', max_length=50, default='默认')
 
     def __str__(self):
-        name = self.user.user.username + ' ' + self.create_time.strftime('%Y-%m-%d')
+        name = self.mark + ' ' + self.create_time.strftime('%Y-%m-%d')
         return name
 
 

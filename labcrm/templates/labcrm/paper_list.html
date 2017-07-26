@@ -1,0 +1,17 @@
+{% extends 'base2.html' %}
+{% block title %}问卷列表{% endblock %}
+{% block quesConf %}active{% endblock %}
+{% block row-left %}
+<input class='btn btn-success btn-block btn-lg' value='TODO'>
+<input class='btn btn-warning btn-block btn-lg' value='TODO'>
+{% endblock %}
+{% block row-right %}
+<h3 class='text-center'>问卷列表</h3>
+<ul>
+{% for paper in papers %}
+<li>
+	<a id='paper{{ paper.id }}' class='btn btn-link' href='{% url "crm:paper" %}/{{ paper.key }}{{ paper.user.id }}'>{{ paper }}</a>
+</li>
+{% endfor %}
+</ul>
+{% endblock %}

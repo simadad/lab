@@ -2,12 +2,23 @@
 {% block title %}问卷配置{% endblock %}
 {% block quesConf %}active{% endblock %}
 {% block row-left %}
-<div class="btn-group btn-group-vertical btn-block">
-	<input class='btn btn-success btn-lg hidden' id='btnCre' type='submit' form='quesCre' value='生成'><!--ques_data-->
-	<input class='btn btn-warning btn-lg hidden' id='btnPre' type='submit' form='formToFill' onclick='quesPre()' value='预览'><!--ques_to_fill-->
-	<input class='btn btn-info btn-lg' type='submit' form='quesConf' id='btnConf' value='配置' onclick='quesConf()'><hr /><!--preview-->
-	<button class='btn btn-info btn-lg' id='btnQuesAdd' data-toggle="modal" data-target="#quesAddModal">添加提问</button>
-</div>
+	<input class='btn btn-success btn-block btn-lg hidden' id='btnCre' type='submit' form='quesCre' value='生成'><!--ques_data-->
+	<input class='btn btn-warning btn-block btn-lg hidden' id='btnPre' type='submit' form='formToFill' onclick='quesPre()' value='预览'><!--ques_to_fill-->
+	<input class='btn btn-info btn-block btn-lg' type='submit' form='quesConf' id='btnConf' value='配置' onclick='quesConf()'><!--preview-->
+	<button class='btn btn-info btn-block btn-lg' id='btnQuesAdd' data-toggle="modal" data-target="#quesAddModal">添加提问</button><hr />
+	<div class="panel panel-info">
+		<div class="panel-heading " role="tab" id="headingOne">
+			<h4 class="panel-title text-center">
+				<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">问卷列表</a>
+			</h4>
+		</div>
+		<div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+		{% for paper in papers %}
+			<a class='btn btn-block btn-link' style='border-bottom:1px #DDD solid' href='{% url "crm:paper" %}/{{ paper.key }}'>{{ paper }}</a>
+		{% endfor %}
+			<a class='btn btn-block btn-link' href='{% url "crm:papers" %}'>更多</a>
+		</div>
+	</div>
 {% endblock %}
 {% block row-right %}
 <div class="row">
