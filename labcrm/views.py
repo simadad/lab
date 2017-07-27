@@ -335,14 +335,20 @@ def ques_fill(request, data_key=None):
             # [title, lab_user, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
             [title, paper_desc, '##'.join(ques_desc), '##'.join(attr_ids), '##'.join(ques_values)])
         print('data: ', data)
-        Paper.objects.create(
-            user=user,
-            key=random.randint(100000000, 999999999),
-            data=data,
-            is_fill=True,
-            mark=user.user.username + mark,
-            finished_time=datetime.datetime.now()
-        )
+        paper.user = user
+        paper.data = data
+        paper.is_fill = True
+        paper.mark = user.user.username + mark
+        paper.finished_time = datetime.datetime.now()
+        paper.save()
+        # Paper.objects.create(
+        #     user=user,
+        #     key=random.randint(100000000, 999999999),
+        #     data=data,
+        #     is_fill=True,
+        #     mark=user.user.username + mark,
+        #     finished_time=datetime.datetime.now()
+        # )
         quests = zip(attrs, ques_values)
         for ques in quests:
             attr, value = ques

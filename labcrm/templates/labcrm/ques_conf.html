@@ -14,7 +14,7 @@
 		</div>
 		<div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
 		{% for paper in papers %}
-			<a class='btn btn-block btn-link' style='border-bottom:1px #DDD solid' href='{% url "crm:paper" %}/{{ paper.key }}'>{{ paper }}</a>
+			<a class='btn btn-link' style='border-bottom:1px #DDD solid' href='{% url "crm:paper" %}/{{ paper.key }}{{ paper.user.id }}'>{{ paper }}</a>
 		{% endfor %}
 			<a class='btn btn-block btn-link' href='{% url "crm:papers" %}'>更多</a>
 		</div>
