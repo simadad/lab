@@ -307,7 +307,7 @@ def ques_conf(request):
             }))
     print('GET: ques_conf 配置页面')
     attrs = UserAttr.objects.all()
-    papers = Paper.objects.filter(is_fill=False, is_del=False).order_by('-create_time')
+    papers = Paper.objects.filter(user__isnull=True).order_by('-create_time')
     print('=================')
     return render(request, 'labcrm/ques_conf.html', {
         'attrs': attrs,

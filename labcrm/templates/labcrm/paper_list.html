@@ -10,7 +10,7 @@
 <ul>
 {% for paper in papers %}
 <li>
-	<a id='paper{{ paper.id }}' class='btn btn-link' href='{% url "crm:paper" %}/{{ paper.key }}{{ paper.user.id }}'>{{ paper }}</a>
+	<a id='paper{{ paper.id }}'target='_blank' class='btn btn-link' href='{% url "crm:paper" %}/{{ paper.key }}{{ paper.user.id }}'>{{ paper }}</a>
 </li>
 {% endfor %}
 </ul>
