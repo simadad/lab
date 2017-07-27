@@ -39,9 +39,9 @@
 		<input type='checkbox' name='userId' value='{{ lab_user.id }}'>
 	</td>
 	{% else %}
-	<td>
+	<!--td>
 		<a href='{% url "crm:class" %}?uid={{ lab_user.id }}' target='_blank'>记录</a>
-	</td>
+	</td-->
 	<td class='hidden tbHid'>
 		<input form='formUserDel' type='checkbox' name='userId' value='{{ lab_user.id }}'>
 	</td>

@@ -61,10 +61,7 @@
 				<li class='visible-lg-inline visible-sm-inline visible-md-inline'><a>|</a></li>
 				<li class='{% block webotConf %}{% endblock %}'><a href='{% url "webot:rule" %}'>微信配置</a></li>
 			</ul>
-			{% if filled %}
-			<p class='navbar-text navbar-right'>{{ paper_time|date:"Y-m-d H:i:s" }}</p>
-			<p class='navbar-text navbar-right'>问卷提交时间</p>
-			{% else %}
+			{% if not filled %}
 			<form class='navbar-form navbar-right'>
 				{% if labUser %}
 				<a class="btn btn-success" href='{% url "crm:fill2" %}/{{ data_key }}'>生成问卷</a>
@@ -72,9 +69,8 @@
 				<a class="btn btn-success" data-toggle="modal" data-target="#userListModal">生成问卷</a>
 				{% endif %}
 			</form>
-			<p class='navbar-text navbar-right'>{{ paper_time|date:"Y-m-d H:i:s" }}</p>
-			<p class='navbar-text navbar-right'>问卷创建时间</p>
 			{% endif %}
+			<p class='navbar-text navbar-right'>{{ paper }}</p>
 		</div>
 	</nav>
 </div>

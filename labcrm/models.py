@@ -27,7 +27,10 @@ class Paper(models.Model):
     mark = models.CharField(verbose_name='标记', max_length=50, default='默认')
 
     def __str__(self):
-        name = self.mark + ' ' + self.create_time.strftime('%Y-%m-%d')
+        if self.finished_time:
+            name = self.mark + ' ' + self.finished_time.strftime('%Y-%m-%d')
+        else:
+            name = self.mark + ' ' + self.create_time.strftime('%Y-%m-%d')
         return name
 
 
