@@ -38,7 +38,7 @@
 					</div>
 					{% endfor %}
 				{% else %}
-					<input type='text' id='labUser{{ ques.aid }}' class='form-control' placeholder='请填写' value='{{ ques.value }}' disabled>
+					<input type='text' id='labUser{{ ques.aid }}' class="form-control" placeholder='请填写' value='{{ ques.value }}' disabled>
 				{% endif %}
 				</div>
 			</div>
@@ -86,8 +86,11 @@
 				{% csrf_token %}
 				<input class='hidden' name='data_key' value='{{ data_key }}'>
 				<table class="table table-hover table-striped table-bordered">
-					<caption>成员列表</caption>
-						<thead class='thead-inverse'>
+					<caption>
+						<b>成员列表</b>
+						<button class='pull-right btn btn-primary' form='' onclick='addNew()'>新成员</button>
+					</caption>
+					<thead class='thead-inverse'>
 						<tr>
 							<th class='col-lg-2'>昵称</th><!-- 昵称为本站 user.username -->
 							<th class='col-lg-2'>用户名</th><!-- 用户名为学习站 user.username 本站 lab_user.nickname -->
@@ -96,7 +99,7 @@
 							<th class='col-lg-2'>入学日期</th>
 							<th class='col-lg-1'>是否生成</th>
 						</tr>
-						</thead>
+					</thead>
 					<tbody id='userList'>
 					{% include 'labcrm/ajax/user_del.html' %}
 					</tbody>
@@ -121,7 +124,57 @@
 <script src="{% static 'bootstrap3\js\bootstrap.min.js' %}"></script>
 <script src="{% static 'bootstrap3\js\npm.js' %}"></script>
 <script>
+function addNew(){
+	var newRow = document.getElementById('userList').insertRow(0);
+	newRow.innerHTML = '\
+	<td>\
+		<input class="form-control" name="nickname" placeholder="昵称" onblur="addNewSrue(this)">\
+	</td>\
+	<td>\
+		<input class="form-control" placeholder="用户名" disabled>\
+	</td>\
+	<td>\
+		<input class="form-control" placeholder="微信" disabled>\
+	</td>\
+	<td>\
+		<input class="form-control" placeholder="问卷" disabled>\
+	</td>\
+	<td>\
+		<input class="form-control" placeholder="入学日期" disabled>\
+	</td>\
+	<td>\
+		<input type="checkbox" name="userId" checked disabled>\
+	</td>'
+	newRow.setAttribute('class', 'success');
+	newRow.children[0].children[0].focus();
+};
 
+function addNewSrue(e){
+	// 添加新成员确认
+	if(e.value.length > 0){					// 后台判断是否为空 TODO
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", '{% url "crm:ajax:new" %}?nickname=' + e.value, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				if(xhr.responseText.length > 0){
+					var uid = xhr.responseText,
+						td = e.parentElement,
+						checkbox = td.parentElement.children[td.parentElement.childElementCount - 1].children[0];
+					td.innerHTML = '<a href=\'{% url "crm:detail" %}?uid=' + uid + "'>" + e.value + '</a>';
+					checkbox.value = uid;
+					checkbox.removeAttribute('disabled');
+				}else{
+					alert('用户名重复');
+					e.select();
+				};
+			};
+		};
+		xhr.send();
+	}else{
+		var tr = e.parentElement.parentElement;
+		tr.parentElement.removeChild(tr);
+	};
+};
 </script>
 </body>
 </html>

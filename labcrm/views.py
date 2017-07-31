@@ -4,7 +4,7 @@ from .models import *
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.utils import IntegrityError
+# from django.db.utils import IntegrityError
 from django import forms
 from collections import namedtuple
 from PIL import Image
@@ -506,6 +506,20 @@ def link_to_class(request):
             return redirect('crm:list')
     url = 'http://crossincode.com/crm/info/?sid=' + str(cid)
     return redirect(url)
+
+
+@login_required
+def ajax_new_user(request):
+    lab_user = request.GET.get('nickname').strip()
+    print('lab_user: ', lab_user)
+    user0, is_new = User.objects.get_or_create(username=lab_user)
+    print('is_new: ', is_new)
+    if is_new:
+        user = LabUser.objects.create(user=user0)
+        print('user.id: ', user.id)
+        return HttpResponse(str(user.id))
+    else:
+        return HttpResponse()
 
 
 @login_required
