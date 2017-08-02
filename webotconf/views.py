@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from .models import ChatRoom, RuleAddFriend
+# from .models import ChatRoom, RuleAddFriend
+from .models import *
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 import re
@@ -49,6 +50,43 @@ def rule_conf(request):
     return render(request, 'webotconf/webot.html', {
         'rooms': rooms,
         'is_strict': is_strict
+    })
+
+
+@login_required
+def qa_conf_strict(request):
+    if request.method == 'POST':
+        keyword = request.POST.get('keyword')
+        desc = request.POST.get('desc')
+        answer = request.POST.get('answer')
+        print('keyword: ', keyword)
+        print('desc: ', desc)
+        print('answer: ', answer)
+        qa_keyword, is_new = QAKeyWord.objects.get_or_create(keyword=keyword, is_strict=True)
+        if is_new:
+            qa_reply = QAReply.objects.create(
+                disc=desc,
+                reply_text=answer,
+            )
+            qa_reply.keywords.add(qa_keyword)
+            return HttpResponse(render(request, 'webotconf/ajax/qa_group.html', {
+                'keyword': qa_keyword,
+            }))
+        else:
+            return HttpResponse()
+    keywords = QAKeyWord.objects.filter(is_strict=True).order_by('keyword')
+    return render(request, 'webotconf/qa_conf.html', {
+        'keywords': keywords,
+        'is_strict_qa': 'True'
+    })
+
+
+@login_required
+def qa_conf(request):
+    keywords = QAKeyWord.objects.filter(is_strict=False)
+    return render(request, 'webotconf/qa_conf.html', {
+        'keywords': keywords,
+        'is_strict_qa': 'False'
     })
 
 

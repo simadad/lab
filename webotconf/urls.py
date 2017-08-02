@@ -8,4 +8,6 @@ ajax_patterns = [
 urlpatterns = [
     url(r'^ajax/', include(ajax_patterns, namespace='ajax')),
     url(r'^rule', views.rule_conf, name='rule'),
+    url(r'^qas', views.qa_conf_strict, name='qas'),
+    url(r'^qa', views.qa_conf, name='qa'),
 ]

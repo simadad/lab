@@ -3,19 +3,25 @@
 {% block webotConf %}active{% endblock %}
 {% block row-left %}
 <ul class="nav nav-pills nav-stacked nav-stacked text-center">
+<!--
 {% if is_strict == 'True' %}
 	<li role="presentation" class="nav"><a href='{% url "webot:rule" %}?strict='>宽松入群规则</a></li>
 	<li role="presentation" class="nav active"><a href='{% url "webot:rule" %}?strict=1'>严格入群规则</a></li>
-{% else %}
+{% elif is_strict == 'False' %}
 	<li role="presentation" class="nav active"><a href='{% url "webot:rule" %}?strict='>宽松入群规则</a></li>
 	<li role="presentation" class="nav"><a href='{% url "webot:rule" %}?strict=1'>严格入群规则</a></li>
-{% endif %}
-	<li role="presentation"><a href="#">自动问答配置</a></li>
+{% endif %}-->
+	<li role="presentation" class="nav {% if is_strict == 'False' %}active{% endif %}"><a href='{% url "webot:rule" %}?strict='>宽松入群规则</a></li>
+	<li role="presentation" class="nav {% if is_strict == 'True' %}active{% endif %}"><a href='{% url "webot:rule" %}?strict=1'>严格入群规则</a></li>
+	<li role="presentation" class="nav {% if is_strict_qa == 'False' %}active{% endif %}"><a href='{% url "webot:qa" %}'>宽松问答配置</a></li>
+	<li role="presentation" class="nav {% if is_strict_qa == 'True' %}active{% endif %}"><a href='{% url "webot:qas" %}'>严格问答配置</a></li>
 </ul>
 <hr />
+{% block buttons %}
 <button type="button" class="btn btn-info btn-lg btn-block unhid hidSwith" onclick='ruleConf()'>更改配置</button>
 <button type="submit" class="btn btn-success btn-lg btn-block hidden hidSwith" form='tagForm' onclick='confSave()'>保存配置</button>
 <button type="button" class="btn btn-danger btn-lg btn-block hidden hidSwith" onclick='confCancel()'>取消更改</button>
+{% endblock %}
 {% endblock %}
 {% block row-right %}
 {% include 'webotconf/ajax/rules.html' %}

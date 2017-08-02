@@ -21,6 +21,7 @@ class RuleAddFriend(models.Model):
 
 class QAKeyWord(models.Model):
     keyword = models.CharField(verbose_name='关键字', max_length=20)
+    is_strict = models.BooleanField(verbose_name='是否严格', default=False)
 
     def __str__(self):
         return self.keyword
@@ -34,4 +35,7 @@ class QAReply(models.Model):
     keywords = models.ManyToManyField(QAKeyWord, verbose_name='关键字集', related_name='replies')
 
     def __str__(self):
-        return self.disc
+        if self.disc:
+            return self.disc
+        else:
+            name = 'R:' + '-'.join([keyword.keyword for keyword in self.keywords])
