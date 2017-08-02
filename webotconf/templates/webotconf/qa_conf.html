@@ -48,6 +48,12 @@ function kwAdd(e){
 			<textarea id="answ00" class="form-control inputs" name="answer" onfocus="select()" placeholder="回答" required rows=3></textarea>\
 		</div>\
 	</div>'
+	
+	$('textarea').each(function () {
+		h(this);
+	}).on('input', function () {
+		h(this);
+	});
 };
 
 function QACancel(){
