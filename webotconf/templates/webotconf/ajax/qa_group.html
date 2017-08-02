@@ -30,7 +30,7 @@
 				<img src='{{ keyword.replies.last.reply_pic }}'>
 			</div>
 		{% else %}
-			<textarea id='answ{{ keyword.id }}' class='form-control inp{{ keyword.id }}' name='answer' onfocus='select()' placeholder='回答' readonly=true required>{{ keyword.replies.last.reply_text }}</textarea>
+			<textarea id='answ{{ keyword.id }}' class='form-control inp{{ keyword.id }}' name='answer' onfocus='select()' placeholder='回答' readonly=true required rows=3>{{ keyword.replies.last.reply_text }}</textarea>
 		{% endif %}
 		</div>
 	</div>
