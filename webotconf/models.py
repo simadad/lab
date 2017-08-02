@@ -28,14 +28,14 @@ class QAKeyWord(models.Model):
 
 
 class QAReply(models.Model):
-    disc = models.CharField(verbose_name='描述', max_length=30, blank=True, null=True)
+    desc = models.CharField(verbose_name='描述', max_length=30, blank=True, null=True)
     is_pic = models.BooleanField(verbose_name='是否图片', default=False)
     reply_text = models.TextField(verbose_name='回答', blank=True, null=True)
     reply_pic = models.ImageField(verbose_name='图片回答', blank=True, null=True)
     keywords = models.ManyToManyField(QAKeyWord, verbose_name='关键字集', related_name='replies')
 
     def __str__(self):
-        if self.disc:
-            return self.disc
+        if self.desc:
+            return self.desc
         else:
             name = 'R:' + '-'.join([keyword.keyword for keyword in self.keywords])

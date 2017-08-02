@@ -16,9 +16,7 @@
 {% endblock %}
 {% block script %}
 <script>
-var kw = '',
-	desc = '',
-	answ = '';
+var kw = desc = answ = '';
 
 function kwAdd(e){
 	// 新增关键字
@@ -33,7 +31,7 @@ function kwAdd(e){
 	<div class="form-group">\
 		<label class="control-label col-lg-1" for="kw00">关键字：</label>\
 		<div class="col-lg-3">\
-			<input type="text" id="kw00" class="form-control inputs" name="keyword" onfocus="select()" placeholder="关键字">\
+			<input type="text" id="kw00" class="form-control inputs" name="keyword" onfocus="select()" placeholder="关键字" required>\
 		</div>\
 		<button class="pull-right btn btn-success" form="newForm" type="submit" onclick="QASave()">保存</button>\
 		<button class="pull-right btn btn-danger" form="" onclick="QACancel()">取消</button>\
@@ -41,26 +39,26 @@ function kwAdd(e){
 	<div class="form-group">\
 		<label class="control-label col-lg-1" for="desc00">描述：</label>\
 		<div class="col-lg-11">\
-			<input type="text" id="desc00" class="form-control inputs" name="desc" onfocus="select()" placeholder="描述">\
+			<input type="text" id="desc00" class="form-control inputs" name="desc" onfocus="select()" placeholder="描述" required>\
 		</div>\
 	</div>\
 	<div class="form-group">\
 		<label class="control-label col-lg-1" for="answ00">回答：</label>\
 		<div class="col-lg-11">\
-			<textarea id="answ00" class="form-control inputs" name="answer" onfocus="select()" placeholder="回答"></textarea>\
+			<textarea id="answ00" class="form-control inputs" name="answer" onfocus="select()" placeholder="回答" required></textarea>\
 		</div>\
 	</div>'
 };
 
 function QACancel(){
 	// 取消新增
-	var newForm = document.getElementById('newForm');
-	newForm.parentNode.removeChild(newForm);
+	var newFormCancel = document.getElementById('newForm');
+	newFormCancel.parentNode.removeChild(newFormCancel);
 	document.getElementById('btnkw').removeAttribute('disabled');
 };
 
 function QASave(){
-	// 关键字保存
+	// 新关键字保存
 	document.getElementById('newForm').onsubmit = function(e){
 		e.preventDefault();
 		var f = e.target,
@@ -76,8 +74,8 @@ function QASave(){
 				var rowNew = xhr.responseText;
 				if(rowNew){
 					QACancel();
-					newForm.innerHTML = rowNew.split('#js_split#\n')[1];
-					newForm.setAttribute('id', rowNew.split('#js_split#\n')[0]);
+					newForm.innerHTML = rowNew.split('#js_split#')[2];
+					newForm.setAttribute('id', 'form'+rowNew.split('#js_split#')[1]);
 				}else{
 					alert('关键字重复！');
 				};
@@ -134,6 +132,46 @@ function modifyCancel(id){
 	document.getElementById('desc'+id).value = desc;
 	document.getElementById('answ'+id).value = answ;
 	QASwith(id);
+	kw = desc = answ = '';
+};
+
+function modifySure(id){
+	// 关键字修改保存
+	var para = document.getElementById('form'+id);
+	para.onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest();
+		xhr.open('POST', '', true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var rowNew = xhr.responseText;
+				//if(rowNew){
+					//QASwith();
+					//para.innerHTML = rowNew.split('#js_split#')[2];
+				//}else{
+					//alert('关键字重复！');
+				//};
+				QASwith();
+				para.innerHTML = rowNew.split('#js_split#')[2];
+			};
+		};
+		xhr.send(formData);
+	};
+};
+
+function QADelete(id){
+	// 关键字组删除
+	var xhr = new XMLHttpRequest(),
+		form = document.getElementById('form'+id);
+	xhr.open('GET', '?delete='+id, true);
+	xhr.onreadystatechange=function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			form.parentNode.removeChild(form);
+		};
+	};
+	xhr.send();
 };
 </script>
 {% endblock %}

@@ -13,7 +13,8 @@
 {% endif %}-->
 	<li role="presentation" class="nav {% if is_strict == 'False' %}active{% endif %}"><a href='{% url "webot:rule" %}?strict='>宽松入群规则</a></li>
 	<li role="presentation" class="nav {% if is_strict == 'True' %}active{% endif %}"><a href='{% url "webot:rule" %}?strict=1'>严格入群规则</a></li>
-	<li role="presentation" class="nav {% if is_strict_qa == 'False' %}active{% endif %}"><a href='{% url "webot:qa" %}'>宽松问答配置</a></li>
+	<!--li role="presentation" class="nav {% if is_strict_qa == 'False' %}active{% endif %}"><a href='{% url "webot:qa" %}'>宽松问答配置</a></li-->
+	<li role="presentation" class="nav {% if is_strict_qa == 'False' %}active{% endif %}"><a href='#'>宽松问答配置</a></li>
 	<li role="presentation" class="nav {% if is_strict_qa == 'True' %}active{% endif %}"><a href='{% url "webot:qas" %}'>严格问答配置</a></li>
 </ul>
 <hr />

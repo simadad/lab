@@ -28,10 +28,10 @@ class QAKeyWordAdmin(admin.ModelAdmin):
 
 
 class QAReplyAdmin(admin.ModelAdmin):
-    list_display = ('disc', 'is_pic')
-    search_fields = ('disc',)
+    list_display = ('desc', 'is_pic')
+    search_fields = ('desc',)
     list_filter = ('is_pic',)
-    fields = ('disc', 'is_pic', 'reply_text', 'reply_pic', 'keywords')
+    fields = ('desc', 'is_pic', 'reply_text', 'reply_pic', 'keywords')
 
 admin.site.register(ChatRoom, ChatRoomAdmin)
 admin.site.register(RuleAddFriend, RuleAddFriendAdmin)

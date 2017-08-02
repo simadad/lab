@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 # from .models import ChatRoom, RuleAddFriend
 from .models import *
 from django.http import HttpResponse
@@ -59,13 +59,24 @@ def qa_conf_strict(request):
         keyword = request.POST.get('keyword')
         desc = request.POST.get('desc')
         answer = request.POST.get('answer')
+        is_modify = request.POST.get('modify')
         print('keyword: ', keyword)
         print('desc: ', desc)
         print('answer: ', answer)
+        print('is_modify: ', is_modify)
+        if is_modify:
+            qa_keyword = get_object_or_404(QAKeyWord, keyword=keyword, is_strict=True)
+            qa_reply = get_object_or_404(QAReply, keywords=qa_keyword)
+            qa_reply.desc = desc
+            qa_reply.reply_text = answer
+            qa_reply.save()
+            return HttpResponse(render(request, 'webotconf/ajax/qa_group.html', {
+                'keyword': qa_keyword,
+            }))
         qa_keyword, is_new = QAKeyWord.objects.get_or_create(keyword=keyword, is_strict=True)
         if is_new:
             qa_reply = QAReply.objects.create(
-                disc=desc,
+                desc=desc,
                 reply_text=answer,
             )
             qa_reply.keywords.add(qa_keyword)
@@ -74,6 +85,14 @@ def qa_conf_strict(request):
             }))
         else:
             return HttpResponse()
+    delete_kid = request.GET.get('delete')
+    print('delete_kid: ', delete_kid)
+    if delete_kid:
+        qa_keyword = get_object_or_404(QAKeyWord, id=delete_kid)
+        qa_reply = get_object_or_404(QAReply, keywords=qa_keyword)
+        qa_keyword.delete()
+        qa_reply.delete()
+        return HttpResponse()
     keywords = QAKeyWord.objects.filter(is_strict=True).order_by('keyword')
     return render(request, 'webotconf/qa_conf.html', {
         'keywords': keywords,
@@ -83,6 +102,16 @@ def qa_conf_strict(request):
 
 @login_required
 def qa_conf(request):
+    if request.method == 'POST':
+        keyword = request.POST.get('keyword')
+        desc = request.POST.get('desc')
+        answer = request.POST.get('answer')
+        is_modify = request.POST.get('modify')
+        print('keyword: ', keyword)
+        print('desc: ', desc)
+        print('answer: ', answer)
+        print('is_modify: ', is_modify)
+
     keywords = QAKeyWord.objects.filter(is_strict=False)
     return render(request, 'webotconf/qa_conf.html', {
         'keywords': keywords,
