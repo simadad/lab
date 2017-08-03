@@ -46,6 +46,7 @@ class PicSubject(models.Model):
     reply = models.TextField(verbose_name='回复')
     time_on = models.DateTimeField(verbose_name='开始时间', auto_now_add=True)
     time_off = models.DateTimeField(verbose_name='结束时间', null=True, blank=True)
+    is_underway = models.BooleanField(verbose_name='进行中', default=True)
 
     def __str__(self):
         return self.tag
