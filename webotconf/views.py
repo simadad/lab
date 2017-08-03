@@ -3,7 +3,9 @@ from django.shortcuts import render, get_object_or_404
 from .models import *
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from PIL import Image
 import re
+from labcrm.views import ImgForm
 # Create your views here.
 
 
@@ -64,27 +66,33 @@ def qa_conf_strict(request):
         print('desc: ', desc)
         print('answer: ', answer)
         print('is_modify: ', is_modify)
+        qa_keyword, is_new = QAKeyWord.objects.get_or_create(keyword=keyword, is_strict=True)
+        form_data = ImgForm(request.POST, request.FILES)
         if is_modify:
             qa_keyword = get_object_or_404(QAKeyWord, keyword=keyword, is_strict=True)
             qa_reply = get_object_or_404(QAReply, keywords=qa_keyword)
             qa_reply.desc = desc
             qa_reply.reply_text = answer
-            qa_reply.save()
-            return HttpResponse(render(request, 'webotconf/ajax/qa_group.html', {
-                'keyword': qa_keyword,
-            }))
-        qa_keyword, is_new = QAKeyWord.objects.get_or_create(keyword=keyword, is_strict=True)
-        if is_new:
+            # qa_reply.save()
+            # return HttpResponse(render(request, 'webotconf/ajax/qa_group.html', {
+            #     'keyword': qa_keyword,
+            # }))
+        elif is_new:
             qa_reply = QAReply.objects.create(
                 desc=desc,
                 reply_text=answer,
             )
             qa_reply.keywords.add(qa_keyword)
-            return HttpResponse(render(request, 'webotconf/ajax/qa_group.html', {
-                'keyword': qa_keyword,
-            }))
         else:
             return HttpResponse()
+        if form_data.is_valid():
+            pic = form_data.cleaned_data['pic']
+            qa_reply.reply_pic = pic
+            qa_reply.is_pic = True
+        qa_reply.save()
+        return HttpResponse(render(request, 'webotconf/ajax/qa_group.html', {
+            'keyword': qa_keyword,
+        }))
     delete_kid = request.GET.get('delete')
     print('delete_kid: ', delete_kid)
     if delete_kid:

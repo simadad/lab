@@ -46,6 +46,11 @@ function kwAdd(e){
 		<label class="control-label col-lg-1" for="answ00">回答：</label>\
 		<div class="col-lg-11">\
 			<textarea id="answ00" class="form-control inputs" name="answer" onfocus="select()" placeholder="回答" required rows=3></textarea>\
+			<div class="input-group" id="picDiv">\
+				<span class="input-group-addon" id="addonPic"><label for="inpPic" class="glyphicon glyphicon-cloud-upload"></label></span>\
+				<input type="text" class="form-control" id="inpPicShow" placeholder="上传图片" aria-describedby="addonPic" name="pic_name">\
+				<input type="file" class="btn btn-md btn-block" name="pic" id="inpPic" accept="image/*" style="display:none">\
+			</div>\
 		</div>\
 	</div>'
 	
@@ -54,6 +59,16 @@ function kwAdd(e){
 	}).on('input', function () {
 		h(this);
 	});
+	
+	var inpPic = document.getElementById('inpPic'),
+	inpPicShow = document.getElementById('inpPicShow');
+	inpPic.onchange = function(){
+		inpPicShow.value=inpPic.value;
+	};
+	inpPicShow.onfocus = function(){
+		inpPic.click();
+		document.getElementById('answ00').focus();
+	};
 };
 
 function QACancel(){
@@ -130,6 +145,16 @@ function QAModify(id){
 	desc = document.getElementById('desc'+id).value;
 	answ = document.getElementById('answ'+id).value;
 	QASwith(id);
+	
+	var inpPic = document.getElementById('inpPic'+id),
+	inpPicShow = document.getElementById('inpPicShow'+id);
+	inpPic.onchange = function(){
+		inpPicShow.value=inpPic.value;
+	};
+	inpPicShow.onfocus = function(){
+		inpPic.click();
+		document.getElementById('answ'+id).focus();
+	};
 };
 
 function modifyCancel(id){

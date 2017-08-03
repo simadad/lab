@@ -31,7 +31,7 @@ class QAReply(models.Model):
     desc = models.CharField(verbose_name='描述', max_length=30, blank=True, null=True)
     is_pic = models.BooleanField(verbose_name='是否图片', default=False)
     reply_text = models.TextField(verbose_name='回答', blank=True, null=True)
-    reply_pic = models.ImageField(verbose_name='图片回答', blank=True, null=True)
+    reply_pic = models.ImageField(verbose_name='图片回答', upload_to='img/answers', blank=True, null=True)
     keywords = models.ManyToManyField(QAKeyWord, verbose_name='关键字集', related_name='replies')
 
     def __str__(self):
