@@ -39,3 +39,21 @@ class QAReply(models.Model):
             return self.desc
         else:
             name = 'R:' + '-'.join([keyword.keyword for keyword in self.keywords])
+
+
+class PicSubject(models.Model):
+    tag = models.CharField(verbose_name='活动标签', max_length=30)
+    reply = models.TextField(verbose_name='回复')
+    time_on = models.DateTimeField(verbose_name='开始时间', auto_now_add=True)
+    time_off = models.DateTimeField(verbose_name='结束时间', null=True, blank=True)
+
+    def __str__(self):
+        return self.tag
+
+
+class SubjectMember(models.Model):
+    subject = models.ForeignKey(PicSubject, verbose_name='活动', on_delete=models.CASCADE, related_name='members')
+    nickname = models.CharField(verbose_name='昵称', max_length=30)
+
+    def __str__(self):
+        return self.subject.tag + '-' + self.nickname
