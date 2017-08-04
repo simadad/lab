@@ -44,7 +44,7 @@ class UserAttr(models.Model):
 
 class Dialog(models.Model):
     dialog = models.TextField(verbose_name='对话记录')
-    user = models.ForeignKey(LabUser, verbose_name='用户')
+    user = models.ForeignKey(LabUser, verbose_name='用户', related_name='dialogs')
     recorder = models.ForeignKey(User, verbose_name='记录员')
     log_time = models.DateTimeField(verbose_name='记录时间', auto_now_add=True)
 
