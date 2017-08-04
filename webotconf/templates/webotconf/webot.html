@@ -16,6 +16,7 @@
 	<!--li role="presentation" class="nav {% if is_strict_qa == 'False' %}active{% endif %}"><a href='{% url "webot:qa" %}'>宽松问答配置</a></li-->
 	<li role="presentation" class="nav {% if is_strict_qa == 'False' %}active{% endif %}"><a href='#'>宽松问答配置</a></li>
 	<li role="presentation" class="nav {% if is_strict_qa == 'True' %}active{% endif %}"><a href='{% url "webot:qas" %}'>严格问答配置</a></li>
+	<li role="presentation" class="nav {% if is_pic %}active{% endif %}"><a href='{% url "webot:pic" %}'>活动图片回复</a></li>
 </ul>
 <hr />
 {% block buttons %}

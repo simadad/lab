@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from PIL import Image
 import re
 from labcrm.views import ImgForm
+import datetime
 # Create your views here.
 
 
@@ -119,11 +120,51 @@ def qa_conf(request):
         print('desc: ', desc)
         print('answer: ', answer)
         print('is_modify: ', is_modify)
-
     keywords = QAKeyWord.objects.filter(is_strict=False)
     return render(request, 'webotconf/qa_conf.html', {
         'keywords': keywords,
         'is_strict_qa': 'False'
+    })
+
+
+@login_required
+def pic_subject(request):
+    sid = request.GET.get('close')
+    rid = request.GET.get('reSub')
+    if sid:
+        print('sid: ', sid)
+        subject = get_object_or_404(PicSubject, id=sid)
+        subject.is_underway = False
+        subject.time_off = datetime.datetime.now()
+        subject.save()
+        print('subject: ', subject, subject.is_underway, subject.time_off)
+        return HttpResponse(render(request, 'webotconf/ajax/sub_history.html', {
+            'subjectHis': subject
+        }))
+    elif request.method == 'POST':
+        tag = request.POST.get('tag')
+        reply = request.POST.get('reply')
+        subject = PicSubject.objects.create(
+            tag=tag,
+            reply=reply,
+            time_on=datetime.datetime.now()
+        )
+        return HttpResponse(render(request, 'webotconf/ajax/sub_underway.html', {
+            'subject': subject
+        }))
+    elif rid:
+        subject = get_object_or_404(PicSubject, id=rid)
+        subject.is_underway = True
+        subject.save()
+        return HttpResponse(render(request, 'webotconf/ajax/sub_underway.html', {
+            'subject': subject
+        }))
+    subject = PicSubject.objects.filter(is_underway=True).last()
+    subject_history = PicSubject.objects.filter(is_underway=False)
+    return render(request, 'webotconf/pic_subject.html', {
+        'is_pic': True,
+        'subject': subject,
+        'subject_history': subject_history
     })
 
 

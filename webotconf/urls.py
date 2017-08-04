@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^rule', views.rule_conf, name='rule'),
     url(r'^qas', views.qa_conf_strict, name='qas'),
     url(r'^qa', views.qa_conf, name='qa'),
+    url(r'^pic', views.pic_subject, name='pic'),
 ]
