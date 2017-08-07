@@ -393,7 +393,7 @@ def paper_display(request, data_key=None):
         if new_paper_name:
             paper.mark = new_paper_name
             paper.save()
-            return HttpResponse(paper.__name__)
+            return HttpResponse(paper.__str__())
         data = paper.data.split('@@')
         if len(data) == 5:
             # title, lab_user, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = data
