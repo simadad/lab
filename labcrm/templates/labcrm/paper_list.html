@@ -8,7 +8,7 @@
 	<li role="presentation" class="nav {% if PType == 'TF' %}active{% endif %}"><a href='?PType=TF'>未填问卷</a></li>
 	<li role="presentation" class="nav {% if PType == 'F' %}active{% endif %}"><a href='?PType=F'>已填问卷</a></li>
 	<li role="presentation" class="nav {% if PType == 'A' %}active{% endif %}"><a href='?PType=A'>全部问卷</a></li>
-	<li role="presentation" class="nav {% if PType == 'N' %}active{% endif %} hidden"><a href='#'>新建问卷</a></li>
+	<li role="presentation" class="nav {% if PType != 'N' %}hidden{% endif %} active"><a href='#'>新建问卷</a></li>
 </ul>
 {% endblock %}
 {% block row-right %}
