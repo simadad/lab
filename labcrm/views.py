@@ -464,9 +464,24 @@ def paper_display(request, data_key=None):
 
 @login_required
 def papers_create(request):
-    if request.method == 'GET':
-        papers = Paper.objects.filter(is_fill=False, is_del=False).order_by('-create_time')
-    else:
+    paper_type = request.GET.get('PType')
+    pid = request.GET.get('paperDel')
+    if paper_type:
+        if paper_type == 'M':
+            papers = Paper.objects.filter(is_fill=False, user__isnull=True, is_del=False).order_by('-create_time')
+        elif paper_type == 'TF':
+            papers = Paper.objects.filter(is_fill=False, user__isnull=False, is_del=False).order_by('-create_time')
+        elif paper_type == 'F':
+            papers = Paper.objects.filter(is_fill=True, is_del=False).order_by('-create_time')
+        elif paper_type == 'A':
+            papers = Paper.objects.filter(is_del=False).order_by('-create_time')
+        # return HttpResponse(render(request, 'labcrm/ajax/papers.html', {
+        #     'papers': papers
+        # }))
+    elif pid:
+        get_object_or_404(Paper, id=pid).delete()
+        return HttpResponse('T')
+    elif request.method == 'POST':
         print('POST: paper_creaete')
         data_key = request.POST.get('data_key')
         uid_list = request.POST.getlist('userId')
@@ -478,9 +493,11 @@ def papers_create(request):
             mark=markPaper['tofill'] + '-' + paper.mark,
             user=user
         ) for user in users)
+        paper_type = 'N'
         print('data_key-uid_list: ', data_key, uid_list)
     return render(request, 'labcrm/paper_list.html', {
-        'papers': papers
+        'papers': papers,
+        'PType': paper_type
     })
 
 
