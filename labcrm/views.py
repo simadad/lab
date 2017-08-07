@@ -377,6 +377,7 @@ def ques_fill(request, data_key=None):
 
 def paper_display(request, data_key=None):
     if request.method == 'GET':
+        new_paper_name = request.GET.get('reName')
         modal_display = False
         if not data_key:
             data_key = request.GET.get('data_key')
@@ -389,6 +390,10 @@ def paper_display(request, data_key=None):
         else:
             lab_user = None
         paper = get_object_or_404(Paper, key=key)
+        if new_paper_name:
+            paper.mark = new_paper_name
+            paper.save()
+            return HttpResponse(paper.__name__)
         data = paper.data.split('@@')
         if len(data) == 5:
             # title, lab_user, paper_desc, ques_desc_str, ques_ids_str, ques_values_str = data

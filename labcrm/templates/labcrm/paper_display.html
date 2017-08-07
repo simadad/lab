@@ -61,16 +61,24 @@
 				<li class='visible-lg-inline visible-sm-inline visible-md-inline'><a>|</a></li>
 				<li class='{% block webotConf %}{% endblock %}'><a href='{% url "webot:rule" %}'>微信配置</a></li>
 			</ul>
-			{% if not filled %}
 			<form class='navbar-form navbar-right'>
+			{% if paper.user %}
+				<a tabindex="0" class="btn close pull-left" aria-label="Close" role="button" data-toggle="popover" data-placement="top" data-trigger="focus"  data-content="无法重命名非模板问卷" disabled>
+					<span aria-hidden="true" style='font-size:0.6em'>{{ paper }}</span>
+				</a>
+			{% else %}
+				<a class='btn' id='navName' onclick='reName()'>{{ paper }}</a>
+				<input class='hidden' id='navMark' placeholder='{{ paper.mark }}' value='{{ paper.mark }}' onfocus='this.select()' onblur='reNameSure()'>
+				<span class='hidden' id='navTime'>{{ paper.create_time|date:"Y-m-d" }}</span>
+			{% endif %}
+			{% if not filled %}
 				{% if labUser %}
 				<a class="btn btn-success" href='{% url "crm:fill2" %}/{{ data_key }}'>生成问卷</a>
 				{% else %}
 				<a class="btn btn-success" data-toggle="modal" data-target="#userListModal">生成问卷</a>
 				{% endif %}
-			</form>
 			{% endif %}
-			<p class='navbar-text navbar-right'>{{ paper }}</p>
+			</form>
 		</div>
 	</nav>
 </div>
@@ -124,7 +132,12 @@
 <script src="{% static 'bootstrap3\js\bootstrap.min.js' %}"></script>
 <script src="{% static 'bootstrap3\js\npm.js' %}"></script>
 <script>
+$(function () {
+  $('[data-toggle="popover"]').popover()
+})
+
 function addNew(){
+	// 添加新成员
 	var newRow = document.getElementById('userList').insertRow(0);
 	newRow.innerHTML = '\
 	<td>\
@@ -174,6 +187,33 @@ function addNewSrue(e){
 		var tr = e.parentElement.parentElement;
 		tr.parentElement.removeChild(tr);
 	};
+};
+
+function reName(){
+	var navMark = document.getElementById('navMark'),
+		navName = document.getElementById('navName'),
+		navTime = document.getElementById('navTime');
+	navName.className = 'hidden';
+	navMark.className = 'form-control';
+	navTime.className = 'text-primary';
+	navMark.focus();
+};
+
+function reNameSure(){
+	var xhr = new XMLHttpRequest(),
+		navMark = document.getElementById('navMark'),
+		navName = document.getElementById('navName'),
+		navTime = document.getElementById('navTime');
+	xhr.open("GET", '?reName=' + navMark.value, true);
+	xhr.onreadystatechange=function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			navTime.className = 'hidden';
+			navMark.className = 'hidden';
+			navName.className = 'btn';
+			navName.innerText = xhr.responseText;
+		};
+	};
+	xhr.send();
 };
 </script>
 </body>
