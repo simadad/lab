@@ -37,6 +37,11 @@
 			<span class="c-indicator"></span>
 		</label>
 	</td>
+	<td>
+		<button type="button" class="btn close btn-block" aria-label="Close" onclick='attrDel({{ attr.id }})'>
+			<span aria-hidden="true" style='color:red'>&times;</span>
+		</button>
+	</td>
 	<!--optionDisplay-->
 	<div class="collapse" id="collapse{{ attr.id }}">
 		<ul class='list-group'>

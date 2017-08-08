@@ -305,8 +305,14 @@ def ques_conf(request):
                 'questions': questions(),
                 'questions2': questions()
             }))
+    aid = request.GET.get('attrDel')
+    if aid:
+        attr = get_object_or_404(UserAttr, id=aid)
+        attr.is_del = True
+        attr.save()
+        return HttpResponse('T')
     print('GET: ques_conf 配置页面')
-    attrs = UserAttr.objects.all()
+    attrs = UserAttr.objects.filter(is_del=False)
     papers = Paper.objects.filter(user__isnull=True).order_by('-create_time')
     print('=================')
     return render(request, 'labcrm/ques_conf.html', {
@@ -553,7 +559,8 @@ def ajax_conf_add(request):
     print('attr-option: ', attr, is_option)
     if is_option:
         attr, _ = UserAttr.objects.update_or_create(attr=attr, defaults={
-            'is_option': True
+            'is_option': True,
+            'is_del': False
         })
         options = request.POST.getlist('options')
         print('options: ', options)
@@ -565,7 +572,8 @@ def ajax_conf_add(request):
             )
     else:
         attr, _ = UserAttr.objects.update_or_create(attr=attr, defaults={
-            'is_option': False
+            'is_option': False,
+            'is_del': False
         })
     # attr_ids = request.POST.getlist('attr_checked')
     # attr_ids.append(attr.id)

@@ -29,14 +29,15 @@
 				<tr>
 					<th>问题</th>
 					<th>提供选项</th>
-					<th>选用</th>
+					<th class='col-md-1'>选用</th>
+					<th class='col-md-1'>删除</th>
 				</tr>
 			</thead>
 			<form method='POST' id='quesConf' action='{% url "crm:ajax:preview" %}'>
 			{% csrf_token %}
 			<tbody id='tbOptions'>
 				{% for attr in attrs %}
-				<tr>
+				<tr id='attrTr{{ attr.id }}'>
 					<td>{{ attr.attr }}</td>
 					{% if attr.is_option %}
 					<td class='info' href="#collapse{{ attr.id }}" data-toggle="collapse">{{ attr.is_option }}</td>
@@ -48,6 +49,11 @@
 							<input type="checkbox" name='attr_checked' value='{{ attr.id }}'>
 							<span class="c-indicator"></span>
 						</label>
+					</td>
+					<td>
+						<button type="button" class="btn close btn-block" aria-label="Close" onclick='attrDel({{ attr.id }})'>
+							<span aria-hidden="true" style='color:red'>&times;</span>
+						</button>
 					</td>
 				</tr>
 				{% endfor %}
@@ -109,6 +115,21 @@
 {% endblock %}
 {% block script %}
 <script>
+function attrDel(aid){
+	// 删除属性
+	var attrTr = document.getElementById('attrTr'+aid),
+		xhr = new XMLHttpRequest();
+	xhr.open('GET', '?attrDel='+aid, true);
+	xhr.onreadystatechange=function(){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			if(xhr.responseText == 'T'){
+				attrTr.parentElement.removeChild(attrTr);
+			};
+		};
+	};
+	xhr.send();
+}
+
 function quesConf(){
 	// ajax 配置
 	document.getElementById("quesConf").onsubmit = function(e){

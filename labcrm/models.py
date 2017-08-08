@@ -37,20 +37,10 @@ class Paper(models.Model):
 class UserAttr(models.Model):
     attr = models.CharField(verbose_name='属性', max_length=255)
     is_option = models.BooleanField(verbose_name='是否提供选项', default=False)
+    is_del = models.BooleanField(verbose_name='是否删除', default=False)
 
     def __str__(self):
         return self.attr
-
-
-class Dialog(models.Model):
-    dialog = models.TextField(verbose_name='对话记录')
-    user = models.ForeignKey(LabUser, verbose_name='用户', related_name='dialogs')
-    recorder = models.ForeignKey(User, verbose_name='记录员')
-    log_time = models.DateTimeField(verbose_name='记录时间', auto_now_add=True)
-
-    def __str__(self):
-        name = self.user.nickname + ' ' + self.log_time.strftime('%Y-%m-%d')
-        return name
 
 
 class AttrOption(models.Model):
@@ -80,6 +70,17 @@ class UserInfoA(models.Model):
 
     def __str__(self):
         return self.answer
+
+
+class Dialog(models.Model):
+    dialog = models.TextField(verbose_name='对话记录')
+    user = models.ForeignKey(LabUser, verbose_name='用户', related_name='dialogs')
+    recorder = models.ForeignKey(User, verbose_name='记录员')
+    log_time = models.DateTimeField(verbose_name='记录时间', auto_now_add=True)
+
+    def __str__(self):
+        name = self.user.nickname + ' ' + self.log_time.strftime('%Y-%m-%d')
+        return name
 
 
 class PicData(models.Model):
