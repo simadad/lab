@@ -144,10 +144,13 @@ def _user_detail_post(request, lab_user):
     attrs = UserAttr.objects.all()
     attr_option = attrs.filter(is_option=True)
     dialog = request.POST.get('dialog')
-    pic_post = request.POST.get('pic')
+    # pic_post = request.POST.get('pic')
     pic_name = request.POST.get('pic_name')
     questions = request.POST.getlist('tagQuestion')
     answers = request.POST.getlist('tagAnswer')
+    dialogs = Dialog.objects.filter(user=lab_user).order_by('-log_time')
+    pics = UserPic.objects.filter(user=lab_user, pic_type=picType['dialog'])
+    user_answers = UserInfoA.objects.filter(user=lab_user, is_del=False)
     print('pic_name is-dialog is-ques is-answ:\t', pic_name, bool(dialog), bool(questions), bool(answers))
     if dialog:
         print('@添加沟通记录')
@@ -169,7 +172,7 @@ def _user_detail_post(request, lab_user):
         image = Image.open(pic)
         print('image:\t', image)
         name = picType['dialog'] + '-' + lab_user.user.username + '-' + \
-               datetime.datetime.now().strftime('%Y-%m-%d') + '.' + pic_name.split('.')[-1]
+            datetime.datetime.now().strftime('%Y-%m-%d') + '.' + pic_name.split('.')[-1]
         image.save('media/img/gallery/%s' % name)
         pic_obj, _ = PicData.objects.get_or_create(pic=pic, defaults={
             'name': name
@@ -358,8 +361,8 @@ def ques_fill(request, data_key=None):
         paper.finished_time = datetime.datetime.now()
         paper.save()
         quests = zip(attrs, ques_values)
-        for ques in quests:
-            attr, value = ques
+        for quest in quests:
+            attr, value = quest
             print('attr value:\t', attr, value)
             _save_uiq_uia(user, attr, value)
         return render(request, 'labcrm/fill_success.html')
@@ -429,7 +432,7 @@ def paper_display(request, data_key=None):
             lab_user = get_object_or_404(LabUser, id=uid)
         else:
             lab_user = None
-        paper = get_object_or_404(Paper, user=uid, key=key)
+        paper = get_object_or_404(Paper, key=key)
         title, paper_desc, ques_desc_str, ques_ids_str = paper.data.split('@@')
         ques_desc = ques_desc_str.split('##')
         attr_ids = ques_ids_str.split('##')
@@ -466,6 +469,7 @@ def papers_create(request):
     print('request\t', request)
     paper_type = request.GET.get('PType')
     pid = request.GET.get('paperDel')
+    papers = []
     if paper_type:
         if paper_type == 'M':
             papers = Paper.objects.filter(is_fill=False, user__isnull=True, is_del=False).order_by('-create_time')
@@ -605,9 +609,9 @@ def ajax_detail_modify(request):
 @login_required
 def ajax_user_del(request):
     print('request\t', request)
-    userId = request.POST.getlist('userId')
-    print('userId:\t', userId)
-    users = LabUser.objects.filter(id__in=userId)
+    uid = request.POST.getlist('userId')
+    print('userId:\t', uid)
+    users = LabUser.objects.filter(id__in=uid)
     for user in users:
         user.is_del = True
         user.save()
