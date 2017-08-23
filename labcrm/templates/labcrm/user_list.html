@@ -4,6 +4,8 @@
 {% block row-left %}
 <button id='btnUserAdd' class='btn btn-info btn-block btn-lg' data-toggle="modal" data-target="#userAddModal" onclick='userAdd()'>添加成员</button>
 <button id='btnUserDel' class='btn btn-warning btn-block btn-lg' onclick='userDel()'>删除成员</button>
+<button id='btnModify' class='btn btn-primary btn-block btn-lg' onclick='rename()'>信息修改</button>
+<button id='btnModOver' class='btn btn-success btn-block btn-lg hidden' onclick='renameOver()'>修改完毕</button>
 <button id='btnDelSure' class='btn btn-danger btn-block btn-lg hidden' form='formUserDel' type='submit' onclick='delSure()'>确认删除</button>
 {% endblock %}
 {% block row-right %}
@@ -71,12 +73,45 @@
 	//alert('昵称重复');
 //};
 //{% endif %}
+function rename(){
+	// 重命名
+	var btnModOver = document.getElementById('btnModOver'),
+		btnUserAdd = document.getElementById('btnUserAdd'),
+		btnUserDel = document.getElementById('btnUserDel'),
+		btnModify = document.getElementById('btnModify'),
+		attrModify = btnModify.getAttribute('class'),
+		attrModOver = btnModOver.getAttribute('class');
+	attrModify += ' hidden';
+	attrModOver = attrModOver.replace('hidden', '');
+	btnModify.setAttribute('class', attrModify);
+	btnModOver.setAttribute('class', attrModOver);
+	btnUserAdd.setAttribute('disabled', true);
+	btnUserDel.setAttribute('disabled', true);
+};
+
+function renameOver(){
+	// 重命名完毕
+	var btnModOver = document.getElementById('btnModOver'),
+		btnUserAdd = document.getElementById('btnUserAdd'),
+		btnUserDel = document.getElementById('btnUserDel'),
+		btnModify = document.getElementById('btnModify'),
+		attrModify = btnModify.getAttribute('class'),
+		attrModOver = btnModOver.getAttribute('class');
+	attrModOver += ' hidden';
+	attrModify = attrModify.replace('hidden', '');
+	btnModify.setAttribute('class', attrModify);
+	btnModOver.setAttribute('class', attrModOver);
+	btnUserAdd.removeAttribute('disabled');
+	btnUserDel.removeAttribute('disabled');
+};
+
 function userDel(){
 	// js 删除成员
 	var tbHid = document.getElementsByClassName('tbHid'),
 		btnDelSure = document.getElementById('btnDelSure'),
 		btnUserAdd = document.getElementById('btnUserAdd'),
 		btnUserDel = document.getElementById('btnUserDel'),
+		btnModify = document.getElementById('btnModify'),
 		attrDelSure = btnDelSure.getAttribute('class'),
 		attrUserDel = btnUserDel.getAttribute('class');
 	for(var i=0;i<tbHid.length;i++){
@@ -87,6 +122,7 @@ function userDel(){
 	btnUserDel.setAttribute('class', attrUserDel);
 	btnDelSure.setAttribute('class', attrDelSure);
 	btnUserAdd.setAttribute('disabled', true);
+	btnModify.setAttribute('disabled', true);
 };
 
 function delSure(){
@@ -98,6 +134,7 @@ function delSure(){
 			xhr = new XMLHttpRequest(),
 			btnDelSure = document.getElementById('btnDelSure'),
 			btnUserAdd = document.getElementById('btnUserAdd'),
+			btnModify = document.getElementById('btnModify'),
 			btnUserDel = document.getElementById('btnUserDel'),
 			attrDelSure = btnDelSure.getAttribute('class'),
 			attrUserDel = btnUserDel.getAttribute('class'),
@@ -113,6 +150,7 @@ function delSure(){
 				btnUserDel.setAttribute('class', attrUserDel);
 				btnDelSure.setAttribute('class', attrDelSure);
 				btnUserAdd.removeAttribute('disabled');
+				btnModify.removeAttribute('disabled');
 			};
 		};
 		xhr.send(formData);
@@ -177,24 +215,31 @@ function userAdd(){
 	document.getElementById('addWechat').removeAttribute('value');
 };
 
-function wechatAdd(e){
-	var para = e.parentElement,
-		uid = e.nextElementSibling.innerText;
-	para.innerHTML = '<input class="form-control" placeholder="微信号" onblur="wechatAddSure(this, ' + uid + ')">';
+function inputThis(e, uid, name){
+	// 得到焦点，开启输入框
+	alert('1111' + name);
+	var para = e.parentElement;
+		//uid = e.nextElementSibling.innerText;
+		//uid = e.parentElement.parentElement.id.replace('user', '');
+	para.innerHTML = '<input class="form-control" placeholder="微信号" onblur="inputThisSure(this,' + uid + ',\'' + name + '\')" focus>';
 	para.children[0].focus();
 };
 
-function wechatAddSure(e, uid){
-	//alert(e.parentElement.nodeName);
-	if(e.value.length > 0){					// 后台判断是否为空 TODO
+function inputThisSure(e, uid, name){
+	// 失去焦点，输入确认
+	alert('222' + name);
+	info = e.value.replace(/^\s+|\s+$/g,"");
+	if(info){					// 后台判断是否为空 TODO
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "?wechat="+e.value+"&uid="+uid, true);
+		xhr.open("GET", "?"+name+"="+info+"&uid="+uid, true);
 		xhr.onreadystatechange=function(){
 			if(xhr.readyState == 4 && xhr.status == 200){
-				e.parentElement.innerHTML = e.value;
+				e.parentElement.innerHTML = info;
 			};
 		};
 		xhr.send();
+	}else{
+		e.parentElement.innerHTML = '<a href="#zz" style="color:red" onclick="inputThis(this,' + uid + ',\'' + name + '\')">添加微信号</a>';
 	};
 };
 </script>

@@ -18,8 +18,8 @@
 	<td>{{ lab_user.wechat }}</td>
 	{% else %}
 	<td class='info'>
-		<a href='#' style='color:red' onclick='wechatAdd(this)'>添加微信号</a>
-		<span class='hidden'>{{ lab_user.id }}</span>
+		<a href='#zz' style='color:red' onclick='inputThis(this, {{ lab_user.id }}, "wechat")'>添加微信号</a>
+		<!--span class='hidden'>{{ lab_user.id }}</span-->
 	</td>
 	{% endif %}
 	{% if lab_user.papers.last %}
