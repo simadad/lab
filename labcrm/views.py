@@ -10,7 +10,8 @@ import base64
 import pymysql
 import random
 import datetime
-from mytool import log_this
+# from mytool import log_this
+from testools.declog import log_this
 # Create your views here.
 
 picType = {
