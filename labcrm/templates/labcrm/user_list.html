@@ -217,17 +217,17 @@ function userAdd(){
 
 function inputThis(e, uid, name){
 	// 得到焦点，开启输入框
-	alert('1111' + name);
+	// alert('1111' + name);
 	var para = e.parentElement;
 		//uid = e.nextElementSibling.innerText;
 		//uid = e.parentElement.parentElement.id.replace('user', '');
-	para.innerHTML = '<input class="form-control" placeholder="微信号" onblur="inputThisSure(this,' + uid + ',\'' + name + '\')" focus>';
+	para.innerHTML = '<input class="form-control" placeholder="' + name + '" onblur="inputThisSure(this,' + uid + ',\'' +name+ '\')" focus>';
 	para.children[0].focus();
 };
 
 function inputThisSure(e, uid, name){
 	// 失去焦点，输入确认
-	alert('222' + name);
+	// alert('222' + name);
 	info = e.value.replace(/^\s+|\s+$/g,"");
 	if(info){					// 后台判断是否为空 TODO
 		var xhr = new XMLHttpRequest();
@@ -239,7 +239,7 @@ function inputThisSure(e, uid, name){
 		};
 		xhr.send();
 	}else{
-		e.parentElement.innerHTML = '<a href="#zz" style="color:red" onclick="inputThis(this,' + uid + ',\'' + name + '\')">添加微信号</a>';
+		e.parentElement.innerHTML = '<a href="#zz" style="color:red" onclick="inputThis(this,' + uid + ',\'' + name + '\')">' +name+ '</a>';
 	};
 };
 </script>
