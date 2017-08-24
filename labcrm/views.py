@@ -56,14 +56,19 @@ def _save_uiq_uia(user, attr, answer):
 
 @log_this
 def _user_list_post(request):
+    # username -> 本站用户名，    nickname -> 学习站用户名
     nickname = request.POST.get('nickname')
     wechat = request.POST.get('wechat')
     username = request.POST.get('username')
-    user, is_new = User.objects.get_or_create(username=nickname)
+    user, is_new = User.objects.get_or_create(username=username)
     print('nickname wechat username is_new: \t', nickname, wechat, username, is_new)
-    if username:
-        print('@添加用户名')
-        LabUser.objects.filter(user__username=nickname).update(nickname=username)
+    if nickname or wechat:
+        if nickname:
+            print('@添加用户名')
+            LabUser.objects.filter(user=user).update(nickname=nickname)
+        elif wechat:
+            print('@添加微信号')
+            LabUser.objects.filter(user=user).update(wechat=wechat)
         users = LabUser.objects.filter(is_del=False).order_by('-user__date_joined')
         return render(request, 'labcrm/ajax/user_del.html', {
             'users': users
@@ -84,11 +89,31 @@ def _user_list_post(request):
 
 @log_this
 def _user_list_get(request):
-    print('@用户列表展示')
-    wechat = request.GET.get('wechat')
     uid = request.GET.get('uid')
-    print('wechat uid:\t', wechat, uid)
-    LabUser.objects.filter(id=uid).update(wechat=wechat)
+    print('uid:\t', uid)
+    if uid:
+        print('@用户数据修改')
+        wechat = request.GET.get('wechat')
+        username = request.GET.get('username')
+        nickname = request.GET.get('nickname')
+        if wechat:
+            print('wechat:\t', wechat)
+            LabUser.objects.filter(id=uid).update(wechat=wechat)
+        elif nickname:
+            print('nickname:\t', nickname)
+            LabUser.objects.filter(id=uid).update(nickname=nickname)
+        else:
+            print('username:\t', username)
+            uuid = get_object_or_404(LabUser, id=uid).user.id
+            User.objects.filter(id=uuid).update(username=username)
+        return HttpResponse()
+    elif request.GET.get('refresh'):
+        print('@修改完毕，刷新列表')
+        users = LabUser.objects.filter(is_del=False).order_by('-user__date_joined')
+        return render(request, 'labcrm/ajax/user_del.html', {
+            'users': users
+        })
+    print('@用户列表展示')
     users = LabUser.objects.filter(is_del=False).order_by('-user__date_joined')
     return render(request, 'labcrm/user_list.html', {
         'users': users

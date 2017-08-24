@@ -13,7 +13,7 @@
 	<caption>成员列表</caption>
 		<thead class='thead-inverse'>
 		<tr>
-			<th class='col-lg-2'>昵称</th><!-- 昵称为本站 user.username -->
+			<th class='col-lg-2'>本站名</th><!-- 昵称为本站 user.username -->
 			<th class='col-lg-2'>用户名 | 学习记录</th><!-- 用户名为学习站 user.username 本站 lab_user.nickname -->
 			<th class='col-lg-2'>微信</th>
 			<th class='col-lg-3'>问卷</th>
@@ -39,9 +39,9 @@
 				<form class="form-horizontal" id='formUserAdd' action='' method='POST'>
 					{% csrf_token %}
 					<div class="form-group">
-						<label class='col-lg-2 control-label' for='addNickname'>昵称：</label>
+						<label class='col-lg-2 control-label' for='addNickname'>本站名：</label>
 						<div class=' col-lg-10'>
-							<input id='addNickname' class='form-control' name='nickname' onfocus="this.select()" required=true placeholder='昵称'>
+							<input id='addNickname' class='form-control' name='username' onfocus="this.select()" required=true placeholder='昵称'>
 						</div>
 					</div>
 					<div class="form-group">
@@ -53,7 +53,7 @@
 					<div class="form-group hidden" id='divAddUsername'>
 						<label class='col-lg-2 control-label' for='addUsername'>用户名：</label>
 						<div class='col-lg-10'>
-							<input id='addUsername' class='form-control' name='username' onfocus="this.select()" placeholder='学习站用户名'>
+							<input id='addUsername' class='form-control' name='nickname' onfocus="this.select()" placeholder='学习站用户名'>
 						</div>
 					</div>
 				</form>
@@ -73,6 +73,20 @@
 	//alert('昵称重复');
 //};
 //{% endif %}
+function hidSwith(){
+// 标签显示与隐藏
+	var tags = document.getElementsByClassName("hidSwith");
+	for(var i=0;i<tags.length;i++){
+		var classVal = tags[i].getAttribute("class");
+		if(classVal.match('hidden')){
+			classVal = classVal.replace('hidden', 'unhid');
+		}else{
+			classVal = classVal.replace('unhid', 'hidden');
+		};
+		tags[i].setAttribute("class", classVal);
+	};
+};
+
 function rename(){
 	// 重命名
 	var btnModOver = document.getElementById('btnModOver'),
@@ -87,22 +101,33 @@ function rename(){
 	btnModOver.setAttribute('class', attrModOver);
 	btnUserAdd.setAttribute('disabled', true);
 	btnUserDel.setAttribute('disabled', true);
+	hidSwith();
 };
 
 function renameOver(){
 	// 重命名完毕
-	var btnModOver = document.getElementById('btnModOver'),
-		btnUserAdd = document.getElementById('btnUserAdd'),
-		btnUserDel = document.getElementById('btnUserDel'),
-		btnModify = document.getElementById('btnModify'),
-		attrModify = btnModify.getAttribute('class'),
-		attrModOver = btnModOver.getAttribute('class');
-	attrModOver += ' hidden';
-	attrModify = attrModify.replace('hidden', '');
-	btnModify.setAttribute('class', attrModify);
-	btnModOver.setAttribute('class', attrModOver);
-	btnUserAdd.removeAttribute('disabled');
-	btnUserDel.removeAttribute('disabled');
+	var xhr = new XMLHttpRequest(),
+		para = document.getElementById('userList');
+	xhr.open('GET', '?refresh=1', true);
+	xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var btnModOver = document.getElementById('btnModOver'),
+					btnUserAdd = document.getElementById('btnUserAdd'),
+					btnUserDel = document.getElementById('btnUserDel'),
+					btnModify = document.getElementById('btnModify'),
+					attrModify = btnModify.getAttribute('class'),
+					attrModOver = btnModOver.getAttribute('class');
+				attrModOver += ' hidden';
+				attrModify = attrModify.replace('hidden', '');
+				btnModify.setAttribute('class', attrModify);
+				btnModOver.setAttribute('class', attrModOver);
+				btnUserAdd.removeAttribute('disabled');
+				btnUserDel.removeAttribute('disabled');
+				para.innerHTML = xhr.responseText;
+				//hidSwith();
+			};
+		};
+	xhr.send();
 };
 
 function userDel(){
@@ -157,13 +182,19 @@ function delSure(){
 	};
 };
 
-function usernameAdd(e){
-	// 增加用户名
+function newAttrAdd(e, tagId){
+	// 新增用户名|微信
 	document.getElementById('divAddUsername').setAttribute('class', 'form-group');
-	document.getElementById('addNickname').setAttribute('value', e.parentElement.previousElementSibling.innerText);
 	document.getElementById('addNickname').setAttribute('readonly', true);
-	document.getElementById('addWechat').setAttribute('value', e.parentElement.nextElementSibling.innerText);
-	document.getElementById('addWechat').setAttribute('readonly', true);
+	document.getElementById('addNickname').setAttribute('value', e.parentElement.parentElement.getElementsByClassName('username')[0].innerText);
+	document.getElementById('addUsername').setAttribute('disabled', true);
+	document.getElementById('addUsername').setAttribute('value', e.parentElement.parentElement.getElementsByClassName('nickname')[0].innerText);
+	document.getElementById('addWechat').setAttribute('disabled', true);
+	document.getElementById('addWechat').setAttribute('value', e.parentElement.parentElement.getElementsByClassName('wechat')[0].innerText);
+	
+	document.getElementById(tagId).removeAttribute('disabled');
+	document.getElementById(tagId).removeAttribute('value');
+	document.getElementById(tagId).setAttribute('required', true);
 	$('#userAddModal').modal('show');
 };
 
@@ -215,31 +246,36 @@ function userAdd(){
 	document.getElementById('addWechat').removeAttribute('value');
 };
 
-function inputThis(e, uid, name){
+function inputThis(e){
 	// 得到焦点，开启输入框
 	// alert('1111' + name);
-	var para = e.parentElement;
-		//uid = e.nextElementSibling.innerText;
-		//uid = e.parentElement.parentElement.id.replace('user', '');
-	para.innerHTML = '<input class="form-control" placeholder="' + name + '" onblur="inputThisSure(this,' + uid + ',\'' +name+ '\')" focus>';
+	// alert(e.innerText);
+	// alert(e.className);
+	var para = e.parentElement,
+		name = e.className,
+		value = e.innerText,
+		uid = e.parentElement.parentElement.id.replace('user', '');
+	para.innerHTML = '<input class="form-control" placeholder="' +value+ '" onblur="inputThisSure(this,' + uid + ',\'' +name+ '\')">';
 	para.children[0].focus();
 };
 
 function inputThisSure(e, uid, name){
 	// 失去焦点，输入确认
 	// alert('222' + name);
-	info = e.value.replace(/^\s+|\s+$/g,"");
+	// alert(e.placeholder);
+	var value = e.placeholder,
+		info = e.value.replace(/^\s+|\s+$/g,"");
 	if(info){					// 后台判断是否为空 TODO
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", "?"+name+"="+info+"&uid="+uid, true);
 		xhr.onreadystatechange=function(){
 			if(xhr.readyState == 4 && xhr.status == 200){
-				e.parentElement.innerHTML = info;
+				e.parentElement.innerHTML = '<a href="#zz" class="' + name + '" style="color:red" onclick="inputThis(this)">' +info+ '</a>';
 			};
 		};
 		xhr.send();
 	}else{
-		e.parentElement.innerHTML = '<a href="#zz" style="color:red" onclick="inputThis(this,' + uid + ',\'' + name + '\')">' +name+ '</a>';
+		e.parentElement.innerHTML = '<a href="#zz" class="' + name + '" style="color:red" onclick="inputThis(this)">' +value+ '</a>';
 	};
 };
 </script>
