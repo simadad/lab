@@ -116,7 +116,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" id='btn-modal-hide' data-dismiss="modal">取消</button>
-				<button type="submit" class="btn btn-success" form='formPaperCre'>生成</button>
+				<button type="submit" class="btn btn-success" id='btnCreate' form='formPaperCre'>生成</button>
 			</div>										
 		</div>
 	</div>
@@ -138,7 +138,8 @@ $(function () {
 
 function addNew(){
 	// 添加新成员
-	var newRow = document.getElementById('userList').insertRow(0);
+	var newRow = document.getElementById('userList').insertRow(0),
+		btnCreate = document.getElementById('btnCreate');
 	newRow.innerHTML = '\
 	<td>\
 		<input class="form-control" name="nickname" placeholder="昵称" onblur="addNewSrue(this)">\
@@ -160,12 +161,14 @@ function addNew(){
 	</td>'
 	newRow.setAttribute('class', 'success');
 	newRow.children[0].children[0].focus();
+	btnCreate.setAttribute('disabled', true);
 };
 
 function addNewSrue(e){
 	// 添加新成员确认
 	if(e.value.length > 0){					// 后台判断是否为空 TODO
-		var xhr = new XMLHttpRequest();
+		var xhr = new XMLHttpRequest(),
+			btnCreate = document.getElementById('btnCreate');
 		xhr.open("GET", '{% url "crm:ajax:new" %}?nickname=' + e.value, true);
 		xhr.onreadystatechange=function(){
 			if(xhr.readyState == 4 && xhr.status == 200){
@@ -176,6 +179,7 @@ function addNewSrue(e){
 					td.innerHTML = '<a href=\'{% url "crm:detail" %}?uid=' + uid + "'>" + e.value + '</a>';
 					checkbox.value = uid;
 					checkbox.removeAttribute('disabled');
+					btnCreate.removeAttribute('disabled');
 				}else{
 					alert('用户名重复');
 					e.select();
