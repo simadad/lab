@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django import forms
+from django.db.utils import IntegrityError
 from collections import namedtuple
 from PIL import Image
 import base64
@@ -61,7 +62,7 @@ def _user_list_post(request):
     wechat = request.POST.get('wechat')
     username = request.POST.get('username')
     user, is_new = User.objects.get_or_create(username=username)
-    print('nickname wechat username is_new: \t', nickname, wechat, username, is_new)
+    print('nickname wechat username is_new:\t', nickname, wechat, username, is_new)
     if nickname or wechat:
         if nickname:
             print('@添加用户名')
@@ -105,7 +106,10 @@ def _user_list_get(request):
         else:
             print('username:\t', username)
             uuid = get_object_or_404(LabUser, id=uid).user.id
-            User.objects.filter(id=uuid).update(username=username)
+            try:
+                User.objects.filter(id=uuid).update(username=username)
+            except IntegrityError as e:
+                return HttpResponse(1)
         return HttpResponse()
     elif request.GET.get('refresh'):
         print('@修改完毕，刷新列表')
