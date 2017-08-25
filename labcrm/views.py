@@ -61,31 +61,35 @@ def _user_list_post(request):
     nickname = request.POST.get('nickname')
     wechat = request.POST.get('wechat')
     username = request.POST.get('username')
+    is_update = request.POST.get('update')
     user, is_new = User.objects.get_or_create(username=username)
-    print('nickname wechat username is_new:\t', nickname, wechat, username, is_new)
-    if nickname or wechat:
+    print('nickname wechat username is_update is_new:\t', nickname, wechat, username, is_update, is_new)
+    if is_update:
         if nickname:
             print('@添加用户名')
             LabUser.objects.filter(user=user).update(nickname=nickname)
         elif wechat:
             print('@添加微信号')
             LabUser.objects.filter(user=user).update(wechat=wechat)
-        users = LabUser.objects.filter(is_del=False).order_by('-user__date_joined')
-        return render(request, 'labcrm/ajax/user_del.html', {
-            'users': users
-        })
-    elif not is_new:
-        print('@昵称重复')
-        return HttpResponse()
-    else:
+        lab_user = get_object_or_404(LabUser, user=user)
+        # return render(request, 'labcrm/ajax/user_del.html', {
+        #     'users': users
+        # })
+    elif is_new:
         print('@添加新用户')
-        new_lab_user = LabUser.objects.create(
+        lab_user = LabUser.objects.create(
             user=user,
             wechat=wechat,
         )
-        return HttpResponse(render(request, 'labcrm/ajax/user_add.html', {
-            'lab_user': new_lab_user,
-        }))
+        # return HttpResponse(render(request, 'labcrm/ajax/user_add.html', {
+        #     'lab_user': users,
+        # }))
+    else:
+        print('@昵称重复')
+        return HttpResponse()
+    return HttpResponse(render(request, 'labcrm/ajax/user_add.html', {
+        'lab_user': lab_user,
+    }))
 
 
 @log_this
@@ -108,7 +112,7 @@ def _user_list_get(request):
             uuid = get_object_or_404(LabUser, id=uid).user.id
             try:
                 User.objects.filter(id=uuid).update(username=username)
-            except IntegrityError as e:
+            except IntegrityError:
                 return HttpResponse(1)
         return HttpResponse()
     elif request.GET.get('refresh'):

@@ -38,22 +38,23 @@
 			<div class="modal-body">
 				<form class="form-horizontal" id='formUserAdd' action='' method='POST'>
 					{% csrf_token %}
+					<input class='hidden' name='update' id='update' disabled>
 					<div class="form-group">
 						<label class='col-lg-2 control-label' for='addNickname'>本站名：</label>
 						<div class=' col-lg-10'>
-							<input id='addNickname' class='form-control' name='username' onfocus="this.select()" required=true placeholder='昵称'>
+							<input id='addNickname' class='form-control' name='username' onfocus="this.select()" readonly placeholder='昵称'>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class='col-lg-2 control-label' for='addWechat'>微信：</label>
 						<div class='col-lg-10'>
-							<input id='addWechat' class='form-control' name='wechat' onfocus="this.select()" required=true placeholder='微信'>
+							<input id='addWechat' class='form-control' name='wechat' onfocus="this.select()" disabled placeholder='微信'>
 						</div>
 					</div>
 					<div class="form-group hidden" id='divAddUsername'>
 						<label class='col-lg-2 control-label' for='addUsername'>用户名：</label>
 						<div class='col-lg-10'>
-							<input id='addUsername' class='form-control' name='nickname' onfocus="this.select()" placeholder='学习站用户名'>
+							<input id='addUsername' class='form-control' name='nickname' onfocus="this.select()" disabled placeholder='学习站用户名'>
 						</div>
 					</div>
 				</form>
@@ -184,32 +185,37 @@ function delSure(){
 
 function newAttrAdd(e, tagId){
 	// 新增用户名|微信
-	document.getElementById('divAddUsername').setAttribute('class', 'form-group');
-	document.getElementById('addNickname').setAttribute('readonly', true);
+	//document.getElementById('addNickname').setAttribute('readonly', true);
 	document.getElementById('addNickname').setAttribute('value', e.parentElement.parentElement.getElementsByClassName('username')[0].innerText);
-	document.getElementById('addUsername').setAttribute('disabled', true);
+	//document.getElementById('addUsername').setAttribute('disabled', true);
 	document.getElementById('addUsername').setAttribute('value', e.parentElement.parentElement.getElementsByClassName('nickname')[0].innerText);
-	document.getElementById('addWechat').setAttribute('disabled', true);
+	//document.getElementById('addWechat').setAttribute('disabled', true);
 	document.getElementById('addWechat').setAttribute('value', e.parentElement.parentElement.getElementsByClassName('wechat')[0].innerText);
 	
+	document.getElementById('divAddUsername').setAttribute('class', 'form-group');
 	document.getElementById(tagId).removeAttribute('disabled');
 	document.getElementById(tagId).removeAttribute('value');
 	document.getElementById(tagId).setAttribute('required', true);
+	document.getElementById('update').setAttribute('value', e.parentElement.parentElement.id);
+	document.getElementById('update').removeAttribute('disabled');
 	$('#userAddModal').modal('show');
 };
 
 $('#userAddModal').on('hidden.bs.modal', function (e) {
+	// 重置模态框数据及格式
 	document.getElementById('formUserAdd').reset();
-	//document.getElementById('addUsername').removeAttribute('value');
-	//document.getElementById('addNickname').removeAttribute('value');
-	document.getElementById('addNickname').removeAttribute('readonly');
-	//document.getElementById('addWechat').removeAttribute('value');
-	document.getElementById('addWechat').removeAttribute('disabled');
+	document.getElementById('addNickname').setAttribute('readonly', true);
+	document.getElementById('addUsername').setAttribute('disabled', true);
+	document.getElementById('addWechat').setAttribute('disabled', true);
+	document.getElementById('update').setAttribute('disabled', true);
 	document.getElementById('divAddUsername').setAttribute('class', 'form-group hidden');
+	//document.getElementById('addNickname').removeAttribute('readonly');
+	//document.getElementById('addWechat').removeAttribute('disabled');
+	
 });
 
 function userAddSure(){
-	// 添加用户/用户名
+	// 添加确认
 	<!-- if(document.getElementById('divAddUsername').getAttribute('class')=='form-group'){ -->
 		<!-- document.getElementById("formUserAdd").onsubmit = ''; -->
 	<!-- }else{ -->
@@ -219,7 +225,7 @@ function userAddSure(){
 			formData = new FormData(f),
 			xhr = new XMLHttpRequest();
 		if(document.getElementById('divAddUsername').getAttribute('class')=='form-group'){
-			para = document.getElementById('userList');
+			para = document.getElementById(document.getElementById('update').value);
 		}else{
 			para = document.getElementById('userList').insertRow(0);
 		};
@@ -230,6 +236,8 @@ function userAddSure(){
 				var rowNew = xhr.responseText;
 				if(rowNew){
 					para.innerHTML = rowNew;
+					console.log('user' + para.getElementsByTagName('input')[0].value);
+					para.setAttribute('id', 'user' + para.getElementsByTagName('input')[0].value)
 				}else{
 					alert('本站名重复');
 				};
@@ -241,9 +249,11 @@ function userAddSure(){
 
 function userAdd(){
 	// 添加成员 清除 modal 数据
-	//document.getElementById('formUserAdd').reset();
+	// document.getElementById('formUserAdd').reset();
 	document.getElementById('addNickname').removeAttribute('value');
 	document.getElementById('addWechat').removeAttribute('value');
+	document.getElementById('addWechat').removeAttribute('disabled');
+	document.getElementById('addNickname').removeAttribute('readonly');
 };
 
 function inputThis(e){
