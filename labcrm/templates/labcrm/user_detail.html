@@ -2,7 +2,7 @@
 {% block title %}详细信息{% endblock %}
 {% block row-left %}
 <div id="accordion" role="tablist" aria-multiselectable="true">
-	<div class="panel panel-default">
+	<!--div class="panel panel-default">
 		<div class="panel-heading" role="tab" id="headingOne">
 			<h4 class="panel-title text-center">
 				<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">用户列表</a>
@@ -16,7 +16,7 @@
 				<li>aaaa</li>
 			</ul>
 		</div>
-	</div>
+	</div-->
 	<div class="panel panel-default">
 		<div class="panel-heading" role="tab" id="headingTwo">
 			<h4 class="panel-title text-center">
@@ -25,20 +25,21 @@
 		</div>
 		<div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
 			<ul>
-				<li>aaaa</li>
-				<li>aaaa</li>
-				<li>aaaa</li>
-				<li>aaaa</li>
+			{% for paper in labUser.papers.all %}
+				<li><a target='_blank' class='' href='{% url "crm:paper" %}/{{ paper.key }}{{ paper.user.id }}'>{{ paper }}</a></li>
+			{% endfor %}
 			</ul>
 		</div>
 	</div>
 </div>
-<div class="btn-group btn-block btn-group-xs btn-group-vertical" role="group">
-	<button class='btn btn-info'><h3>生成问卷</h3></button><hr />
-	<button class='btn btn-info' id='btnModify' onclick='infoModify(this)'><h3>修改资料</h3></button><hr />
-	<button class='btn btn-info' data-toggle="modal" data-target="#dialogModal"><h3>添加记录</h3></button><hr />
-	<button class='btn btn-danger hidden' id='tagCancel' onclick='modifyConcel()'><h3>取消修改</h3></button>
+<div class='btns'>
+	<button class='btn btn-block btn-lg btn-info'>生成问卷</button>
+	<button class='btn btn-block btn-lg btn-info' id='btnModify' onclick='infoModify(this)'>修改资料</button>
+	<button class='btn btn-block btn-lg btn-info' data-toggle="modal" data-target="#dialogModal">添加记录</button>
+	<button class='btn btn-block btn-lg btn-danger hidden' id='tagCancel' onclick='modifyConcel()'>取消修改</button>
 </div>
+<hr />
+<a class='btn btn-block btn-lg btn-success' href='{% url "crm:schedule" %}'>学习进度</a>
 {% endblock %}
 {% block row-right %}
 {% include 'labcrm/ajax_user_detail.html' %}

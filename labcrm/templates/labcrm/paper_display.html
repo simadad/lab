@@ -166,9 +166,9 @@ function addNew(){
 
 function addNewSrue(e){
 	// 添加新成员确认
+	var btnCreate = document.getElementById('btnCreate');
 	if(e.value.length > 0){					// 后台判断是否为空 TODO
-		var xhr = new XMLHttpRequest(),
-			btnCreate = document.getElementById('btnCreate');
+		var xhr = new XMLHttpRequest();
 		xhr.open("GET", '{% url "crm:ajax:new" %}?nickname=' + e.value, true);
 		xhr.onreadystatechange=function(){
 			if(xhr.readyState == 4 && xhr.status == 200){
@@ -190,6 +190,7 @@ function addNewSrue(e){
 	}else{
 		var tr = e.parentElement.parentElement;
 		tr.parentElement.removeChild(tr);
+		btnCreate.removeAttribute('disabled');
 	};
 };
 

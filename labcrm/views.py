@@ -107,6 +107,7 @@ def _user_list_get(request):
         elif nickname:
             print('nickname:\t', nickname)
             LabUser.objects.filter(id=uid).update(nickname=nickname)
+            LabUser.objects.filter(id=uid).update(class_id=None)
         else:
             print('username:\t', username)
             uuid = get_object_or_404(LabUser, id=uid).user.id
@@ -559,6 +560,12 @@ def link_to_class(request):
             return redirect('crm:list')
     url = 'http://crossincode.com/crm/info/?sid=' + str(cid)
     return redirect(url)
+
+
+@log_this
+@login_required
+def learning_schedule(request):
+    return HttpResponse(request)
 
 
 @log_this
