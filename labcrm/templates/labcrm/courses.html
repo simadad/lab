@@ -96,10 +96,10 @@ function courseAddSure(){
 				para.setAttribute('class', 'warning');
 				para.innerHTML = xhr.responseText;
 				para.getElementsByClassName('newIndex')[0].innerText = parseInt(para.nextElementSibling.firstElementChild.innerText)+1;
-				$('#courseModal').modal('hide');
 			};
 		};
 		xhr.send(formData);
+		$('#courseModal').modal('hide');
 	};
 };
 </script>

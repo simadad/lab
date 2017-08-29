@@ -12,7 +12,7 @@ import pymysql
 import random
 import datetime
 # from mytool import log_this
-from testools.declog import log_this
+from testools.declog import log_this, log_stack
 # Create your views here.
 
 picType = {
@@ -56,6 +56,26 @@ def _save_uiq_uia(user, attr, answer):
     return uiq
 
 
+@log_stack(2)
+def get_class_id(nickname):
+    """
+    获取学习站用户ID
+    """
+    db = pymysql.connect(*crossin_db, charset="utf8")
+    cur = db.cursor()
+    cur.execute('''
+        SELECT id FROM auth_user user
+        WHERE user.username = '{username}'
+    '''.format(username=nickname))
+    cid = cur.fetchone()
+    print('class_uid:\t', cid)
+    if cid:
+        cid = cid[0]
+    else:
+        cid = False
+    return cid
+
+
 @log_this
 def _user_list_post(request):
     # username -> 本站用户名，    nickname -> 学习站用户名
@@ -64,11 +84,16 @@ def _user_list_post(request):
     username = request.POST.get('username')
     is_update = request.POST.get('update')
     user, is_new = User.objects.get_or_create(username=username)
-    print('nickname wechat username is_update is_new:\t', nickname, wechat, username, is_update, is_new)
+    print('nickname wechat username:\t', nickname, wechat, username)
+    print('update is_new:\t', is_update, is_new)
     if is_update:
         if nickname:
             print('@添加用户名')
-            LabUser.objects.filter(user=user).update(nickname=nickname)
+            cid = get_class_id(nickname)
+            if cid:
+                LabUser.objects.filter(user=user).update(nickname=nickname, class_id=cid)
+            else:
+                LabUser.objects.filter(user=user).update(nickname=nickname)
         elif wechat:
             print('@添加微信号')
             LabUser.objects.filter(user=user).update(wechat=wechat)
@@ -107,8 +132,11 @@ def _user_list_get(request):
             LabUser.objects.filter(id=uid).update(wechat=wechat)
         elif nickname:
             print('nickname:\t', nickname)
-            LabUser.objects.filter(id=uid).update(nickname=nickname)
-            LabUser.objects.filter(id=uid).update(class_id=None)
+            cid = get_class_id(nickname)
+            if cid:
+                LabUser.objects.filter(id=uid).update(nickname=nickname, class_id=cid)
+            else:
+                LabUser.objects.filter(id=uid).update(nickname=nickname, class_id=None)
         else:
             print('username:\t', username)
             uuid = get_object_or_404(LabUser, id=uid).user.id
@@ -543,22 +571,11 @@ def link_to_class(request):
     print('request\t', request)
     uid = request.GET.get('uid')
     user = get_object_or_404(LabUser, id=uid)
+    print('class_id:\t', user.class_id)
     if user.class_id:
         cid = user.class_id
     else:
-        db = pymysql.connect(*crossin_db, charset="utf8")
-        cur = db.cursor()
-        cur.execute('''
-            SELECT id FROM auth_user user
-            WHERE user.username = '{username}'
-        '''.format(username=user.nickname))
-        cid = cur.fetchone()
-        if cid:
-            cid = cid[0]
-            user.class_id = cid
-            user.save()
-        else:
-            return redirect('crm:list')
+        return redirect('crm:list')
     url = 'http://crossincode.com/crm/info/?sid=' + str(cid)
     return redirect(url)
 
