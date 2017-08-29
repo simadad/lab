@@ -24,6 +24,7 @@ markPaper = {
 }
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
 QuesTuple2 = namedtuple('QuesTuple', ['desc', 'aid', 'attr', 'value'])
+crossin_db = ('47.93.61.70', 'markdev', 'mark2017', 'codeclass')
 
 
 class ImgForm(forms.Form):
@@ -405,7 +406,7 @@ def ques_fill(request, data_key=None):
     quests = zip(ques_desc, attr_ids, attrs)
     quests = sorted(quests, key=lambda x: x[2].is_option, reverse=True)
     print('data:\t', paper.data)
-    
+
     def questions():
         for ques in quests:
             print('ques:\t', ques)
@@ -545,7 +546,7 @@ def link_to_class(request):
     if user.class_id:
         cid = user.class_id
     else:
-        db = pymysql.connect('47.93.61.70', 'markdev', 'mark2017', 'codeclass', charset="utf8")
+        db = pymysql.connect(*crossin_db, charset="utf8")
         cur = db.cursor()
         cur.execute('''
             SELECT id FROM auth_user user
@@ -562,10 +563,120 @@ def link_to_class(request):
     return redirect(url)
 
 
+def get_inner_course(data):
+    """
+    内部课程生成器
+    """
+    for chapter_title, lesson_title, chapter_seq, lesson_seq, learn_time in data:
+        # print(chapter_title, lesson_title, chapter_seq, lesson_seq, learn_time)
+        title = '{chapter_seq:0>3} - {lesson_seq:0>3}: {chapter_title} - {lesson_title}'.format(
+            chapter_seq=chapter_seq,
+            chapter_title=chapter_title,
+            lesson_seq=lesson_seq,
+            lesson_title=lesson_title
+        )
+        print(title)
+        # yield True, title, learn_time
+        yield title, learn_time
+
+
+def get_whole_course(inner_course, outer_course):
+    """
+    全部课程生成器
+    """
+    # title_early = ''
+    # learn_time_early = datetime.datetime(2000, 1, 1)
+    title_early, learn_time_early = next(inner_course)
+    for course in outer_course:
+        # _title = course.title
+        # _learn_time = course.learn_time
+        _title, _learn_time = course
+        print(title_early, learn_time_early, _title, _learn_time, '000')
+        while learn_time_early < _learn_time:
+            print(title_early, learn_time_early, _title, _learn_time, 111)
+            yield title_early, learn_time_early
+            try:
+                title_early, learn_time_early = next(inner_course)
+            except StopIteration:
+                title_early, learn_time_early = _title, _learn_time
+        else:
+            pass
+            # print(_learn_time, 222)
+            # yield _title, _learn_time
+            # title_early, learn_time_early = _title, _learn_time
+    else:
+        while True:
+            try:
+                print(title_early, learn_time_early, 333)
+                yield title_early, learn_time_early
+                title_early, learn_time_early = next(inner_course)
+            except StopIteration:
+                break
+
+
+@log_this
+def _save_schedule(lab_user, info):
+    for title, learn_time in info:
+        LearnedCourse.objects.get_or_create(
+            user=lab_user,
+            title=title,
+            defaults={'learn_time': learn_time}
+        )
+
+
+@log_this
+def _learning_schedule_post(request, lab_user):
+    title = request.POST.get('courseTitle')
+    learn_time = request.POST.get('courseTime')
+    print('title-time:\t', title, learn_time)
+    course, _ = LearnedCourse.objects.update_or_create(
+        user=lab_user,
+        title=title,
+        is_inner=False,
+        defaults={'learn_time': datetime.datetime.strptime(learn_time, '%Y-%m-%d')}
+    )
+    print(course.learn_time)
+    return HttpResponse(render(request, 'labcrm/ajax/course_list.html', {
+        'add_new': True,
+        'course': course
+    }))
+
+
+@log_this
+def _learning_schedule_get(request, lab_user):
+    if lab_user.class_id:
+        # TODO 检测是否更新进度
+        db = pymysql.connect(*crossin_db, charset="utf8")
+        cur = db.cursor()
+        cur.execute('''
+            SELECT chapter.title, lesson.title, chapter.seq, lesson.seq, learn_time
+            FROM school_learnedlesson learn
+            JOIN school_lesson lesson ON learn.lesson_id = lesson.id
+            JOIN school_chapter chapter ON lesson.chapter_id = chapter.id
+            WHERE user_id = 6367
+        ''')
+        inner_course = get_inner_course(cur.fetchall())
+        # outer_course = lab_user.courses
+        # courses = get_whole_course(inner_course, outer_course)
+        _save_schedule(lab_user, inner_course)
+        courses = LearnedCourse.objects.filter(user=lab_user).order_by('-learn_time')
+        return render(request, 'labcrm/courses.html', {
+            'lab_user': lab_user,
+            'courses': courses
+        })
+    else:
+        return HttpResponse()
+
+
 @log_this
 @login_required
 def learning_schedule(request):
-    return HttpResponse(request)
+    uid = request.GET.get('uid')
+    lab_user = get_object_or_404(LabUser, id=uid)
+    if request.method == 'GET':
+        return _learning_schedule_get(request, lab_user)
+    else:
+        return _learning_schedule_post(request, lab_user)
 
 
 @log_this

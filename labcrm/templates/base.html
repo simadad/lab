@@ -6,6 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap.min.css' %}" />
 	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap-theme.min.css' %}" />
+	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap-datetimepicker.min.css' %}" />
 	{% block link %}<link />{% endblock %}
     <title>{% block title %}标题{% endblock %}</title>
 </head>
@@ -51,9 +52,12 @@
 </footer>
 {% block modal %}{% endblock %}
 <!--script src="http://code.jquery.com/jquery.js"></script-->
-<script src="{% static 'bootstrap3\js\jquery.min.js' %}"></script>
+<script src="{% static 'bootstrap3\js\jquery.min.js' %}" charset="UTF-8"></script>
 <script src="{% static 'bootstrap3\js\bootstrap.min.js' %}"></script>
 <script src="{% static 'bootstrap3\js\npm.js' %}"></script>
+<script src="{% static 'bootstrap3\js\moment.min.js' %}"></script>
+<script src="{% static 'bootstrap3\js\bootstrap-datetimepicker.min.js' %}" charset="UTF-8"></script>
+<script src="{% static 'bootstrap3\js\bootstrap-datetimepicker.zh-CN.js' %}" charset="UTF-8"></script>
 <script>
 function navbarLogin(){
 	var para = document.getElementById('fromNavbar');

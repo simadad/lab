@@ -39,7 +39,7 @@
 	<button class='btn btn-block btn-lg btn-danger hidden' id='tagCancel' onclick='modifyConcel()'>取消修改</button>
 </div>
 <hr />
-<a class='btn btn-block btn-lg btn-success' href='{% url "crm:schedule" %}'>学习进度</a>
+<a target='_blank' class='btn btn-block btn-lg btn-success' href='{% url "crm:schedule" %}?uid={{ labUser.id }}'>学习进度</a>
 {% endblock %}
 {% block row-right %}
 {% include 'labcrm/ajax_user_detail.html' %}

@@ -101,6 +101,16 @@ class UserPic(models.Model):
         return self.pic.name
 
 
+class LearnedCourse(models.Model):
+    user = models.ForeignKey(LabUser, verbose_name='用户', on_delete=models.CASCADE, related_name='courses')
+    title = models.CharField(max_length=255, verbose_name='课程题目')
+    learn_time = models.DateTimeField(verbose_name='学习时间')
+    is_inner = models.BooleanField(verbose_name='内部课程', default=True)
+
+    def __str__(self):
+        return self.title
+
+
 # GENDER_CHOICES = (
 #     ('S', '保密'),
 #     ('M', '男'),
