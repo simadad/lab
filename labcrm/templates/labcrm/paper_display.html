@@ -54,13 +54,7 @@
 			<p class='navbar-text navbar-left'><b>管理员菜单</b></p>
 			<p class='navbar-text navbar-left'><label>欢迎您：{{ user }}</label></p>
 			<p class='navbar-text navbar-center'><a class='navbar-link' href='{% url "homepage" %}'>crossin编程实战训练营</a></p>
-			<ul class="nav navbar-nav">
-				<li class='{% block userList %}{% endblock %}'><a href='{% url "crm:list" %}'>用户列表</a></li>
-				<li class='visible-lg-inline visible-sm-inline visible-md-inline'><a>|</a></li>
-				<li class='{% block quesConf %}{% endblock %}'><a href='{% url "crm:conf" %}'>问卷设计</a></li>
-				<li class='visible-lg-inline visible-sm-inline visible-md-inline'><a>|</a></li>
-				<li class='{% block webotConf %}{% endblock %}'><a href='{% url "webot:rule" %}'>微信配置</a></li>
-			</ul>
+			{% include 'labcrm/tools/nav_bar.html' %}
 			<form class='navbar-form navbar-right'>
 			{% if paper.user %}
 				<a tabindex="0" class="btn close pull-left" aria-label="Close" role="button" data-toggle="popover" data-placement="top" data-trigger="focus"  data-content="无法重命名非模板问卷" disabled>

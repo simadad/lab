@@ -1,18 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-	{% load static %}
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap.min.css' %}" />
-	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap-theme.min.css' %}" />
-    <title>问卷</title>
-</head>
-<body>
-<header>
-	<h1 class='text-center'><a href=''>crossin编程实战训练营</a></h1>
-</header>
-<content class='row'>
+{% extends 'base.html' %}
+{% block title %}问卷{% endblock %}
+{% block header %}
+<h1 class='col-md-12 text-center'><a href='{% url "homepage" %}'>crossin编程实战训练营</a></h1>
+{% endblock %}
+{% block head_hr %}{% endblock %}
+{% block content %}
 <div class='col-md-12'>
 	<form action='{% url "crm:paper" %}' method='POST' id='formResult'>
 	{% csrf_token %}
@@ -62,7 +54,8 @@
 	{% include 'labcrm/ques_data.html' %}
 	{% endblock %}
 {% endif %}
-</content>
+{% endblock %}
+{% block modal %}
 <div class="modal fade" id='paperModal' tabindex="-1" role="dialog">
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
@@ -79,12 +72,8 @@
 		</div>
 	</div>
 </div>
-<footer>
-	<p class='text-center'><b><a>***感谢访问***</a></b></p>
-</footer>
-<script src="{% static 'bootstrap3\js\jquery.min.js' %}"></script>
-<script src="{% static 'bootstrap3\js\bootstrap.min.js' %}"></script>
-<script src="{% static 'bootstrap3\js\npm.js' %}"></script>
+{% endblock %}
+{% block script %}
 <script>
 var userAgent = navigator.userAgent; 
 var isOpera = userAgent.indexOf("Opera") > -1;
@@ -168,6 +157,6 @@ $('#paperModal').on('hidden.bs.modal', function () {
 	document.getElementById('formResult').action='{% url "crm:paper" %}';
 });
 </script>
-
+{% endblock %}
 </body>
 </html>
