@@ -36,6 +36,10 @@
 		<a href='#zz' class='wechat' style='color:red' onclick='inputThis(this)'>添加微信号</a>
 	</td>
 	{% endif %}
+	<td class='unhid hidSwith'>{{ lab_user.ta }}</td>
+	<td class='info hidden hidSwith'>
+		<a href='#zz' class='ta' style='color:red' onclick='inputThis(this)'>{{ lab_user.ta }}</a>
+	</td>
 	{% if lab_user.papers.last %}
 	<td>
 		<a href='{% url "crm:paper" %}?data_key={{ lab_user.papers.last.key }}{{ lab_user.id }}'>{{ lab_user.papers.last }}</a>

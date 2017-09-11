@@ -11,6 +11,7 @@ class LabUser(models.Model):
     wechat = models.CharField(max_length=30, verbose_name='微信号', blank=True, null=True)
     is_del = models.BooleanField(verbose_name='是否删除', default=False)
     class_id = models.IntegerField(verbose_name='教室ID', blank=True, null=True)
+    ta = models.CharField(max_length=30, verbose_name='助教', default='暂无')
 
     def __str__(self):
         return self.user.username

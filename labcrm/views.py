@@ -127,6 +127,7 @@ def _user_list_get(request):
         wechat = request.GET.get('wechat')
         username = request.GET.get('username')
         nickname = request.GET.get('nickname')
+        ta = request.GET.get('ta')      # teaching assistant
         if wechat:
             print('wechat:\t', wechat)
             LabUser.objects.filter(id=uid).update(wechat=wechat)
@@ -137,6 +138,9 @@ def _user_list_get(request):
                 LabUser.objects.filter(id=uid).update(nickname=nickname, class_id=cid)
             else:
                 LabUser.objects.filter(id=uid).update(nickname=nickname, class_id=None)
+        elif ta:
+            print('ta:\t', ta)
+            LabUser.objects.filter(id=uid).update(ta=ta)
         else:
             print('username:\t', username)
             uuid = get_object_or_404(LabUser, id=uid).user.id
