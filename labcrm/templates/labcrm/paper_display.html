@@ -99,7 +99,7 @@
 						<button class='pull-right btn btn-primary' form='' onclick='addNew()'>新成员</button>
 					</caption>
 					<thead class='thead-inverse'>
-						<tr>
+						<tr id='tr_papers'>
 							<th>昵称</th><!-- 昵称为本站 user.username -->
 							<th>微信</th>
 							<th>助教</th>
@@ -140,26 +140,19 @@ $(function () {
 function addNew(){
 	// 添加新成员
 	var newRow = document.getElementById('userList').insertRow(0),
-		btnCreate = document.getElementById('btnCreate');
-	newRow.innerHTML = '\
-	<td>\
-		<input class="form-control" name="nickname" placeholder="昵称" onblur="addNewSrue(this)">\
-	</td>\
-	<td>\
-		<input class="form-control" placeholder="用户名" disabled>\
-	</td>\
-	<td>\
-		<input class="form-control" placeholder="微信" disabled>\
-	</td>\
-	<td>\
-		<input class="form-control" placeholder="问卷" disabled>\
-	</td>\
-	<td>\
-		<input class="form-control" placeholder="入学日期" disabled>\
-	</td>\
-	<td>\
-		<input type="checkbox" name="userId" checked disabled>\
-	</td>'
+		tr_papers = document.getElementById('tr_papers'),
+		btnCreate = document.getElementById('btnCreate'),
+		th_papers = document.getElementsByTagName('th');
+	// console.log(th_papers, th_papers.length);
+	for(var i=0;i<th_papers.length-1;i++){
+		var cell = newRow.insertCell();
+		cell.innerHTML = '<td><input class="form-control" disabled placeholder="' + th_papers[i].innerText + '"></td>';
+		// console.log(cell);
+	};
+	newRow.insertCell().innerHTML = '<td><input type="checkbox" name="userId" checked disabled></td>';
+	newRow.firstElementChild.firstElementChild.setAttribute('name', 'nickname');
+	newRow.firstElementChild.firstElementChild.setAttribute('onblur', 'addNewSrue(this)');
+	newRow.firstElementChild.firstElementChild.removeAttribute('disabled');
 	newRow.setAttribute('class', 'success');
 	newRow.children[0].children[0].focus();
 	btnCreate.setAttribute('disabled', true);
@@ -176,7 +169,13 @@ function addNewSrue(e){
 				if(xhr.responseText.length > 0){
 					var uid = xhr.responseText,
 						td = e.parentElement,
-						checkbox = td.parentElement.children[td.parentElement.childElementCount - 1].children[0];
+						checkbox = td.parentElement.children[td.parentElement.childElementCount - 1].children[0],
+						tds = td.parentElement.getElementsByTagName('td');
+					console.log(tds.length);
+					for(var i=1;i<tds.length-1;i++){
+						console.log(11111, tds[i].firstElementChild.getAttribute('placeholder'));
+						tds[i].innerText = tds[i].firstElementChild.getAttribute('placeholder');
+					};
 					td.innerHTML = '<a href=\'{% url "crm:detail" %}?uid=' + uid + "'>" + e.value + '</a>';
 					checkbox.value = uid;
 					checkbox.removeAttribute('disabled');
