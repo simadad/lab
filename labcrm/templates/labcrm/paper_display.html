@@ -1,18 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-	{% load static %}
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap.min.css' %}" />
-	<link rel='stylesheet' type='text/css' href="{% static 'bootstrap3\css\bootstrap-theme.min.css' %}" />
-    <title>问卷预览</title>
-</head>
-<body class='container-fluid'>
-<header>
+{% extends 'base.html' %}
+{% block title %}问卷预览{% endblock %}
+{% block header %}
 	<h1 class='text-center'><a href=''>crossin编程实战训练营</a></h1>
-</header>
-<content class='row'>
+{% endblock %}
+{% block head_hr %}{% endblock %}
+{% block content %}
 <div class='col-md-12'>
 	<form>
 		<h3 class='text text-center'>{{ title }}</h3>
@@ -46,7 +38,13 @@
 		{% endfor %}
 	</form>
 </div>
-</content>
+{% endblock %}
+{% block footer %}
+<p class='text-center'><b><a>***感谢访问***</a></b></p>
+<hr />
+<hr />
+{% endblock %}
+{% block modal %}
 {% if user.is_staff and not modal_display %}
 <div class='row'>
 	<nav class="col-md-12 navbar navbar-default navbar-fixed-bottom">
@@ -118,14 +116,8 @@
 </div>
 {% endif %}
 {% endif %}
-<footer>
-	<p class='text-center'><b><a>***感谢访问***</a></b></p>
-	<hr />
-	<hr />
-</footer>
-<script src="{% static 'bootstrap3\js\jquery.min.js' %}"></script>
-<script src="{% static 'bootstrap3\js\bootstrap.min.js' %}"></script>
-<script src="{% static 'bootstrap3\js\npm.js' %}"></script>
+{% endblock %}
+{% block script %}
 <script>
 $(function () {
   $('[data-toggle="popover"]').popover()
@@ -215,5 +207,6 @@ function reNameSure(){
 	xhr.send();
 };
 </script>
+{% endblock %}
 </body>
 </html>

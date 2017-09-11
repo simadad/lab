@@ -3,7 +3,9 @@
 {% block h1 %}{% endblock %}
 <nav class="col-md-12 navbar navbar-default{% block topfix %} navbar-fixed-top{% endblock %}">
 	<div class='container-fluid'>
+		{% block homepage %}
 		<p class='navbar-text navbar-center'><a class='navbar-link' href='{% url "homepage" %}'>crossin编程实战训练营</a></p>
+		{% endblock %}
 		{% include 'labcrm/tools/nav_bar.html' %}
 		<form class="navbar-form navbar-right" action='{% url "accounts:login" %}' id='fromNavbar' method='POST'>
 		{% csrf_token %}
