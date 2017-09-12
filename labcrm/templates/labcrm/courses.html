@@ -80,6 +80,11 @@ $('.form_datetime').datetimepicker({
 	showMeridian: 1
 });
 
+$('#courseModal').on('hidden.bs.modal', function (e) {
+	// 重置模态框数据及格式
+	document.getElementById('formCourse').reset();
+});
+
 function courseAddSure(){
 	// 添加课程确认
 	console.log('添加课程确认');

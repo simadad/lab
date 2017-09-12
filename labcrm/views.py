@@ -584,7 +584,7 @@ def link_to_class(request):
     return redirect(url)
 
 
-def get_inner_course(data):
+def get_course_format(data):
     """
     内部课程生成器
     """
@@ -674,19 +674,17 @@ def _learning_schedule_get(request, lab_user):
             FROM school_learnedlesson learn
             JOIN school_lesson lesson ON learn.lesson_id = lesson.id
             JOIN school_chapter chapter ON lesson.chapter_id = chapter.id
-            WHERE user_id = 6367
-        ''')
-        inner_course = get_inner_course(cur.fetchall())
+            WHERE user_id = {uid}
+        '''.format(uid=lab_user.class_id))
+        course_list = get_course_format(cur.fetchall())
         # outer_course = lab_user.courses
         # courses = get_whole_course(inner_course, outer_course)
-        _save_schedule(lab_user, inner_course)
-        courses = LearnedCourse.objects.filter(user=lab_user).order_by('-learn_time')
-        return render(request, 'labcrm/courses.html', {
-            'lab_user': lab_user,
-            'courses': courses
-        })
-    else:
-        return HttpResponse()
+        _save_schedule(lab_user, course_list)
+    courses = LearnedCourse.objects.filter(user=lab_user).order_by('-learn_time')
+    return render(request, 'labcrm/courses.html', {
+        'lab_user': lab_user,
+        'courses': courses
+    })
 
 
 @log_this
