@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 
 
 class LabUser(models.Model):
+    """
+    用户
+    """
     # user.username 本站“昵称”
     user = models.OneToOneField(User, verbose_name='用户', on_delete=models.CASCADE, related_name='labuser')
     # nickname 为学习站 user.username 本站“用户名”
@@ -18,6 +21,9 @@ class LabUser(models.Model):
 
 
 class Paper(models.Model):
+    """
+    问卷
+    """
     user = models.ForeignKey(LabUser, verbose_name='用户', related_name='papers', null=True, blank=True)
     create_time = models.DateTimeField(verbose_name='建表时间', auto_now_add=True)
     finished_time = models.DateTimeField(verbose_name='填写时间', null=True, blank=True)
@@ -36,6 +42,9 @@ class Paper(models.Model):
 
 
 class UserAttr(models.Model):
+    """
+    用户属性
+    """
     attr = models.CharField(verbose_name='属性', max_length=255)
     is_option = models.BooleanField(verbose_name='是否提供选项', default=False)
     is_del = models.BooleanField(verbose_name='是否删除', default=False)
@@ -45,6 +54,9 @@ class UserAttr(models.Model):
 
 
 class AttrOption(models.Model):
+    """
+    属性预选项
+    """
     option = models.CharField(verbose_name='选项', max_length=255)
     attr = models.ForeignKey(UserAttr, verbose_name='属性', related_name='options')
 
@@ -53,6 +65,9 @@ class AttrOption(models.Model):
 
 
 class UserInfoQ(models.Model):
+    """
+    用户属性提问
+    """
     user = models.ForeignKey(LabUser, verbose_name='用户', related_name='questions')
     paper = models.ForeignKey(Paper, verbose_name='问卷', related_name='questions', blank=True, null=True)
     attr = models.ForeignKey(UserAttr, verbose_name='属性', related_name='questions')
@@ -63,6 +78,9 @@ class UserInfoQ(models.Model):
 
 
 class UserInfoA(models.Model):
+    """
+    用户属性回答
+    """
     user = models.ForeignKey(LabUser, verbose_name='用户', on_delete=models.CASCADE, related_name='answers')
     question = models.ForeignKey(UserInfoQ, verbose_name='问题', on_delete=models.CASCADE, related_name='answers')
     answer = models.CharField(verbose_name='回答', max_length=255)
@@ -74,6 +92,9 @@ class UserInfoA(models.Model):
 
 
 class Dialog(models.Model):
+    """
+    对话记录
+    """
     dialog = models.TextField(verbose_name='对话记录')
     user = models.ForeignKey(LabUser, verbose_name='用户', related_name='dialogs')
     recorder = models.ForeignKey(User, verbose_name='记录员')
@@ -85,6 +106,9 @@ class Dialog(models.Model):
 
 
 class PicData(models.Model):
+    """
+    图片数据
+    """
     pic = models.ImageField(verbose_name='地址', upload_to='img/gallery', unique=True)
     create_time = models.DateTimeField(verbose_name='上传时间', auto_now_add=True)
     name = models.CharField(verbose_name='图片名', max_length=50)
@@ -94,6 +118,9 @@ class PicData(models.Model):
 
 
 class UserPic(models.Model):
+    """
+    用户图片
+    """
     pic = models.ForeignKey(PicData, verbose_name='图片', on_delete=models.CASCADE, related_name='upic')
     user = models.ForeignKey(LabUser, verbose_name='用户', on_delete=models.CASCADE, related_name='upic')
     pic_type = models.CharField(verbose_name='图片类型', max_length=30, default='NoType')
@@ -103,6 +130,9 @@ class UserPic(models.Model):
 
 
 class LearnedCourse(models.Model):
+    """
+    已学课程
+    """
     user = models.ForeignKey(LabUser, verbose_name='用户', on_delete=models.CASCADE, related_name='courses')
     title = models.CharField(max_length=255, verbose_name='课程题目')
     learn_time = models.DateTimeField(verbose_name='学习时间')

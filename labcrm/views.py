@@ -702,6 +702,13 @@ def learning_schedule(request):
 
 @log_this
 @login_required
+def subject_done(request):
+
+    return HttpResponse(request)
+
+
+@log_this
+@login_required
 def ajax_new_user(request):
     print('request\t', request)
     lab_user = request.GET.get('nickname').strip()

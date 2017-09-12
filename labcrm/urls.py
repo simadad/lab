@@ -24,4 +24,5 @@ urlpatterns = [
     url(r'^fill', views.ques_fill, name='fill2'),
     url(r'^class', views.link_to_class, name='class'),
     url(r'^schedule', views.learning_schedule, name='schedule'),
+    url(r'done', views.subject_done, name='done'),
 ]
