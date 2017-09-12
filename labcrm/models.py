@@ -137,6 +137,7 @@ class LearnedCourse(models.Model):
     title = models.CharField(max_length=255, verbose_name='课程题目')
     learn_time = models.DateTimeField(verbose_name='学习时间')
     is_inner = models.BooleanField(verbose_name='内部课程', default=True)
+    course_id = models.IntegerField(verbose_name='科目ID', default=0)
 
     def __str__(self):
         return self.title
