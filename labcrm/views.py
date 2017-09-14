@@ -616,7 +616,7 @@ def get_course_format(lab_user, data):
     内部课程生成器
     """
     for chapter_title, lesson_title, chapter_seq, lesson_seq, course_id, learn_time in data:
-        _set_course_statistic(lab_user, chapter_title, course_id)
+        _set_course_statistic(lab_user, lesson_title, course_id)
         title = '{chapter_seq:0>3} - {lesson_seq:0>3}: {chapter_title} - {lesson_title}'.format(
             chapter_seq=chapter_seq,
             chapter_title=chapter_title,

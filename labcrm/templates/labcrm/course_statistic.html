@@ -28,8 +28,16 @@
 			<td>{{ cd.amounts }}</td>
 			<td>{{ cd.max }}</td>
 			<td>{{ cd.latest|date:"Y-m-d" }}</td>
-			<td>{{ cd.mid }}</td>
-			<td>{{ cd.end }}</td>
+			{% if cd.mid %}
+				<td><strong class='text-danger'>{{ cd.mid }}</strong></td>
+			{% else %}
+				<td>{{ cd.mid }}</td>
+			{% endif %}
+			{% if cd.end %}
+				<td><strong class='text-danger'>{{ cd.end }}</strong></td>
+			{% else %}
+				<td>{{ cd.end }}</td>
+			{% endif %}
 		</tr>
 	{% endfor %}
 	</tbody>
