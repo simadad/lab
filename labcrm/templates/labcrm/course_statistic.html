@@ -24,7 +24,7 @@
 	<tbody id='courseList'>
 	{% for cd in course_data %}
 		<tr class='{% if cd.mid and cd.end %}success{% endif %}'>
-			<td><a href='{% url "crm:schedule" %}?uid={{ cd.lab_user.id }}'>{{ cd.user }}</a></td>
+			<td><a href='{% url "crm:schedule" %}?uid={{ cd.user.id }}'>{{ cd.user }}</a></td>
 			<td>{{ cd.amounts }}</td>
 			<td>{{ cd.max }}</td>
 			<td>{{ cd.latest|date:"Y-m-d" }}</td>
