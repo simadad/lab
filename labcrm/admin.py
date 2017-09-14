@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import LabUser, Paper, UserInfoQ, UserInfoA, UserAttr, AttrOption, Dialog
+from .models import *
 # Register your models here.
 
 
@@ -108,3 +108,4 @@ admin.site.register(UserInfoA, UserInfoAAdmin)
 admin.site.register(UserAttr, UserAttrAdmin)
 admin.site.register(AttrOption, AttrOptionAdmin)
 admin.site.register(Dialog, DialogAdmin)
+admin.site.register(LearnedCourse)

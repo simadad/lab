@@ -5,9 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django import forms
 from django.db.utils import IntegrityError
+from django.db.models import Max
 from collections import namedtuple
 from PIL import Image
 import base64
+import json
 import pymysql
 import random
 import datetime
@@ -22,8 +24,15 @@ markPaper = {
     'tofill': 'TF',
     'default': 'DF'
 }
+# 课程状态，`期中项目` 与 `期末项目` 和数据库字段 school_chapter.title 对应
+course_to_status = {
+    '期中项目': (1, (True, False)),
+    '期末项目': (2, (False, True)),
+    '期末+期中': (3, (True, True)),
+    '进行中': (0, (False, False)),
+}
 QuesTuple = namedtuple('QuesTuple', ['desc', 'aid', 'attr'])
-QuesTuple2 = namedtuple('QuesTuple', ['desc', 'aid', 'attr', 'value'])
+QuesTuple2 = namedtuple('QuesTuple2', ['desc', 'aid', 'attr', 'value'])
 crossin_db = ('47.93.61.70', 'markdev', 'mark2017', 'codeclass')
 
 
@@ -584,12 +593,30 @@ def link_to_class(request):
     return redirect(url)
 
 
-def get_course_format(data):
+def _set_course_statistic(lab_user, *data):
+    """
+    完课统计记录
+    """
+    chapter_title, course_id = data
+    course_id = str(course_id)
+    status = course_to_status.get(chapter_title)
+    if status:
+        status = status[0]
+        statistic = json.loads(lab_user.statistic)
+        if statistic.get(course_id):
+            statistic[course_id] += status
+        else:
+            statistic[course_id] = status
+        lab_user.statistic = json.dumps(statistic)
+        lab_user.save()
+
+
+def get_course_format(lab_user, data):
     """
     内部课程生成器
     """
-    for chapter_title, lesson_title, chapter_seq, lesson_seq, learn_time in data:
-        # print(chapter_title, lesson_title, chapter_seq, lesson_seq, learn_time)
+    for chapter_title, lesson_title, chapter_seq, lesson_seq, course_id, learn_time in data:
+        _set_course_statistic(lab_user, chapter_title, course_id)
         title = '{chapter_seq:0>3} - {lesson_seq:0>3}: {chapter_title} - {lesson_title}'.format(
             chapter_seq=chapter_seq,
             chapter_title=chapter_title,
@@ -598,50 +625,19 @@ def get_course_format(data):
         )
         print(title)
         # yield True, title, learn_time
-        yield title, learn_time
-
-
-def get_whole_course(inner_course, outer_course):
-    """
-    全部课程生成器
-    """
-    # title_early = ''
-    # learn_time_early = datetime.datetime(2000, 1, 1)
-    title_early, learn_time_early = next(inner_course)
-    for course in outer_course:
-        # _title = course.title
-        # _learn_time = course.learn_time
-        _title, _learn_time = course
-        print(title_early, learn_time_early, _title, _learn_time, '000')
-        while learn_time_early < _learn_time:
-            print(title_early, learn_time_early, _title, _learn_time, 111)
-            yield title_early, learn_time_early
-            try:
-                title_early, learn_time_early = next(inner_course)
-            except StopIteration:
-                title_early, learn_time_early = _title, _learn_time
-        else:
-            pass
-            # print(_learn_time, 222)
-            # yield _title, _learn_time
-            # title_early, learn_time_early = _title, _learn_time
-    else:
-        while True:
-            try:
-                print(title_early, learn_time_early, 333)
-                yield title_early, learn_time_early
-                title_early, learn_time_early = next(inner_course)
-            except StopIteration:
-                break
+        yield course_id, title, learn_time
 
 
 @log_this
 def _save_schedule(lab_user, info):
-    for title, learn_time in info:
+    for course_id, title, learn_time in info:
         LearnedCourse.objects.get_or_create(
             user=lab_user,
             title=title,
-            defaults={'learn_time': learn_time}
+            defaults={
+                'learn_time': learn_time,
+                'course_id': course_id
+            }
         )
 
 
@@ -666,17 +662,22 @@ def _learning_schedule_post(request, lab_user):
 @log_this
 def _learning_schedule_get(request, lab_user):
     if lab_user.class_id:
-        # TODO 检测是否更新进度
+        all_course = lab_user.courses.filter(course_id__gt=0)
+        if all_course:
+            last_time = all_course.latest('learn_time').learn_time
+        else:
+            last_time = 0
         db = pymysql.connect(*crossin_db, charset="utf8")
         cur = db.cursor()
         cur.execute('''
-            SELECT chapter.title, lesson.title, chapter.seq, lesson.seq, learn_time
+            SELECT chapter.title, lesson.title, chapter.seq, lesson.seq, chapter.course_id, learn_time
             FROM school_learnedlesson learn
             JOIN school_lesson lesson ON learn.lesson_id = lesson.id
             JOIN school_chapter chapter ON lesson.chapter_id = chapter.id
             WHERE user_id = {uid}
-        '''.format(uid=lab_user.class_id))
-        course_list = get_course_format(cur.fetchall())
+            AND learn_time > '{last_time}'
+        '''.format(uid=lab_user.class_id, last_time=last_time))
+        course_list = get_course_format(lab_user, cur.fetchall())
         # outer_course = lab_user.courses
         # courses = get_whole_course(inner_course, outer_course)
         _save_schedule(lab_user, course_list)
@@ -698,11 +699,54 @@ def learning_schedule(request):
         return _learning_schedule_post(request, lab_user)
 
 
+def course_data_generator(course_id):
+    """
+    完课统计展示数据生成器
+    :return:
+    """
+    courses = LearnedCourse.objects.filter(course_id=course_id)
+    status_to_course = {course_to_status[i][0]: course_to_status[i][1] for i in course_to_status}
+    course_tuple = namedtuple('CourseTuple', ['user', 'amounts', 'max', 'latest', 'mid', 'end'])
+    for uid, in set(courses.values_list('user')):
+        lab_user = get_object_or_404(LabUser, id=uid)
+        user_courses = courses.filter(user=lab_user.id)
+        amounts = user_courses.count()
+        course_max = user_courses.aggregate(Max('title'))['title__max']
+        latest = user_courses.latest('learn_time').learn_time
+        statistic = json.loads(lab_user.statistic)
+        status = statistic.get(str(course_id), 0)
+        mid_test, end_test = status_to_course[status]
+        yield course_tuple(lab_user, amounts, course_max, latest, mid_test, end_test)
+
+
+def course_index():
+    """
+    课程 序号-科目 生成器
+    """
+    course_list_tuple = namedtuple('CourseListTuple', ['index', 'course'])
+    for c in LearnedCourse.COURSE_CHOICES:
+        yield course_list_tuple(*c)
+
+
 @log_this
 @login_required
-def subject_done(request):
-
-    return HttpResponse(request)
+def subject_statistic(request):
+    """
+    完课统计展示
+    """
+    course_id = request.GET.get('course')
+    if course_id:
+        course_id = int(course_id)
+    else:
+        course_id = 1
+    course = dict(LearnedCourse.COURSE_CHOICES)[course_id]
+    course_data = sorted(course_data_generator(course_id), key=lambda x: (x.end, x.mid, x.max, x.amounts), reverse=True)
+    return render(request, 'labcrm/course_statistic.html', {
+        'course': course,
+        'course_id': course_id,
+        'course_list': course_index(),
+        'course_data': course_data
+    })
 
 
 @log_this

@@ -15,6 +15,9 @@ class LabUser(models.Model):
     is_del = models.BooleanField(verbose_name='是否删除', default=False)
     class_id = models.IntegerField(verbose_name='教室ID', blank=True, null=True)
     ta = models.CharField(max_length=30, verbose_name='助教', default='暂无')
+    # json 格式可扩充字段，{course_id: status, }
+    # status ={1: 期中, 2: 期末, 3: 期中+期末}
+    statistic = models.TextField(verbose_name='完课统计', default='{}')
 
     def __str__(self):
         return self.user.username
@@ -133,11 +136,17 @@ class LearnedCourse(models.Model):
     """
     已学课程
     """
+    # 利用选项设置 course_id 索引，查看课程方法 get_course_id_display()
+    COURSE_CHOICES = (
+        (0, '课外课程'),
+        (1, 'Python 零基础入门'),
+        (2, '爬虫实战'),
+    )
     user = models.ForeignKey(LabUser, verbose_name='用户', on_delete=models.CASCADE, related_name='courses')
     title = models.CharField(max_length=255, verbose_name='课程题目')
     learn_time = models.DateTimeField(verbose_name='学习时间')
     is_inner = models.BooleanField(verbose_name='内部课程', default=True)
-    course_id = models.IntegerField(verbose_name='科目ID', default=0)
+    course_id = models.IntegerField(verbose_name='科目ID', default=0, choices=COURSE_CHOICES)
 
     def __str__(self):
         return self.title
