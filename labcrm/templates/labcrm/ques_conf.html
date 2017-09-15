@@ -1,6 +1,8 @@
 {% extends 'base2.html' %}
 {% block title %}问卷配置{% endblock %}
-{% block quesConf %}active{% endblock %}
+{% block nav_bar %}
+	{% include 'labcrm/tools/nav_bar.html' with tag_conf="active" %}
+{% endblock %}
 {% block row-left %}
 	<input class='btn btn-success btn-block btn-lg hidden' id='btnCre' type='submit' form='quesCre' value='生成'><!--ques_data-->
 	<input class='btn btn-warning btn-block btn-lg hidden' id='btnPre' type='submit' form='formToFill' onclick='quesPre()' value='预览'><!--ques_to_fill-->

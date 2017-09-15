@@ -1,6 +1,8 @@
 {% extends 'base2.html' %}
 {% block title %}完课统计{% endblock %}
-{% block subjectDone %}active{% endblock %}
+{% block nav_bar %}
+	{% include 'labcrm/tools/nav_bar.html' with tag_statis="active" %}
+{% endblock %}
 {% block row-left %}
 <ul class="nav nav-pills nav-stacked nav-stacked text-center">
 {% for c in course_list %}

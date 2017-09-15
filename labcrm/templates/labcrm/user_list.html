@@ -1,6 +1,8 @@
 {% extends 'base2.html' %}
 {% block title %}用户列表{% endblock %}
-{% block userList %}active{% endblock %}
+{% block nav_bar %}
+	{% include 'labcrm/tools/nav_bar.html' with tag_list="active" %}
+{% endblock %}
 {% block row-left %}
 <button id='btnUserAdd' class='btn btn-info btn-block btn-lg' data-toggle="modal" data-target="#userAddModal" onclick='userAdd()'>添加成员</button>
 <button id='btnUserDel' class='btn btn-warning btn-block btn-lg' onclick='userDel()'>删除成员</button>

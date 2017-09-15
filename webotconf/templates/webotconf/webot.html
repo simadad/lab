@@ -1,6 +1,8 @@
 {% extends 'base2.html' %}
 {% block title %}微信配置{% endblock %}
-{% block webotConf %}active{% endblock %}
+{% block nav_bar %}
+	{% include 'labcrm/tools/nav_bar.html' with tag_webot="active" %}
+{% endblock %}
 {% block row-left %}
 <ul class="nav nav-pills nav-stacked nav-stacked text-center">
 <!--
