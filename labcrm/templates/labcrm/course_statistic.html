@@ -4,6 +4,8 @@
 	{% include 'labcrm/tools/nav_bar.html' with tag_statis="active" %}
 {% endblock %}
 {% block row-left %}
+<a class='btn btn-lg btn-block {% block schedule_class %}btn-info{% endblock %}' href='{% url "crm:schedule" %}'>总体进度</a>
+<hr />
 <ul class="nav nav-pills nav-stacked nav-stacked text-center">
 {% for c in course_list %}
 	<li role="presentation" class="nav {% if course_id == c.index %}active{% endif %}"><a href='{% url "crm:statistic" %}?course={{ c.index }}'>{{ c.course }}</a></li>
@@ -26,7 +28,7 @@
 	<tbody id='courseList'>
 	{% for cd in course_data %}
 		<tr class='{% if cd.mid and cd.end %}success{% endif %}'>
-			<td><a href='{% url "crm:schedule" %}?uid={{ cd.user.id }}'>{{ cd.user }}</a></td>
+			<td><a href='{% url "crm:courses" %}?uid={{ cd.user.id }}'>{{ cd.user }}</a></td>
 			<td>{{ cd.amounts }}</td>
 			<td>{{ cd.max }}</td>
 			<td>{{ cd.latest|date:"Y-m-d" }}</td>

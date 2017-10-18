@@ -203,6 +203,8 @@ def _user_detail_get(request, lab_user):
             'answers': user_answers,
             'dialogs': dialogs,
             'pics': pics,
+            'courses': LearningSchedule.COURSE_CHOICES,
+            'schedules': LearningSchedule.SCHEDULE_CHOICES
         })
     else:
         print('@取消修改')
@@ -642,7 +644,7 @@ def _save_schedule(lab_user, info):
 
 
 @log_this
-def _learning_schedule_post(request, lab_user):
+def _learning_courses_post(request, lab_user):
     title = request.POST.get('courseTitle')
     learn_time = request.POST.get('courseTime')
     print('title-time:\t', title, learn_time)
@@ -660,7 +662,7 @@ def _learning_schedule_post(request, lab_user):
 
 
 @log_this
-def _learning_schedule_get(request, lab_user):
+def _learning_courses_get(request, lab_user):
     if lab_user.class_id:
         all_course = lab_user.courses.filter(course_id__gt=0)
         if all_course:
@@ -690,19 +692,18 @@ def _learning_schedule_get(request, lab_user):
 
 @log_this
 @login_required
-def learning_schedule(request):
+def learning_courses(request):
     uid = request.GET.get('uid')
     lab_user = get_object_or_404(LabUser, id=uid)
     if request.method == 'GET':
-        return _learning_schedule_get(request, lab_user)
+        return _learning_courses_get(request, lab_user)
     else:
-        return _learning_schedule_post(request, lab_user)
+        return _learning_courses_post(request, lab_user)
 
 
 def course_data_generator(course_id):
     """
     完课统计展示数据生成器
-    :return:
     """
     courses = LearnedCourse.objects.filter(course_id=course_id)
     status_to_course = {course_to_status[i][0]: course_to_status[i][1] for i in course_to_status}
@@ -738,7 +739,7 @@ def subject_statistic(request):
     if course_id:
         course_id = int(course_id)
     else:
-        course_id = 1
+        course_id = 0
     course = dict(LearnedCourse.COURSE_CHOICES)[course_id]
     course_data = sorted(course_data_generator(course_id), key=lambda x: (x.end, x.mid, x.max, x.amounts), reverse=True)
     return render(request, 'labcrm/course_statistic.html', {
@@ -747,6 +748,45 @@ def subject_statistic(request):
         'course_list': course_index(),
         'course_data': course_data
     })
+
+
+@log_this
+@login_required
+def schedule_statistic(request):
+    """
+    总体进度统计
+    """
+    sid = request.GET.get('del_sid')
+    if request.method == 'POST':
+        print('@user_list 更新进度')
+        uid = request.POST.get('user')
+        courses = request.POST.getlist('course')
+        schedules = request.POST.getlist('schedule')
+        notes = request.POST.getlist('note')
+        user = get_object_or_404(LabUser, id=uid)
+        print('uid:\t', uid)
+        for course, schedule, note in zip(courses, schedules, notes):
+            print('course schedule note:\t', course, schedule, note)
+            LearningSchedule.objects.create(
+                user=user,
+                course_id=course,
+                # course_id=course.split('-')[0],
+                schedule=schedule,
+                # schedule=schedule.split('-')[0],
+                note=note
+            )
+        return HttpResponse()
+    elif sid:
+        print('@user_list 删除进度')
+        print('del_sid:\t', sid)
+        get_object_or_404(LearningSchedule, id=sid).delete()
+        return HttpResponse()
+    else:
+        print('@课程统计')
+        return render(request, 'labcrm/schedule_statistic.html', {
+            'schedules': LearningSchedule.objects.all(),
+            'course_list': course_index(),
+        })
 
 
 @log_this

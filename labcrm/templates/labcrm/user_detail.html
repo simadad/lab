@@ -39,7 +39,8 @@
 	<button class='btn btn-block btn-lg btn-danger hidden' id='tagCancel' onclick='modifyConcel()'>取消修改</button>
 </div>
 <hr />
-<a target='_blank' class='btn btn-block btn-lg btn-success' href='{% url "crm:schedule" %}?uid={{ labUser.id }}'>学习进度</a>
+<a target='_blank' class='btn btn-block btn-lg btn-success' href='{% url "crm:courses" %}?uid={{ labUser.id }}'>学习记录</a>
+<a class='btn btn-block btn-lg btn-success' data-toggle="modal" data-target="#scheduleModal">更新进度</a>
 {% endblock %}
 {% block row-right %}
 {% include 'labcrm/ajax_user_detail.html' %}
@@ -67,6 +68,54 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" id='btn-modal-hide' data-dismiss="modal">取消</button>
 				<button type="submit" class="btn btn-primary" form='formDialog' onclick='dialogSave()'>保存</button>
+			</div>										
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id='scheduleModal' tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">更新进度:</h4>
+			</div>
+			<div class="modal-body">
+				<form id='formSchedule' action='{% url "crm:schedule" %}' method='POST'>
+					{% csrf_token %}
+					<table class="table table-hover table-striped table-bordered" id='table_schedule'>
+						<caption><h4 class='text-center'>课程进度<h4></caption>
+							<thead class='thead-inverse'>
+							<tr>
+								<th class='col-md-3'>课程</th>
+								<th class='col-md-2'>阶段</th>
+								<th class='col-md-6'>备注</th>
+								<th class='col-md-1'>删除</th>
+							</tr>
+							</thead>
+						<tbody id='courseList'>
+						{% for schedule in labUser.schedule.all %}
+							<tr sid={{ schedule.id }}>
+								<td>{{ schedule.get_course_id_display }}</td>
+								<td><a href='#' onclick='inputThis(this)' class='schedule'>{{ schedule.get_schedule_display }}</a></td>
+								<td><a href='#' onclick='inputThis(this)' class='note'>{{ schedule.note }}</a></td>
+								<td>
+									<button type="button" class="btn close btn-block" aria-label="Close" onclick="scheduleDel(this)">
+										<span aria-hidden="true" style="color:red">&times;</span>
+									</button>
+								</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+					<input class='hidden' name='user' value='{{ labUser.id }}'>
+				</form>
+			</div>
+			<div class='col-xs-4 col-xs-offset-4'>
+				<button class='btn btn-block btn-xs btn-primary' onclick='courseMore()'>▼</button>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" id='btn-modal-hide' data-dismiss="modal">取消</button>
+				<button type="submit" class="btn btn-primary" form='formSchedule' onclick='scheduleSave()'>保存</button>
 			</div>										
 		</div>
 	</div>
@@ -240,6 +289,91 @@ function dialogSave(){
 		xhr.send(formData);
 	};
 };
+
+function courseMore(){
+	// 新增课程
+	var para = document.getElementById('table_schedule');
+		newRow = para.insertRow();
+	newRow.innerHTML = '\
+		<td>\
+			<select class="form-control" name="course">\
+			{% for cid, course in courses %}\
+				<option value="{{ cid }}">{{ course }}</option>\
+			{% endfor %}\
+			</select>\
+		</td>\
+		<td>\
+			<input onclick="inputThis(this)" class="schedule form-control" placeholder="阶段" required></a>\
+		</td>\
+		<td><input class="form-control" placeholder="备注" name="note" required></td>\
+		<td>\
+			<button type="button" class="btn close btn-block" aria-label="Close" onclick="scheduleDel(this)">\
+				<span aria-hidden="true" style="color:red">&times;</span>\
+			</button>\
+		</td>'
+}
+
+function scheduleDel(e){
+	// 删除进度信息行
+	var tr = e.parentElement.parentElement,
+		sid = tr.getAttribute('sid');
+	if(sid){
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '{% url "crm:schedule" %}?del_sid='+sid, true);
+		xhr.send();
+	};
+	tr.parentElement.removeChild(tr);
+	
+};
+
+$('#scheduleModal').on('hidden.bs.modal', function (e) {
+	// 重置模态框数据及格式
+	document.getElementById('formSchedule').reset();
+	
+});
+
+function scheduleSave(){
+	// 保存进度修改
+	document.getElementById("formSchedule").onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest();
+		xhr.open("POST", f.action, true);
+		xhr.onreadystatechange=function(){
+			window.location.reload();
+		};
+		xhr.send(formData);
+	};
+};
+
+function inputThis(e){
+	// 得到焦点，开启输入框
+	var para = e.parentElement,
+		name = e.className,
+		value = e.innerText;
+	if(name=='note'){
+		para.innerHTML = '<input class="form-control" placeholder="备注" name="note" required value="' + value + '">';
+		para.firstElementChild.select();
+	}else{
+		para.innerHTML = '<select class="form-control" name="schedule">\
+						{% for sid, schedule in schedules %}\
+							<option value="{{ sid }}">{{ schedule }}</option>\
+						{% endfor %}\
+						</select>'
+		showDropdown(para.firstElementChild);
+	};
+};
+
+function showDropdown (element) {
+	// <select> element displays its options on mousedown, not click.
+	// stack_overflow 大神代码，打开下拉列表
+    var event;
+    event = document.createEvent('MouseEvents');
+    event.initMouseEvent('mousedown', true, true, window);
+    element.dispatchEvent(event);
+};
+
 </script>
 {% if not answers %}
 <script>

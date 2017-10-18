@@ -152,6 +152,24 @@ class LearnedCourse(models.Model):
         return self.title
 
 
+class LearningSchedule(models.Model):
+    """
+    学习进度
+    """
+    COURSE_CHOICES = LearnedCourse.COURSE_CHOICES
+    SCHEDULE_CHOICES = (
+        (1, '入门'),
+        (2, '基础'),
+        (3, '项目')
+    )
+    course_id = models.IntegerField(verbose_name='科目ID', default=0, choices=COURSE_CHOICES)
+    schedule = models.IntegerField(verbose_name='学习阶段', choices=SCHEDULE_CHOICES)
+    user = models.ForeignKey(LabUser, verbose_name='用户', on_delete=models.CASCADE, related_name='schedule')
+    note = models.CharField(verbose_name='备注', max_length=255)
+
+    def __str__(self):
+        return '{name} - {course}'.format(name=self.user.nickname, course=dict(self.COURSE_CHOICES)[self.course_id])
+
 # GENDER_CHOICES = (
 #     ('S', '保密'),
 #     ('M', '男'),

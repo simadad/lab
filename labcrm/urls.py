@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^fill/(?P<data_key>\d*)$', views.ques_fill, name='fill'),
     url(r'^fill', views.ques_fill, name='fill2'),
     url(r'^class', views.link_to_class, name='class'),
-    url(r'^schedule', views.learning_schedule, name='schedule'),
-    url(r'statistic', views.subject_statistic, name='statistic'),
+    url(r'^courses', views.learning_courses, name='courses'),
+    url(r'^statistic', views.subject_statistic, name='statistic'),
+    url(r'^schedule', views.schedule_statistic, name='schedule'),
 ]
