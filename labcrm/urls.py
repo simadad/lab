@@ -10,9 +10,14 @@ ajax_urls = [
     url(r'^new', views.ajax_new_user, name='new')
 ]
 
+modify_urls = [
+    url(r'^schedule', views.modify_schedule, name='schedule')
+]
+
 
 urlpatterns = [
     url(r'^ajax/', include(ajax_urls, namespace='ajax')),
+    url(r'^modify/', include(modify_urls, namespace='modify')),
     url(r'^users', views.user_list, name='list'),
     url(r'^detail/(?P<new_id>.*)$', views.user_detail, name='detail2'),
     url(r'^detail', views.user_detail, name='detail'),

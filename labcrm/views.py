@@ -770,9 +770,7 @@ def schedule_statistic(request):
             LearningSchedule.objects.create(
                 user=user,
                 course_id=course,
-                # course_id=course.split('-')[0],
                 schedule=schedule,
-                # schedule=schedule.split('-')[0],
                 note=note
             )
         return HttpResponse()
@@ -787,6 +785,29 @@ def schedule_statistic(request):
             'schedules': LearningSchedule.objects.all(),
             'course_list': course_index(),
         })
+
+
+@log_this
+@login_required
+def modify_schedule(request):
+    """
+    user_detail 学习进度修改
+    """
+    sid = request.GET.get('sid')
+    schedule = request.GET.get('schedule')
+    note = request.GET.get('note')
+    ls = get_object_or_404(LearningSchedule, id=sid)
+    print('@进度修改')
+    if schedule:
+        ls.schedule = int(schedule)
+        value = ls.get_schedule_display()
+        print('sid-schedule:\t', sid, schedule, value)
+    else:
+        print('sid-note:\t', sid, note)
+        ls.note = note
+        value = ls.note
+    ls.save()
+    return HttpResponse(value)
 
 
 @log_this

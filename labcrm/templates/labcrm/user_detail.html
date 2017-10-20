@@ -333,7 +333,7 @@ $('#scheduleModal').on('hidden.bs.modal', function (e) {
 });
 
 function scheduleSave(){
-	// 保存进度修改
+	// 保存新增进度
 	document.getElementById("formSchedule").onsubmit = function(e){
 		e.preventDefault();
 		var f = e.target,
@@ -350,13 +350,14 @@ function scheduleSave(){
 function inputThis(e){
 	// 得到焦点，开启输入框
 	var para = e.parentElement,
+		sid = para.parentElement.getAttribute('sid'),
 		name = e.className,
 		value = e.innerText;
 	if(name=='note'){
-		para.innerHTML = '<input class="form-control" placeholder="备注" name="note" required value="' + value + '">';
+		para.innerHTML = '<input class="form-control" placeholder="备注" name="note" required value="' + value + '" onblur="inputThisSure(this,' + sid + ',\'' + name + '\')">';
 		para.firstElementChild.select();
 	}else{
-		para.innerHTML = '<select class="form-control" name="schedule">\
+		para.innerHTML = '<select class="form-control" name="schedule" onblur="inputThisSure(this,' + sid + ',\'' + name + '\')">\
 						{% for sid, schedule in schedules %}\
 							<option value="{{ sid }}">{{ schedule }}</option>\
 						{% endfor %}\
@@ -372,6 +373,24 @@ function showDropdown (element) {
     event = document.createEvent('MouseEvents');
     event.initMouseEvent('mousedown', true, true, window);
     element.dispatchEvent(event);
+};
+
+function inputThisSure(e, sid, name){
+	// 失去焦点，进度修改确认
+	var value = e.value
+	if(value && sid){
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", '{% url "crm:modify:schedule" %}?sid=' + sid + '&' + name + '=' + value, true);
+		xhr.onreadystatechange=function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				e.parentElement.innerHTML = '<a href="#" class="' + name + '" onclick="inputThis(this)">' + xhr.responseText + '</a>';
+			};
+		};
+		xhr.send();
+	}else{
+		alert('该选项不能为空！');
+		e.focus();
+	};
 };
 
 </script>
