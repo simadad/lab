@@ -635,7 +635,7 @@ def get_sample_format(data):
     训练营课程生成器
     """
     for project_title, project_seq, project_domain, solution_create_time in data:
-        title = '{domain} - {seq}: {title}'.format(
+        title = '{domain:0>3} - {seq:0>3}: {title}'.format(
             domain=project_domain,
             seq=project_seq,
             title=project_title
@@ -703,12 +703,13 @@ def _save_sample(lab_user, last_time):
                 JOIN oj_sample sample ON solution.sample_id = sample.id
                 JOIN oj_project project ON sample.project_id = project.id
                 WHERE user_id = {uid}
-            '''.format(uid=lab_user.class_id))
+                AND solution.create_time > '{last_time}'
+            '''.format(uid=lab_user.class_id, last_time=last_time))
     course_list = get_sample_format(cur.fetchall())
     _save_schedule(lab_user, course_list)
 
 
-@log_stack(1)
+@log_this
 def _learning_courses_get(request, lab_user):
     print('user.class_id:\t', lab_user.class_id)
     if lab_user.class_id:
@@ -719,7 +720,7 @@ def _learning_courses_get(request, lab_user):
             last_time = 0
         print(11111111)
         _save_lesson(lab_user, last_time)
-        # _save_sample(lab_user, last_time)
+        _save_sample(lab_user, last_time)
     courses = LearnedCourse.objects.filter(user=lab_user).order_by('-learn_time')
     return render(request, 'labcrm/courses.html', {
         'lab_user': lab_user,
@@ -727,7 +728,7 @@ def _learning_courses_get(request, lab_user):
     })
 
 
-@log_stack
+@log_this
 @login_required
 def learning_courses(request):
     print(999999)
