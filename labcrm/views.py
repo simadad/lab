@@ -687,9 +687,7 @@ def _save_lesson(lab_user, last_time):
                 WHERE user_id = {uid}
                 AND learn_time > '{last_time}'
             '''.format(uid=lab_user.class_id, last_time=last_time))
-    print(222222222)
     course_list = get_lesson_format(lab_user, cur.fetchall())
-    print(33333333333)
     _save_schedule(lab_user, course_list)
 
 
@@ -718,7 +716,6 @@ def _learning_courses_get(request, lab_user):
             last_time = all_course.latest('learn_time').learn_time
         else:
             last_time = 0
-        print(11111111)
         _save_lesson(lab_user, last_time)
         _save_sample(lab_user, last_time)
     courses = LearnedCourse.objects.filter(user=lab_user).order_by('-learn_time')
@@ -731,7 +728,6 @@ def _learning_courses_get(request, lab_user):
 @log_this
 @login_required
 def learning_courses(request):
-    print(999999)
     uid = request.GET.get('uid')
     lab_user = get_object_or_404(LabUser, id=uid)
     print('user:\t', lab_user)
