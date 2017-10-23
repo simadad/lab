@@ -613,9 +613,9 @@ def _set_course_statistic(lab_user, *data):
         lab_user.save()
 
 
-def get_course_format(lab_user, data):
+def get_lesson_format(lab_user, data):
     """
-    内部课程生成器
+    基础课程生成器
     """
     for chapter_title, lesson_title, chapter_seq, lesson_seq, course_id, learn_time in data:
         _set_course_statistic(lab_user, lesson_title, course_id)
@@ -628,6 +628,20 @@ def get_course_format(lab_user, data):
         print(title)
         # yield True, title, learn_time
         yield course_id, title, learn_time
+
+
+def get_sample_format(data):
+    """
+    训练营课程生成器
+    """
+    for project_title, project_seq, project_domain, solution_create_time in data:
+        title = '{domain} - {seq}: {title}'.format(
+            domain=project_domain,
+            seq=project_seq,
+            title=project_title
+        )
+        print(title)
+        yield '3', title, solution_create_time
 
 
 @log_this
@@ -661,28 +675,51 @@ def _learning_courses_post(request, lab_user):
     }))
 
 
-@log_this
+@log_stack(2)
+def _save_lesson(lab_user, last_time):
+    db = pymysql.connect(*crossin_db, charset="utf8")
+    cur = db.cursor()
+    cur.execute('''
+                SELECT chapter.title, lesson.title, chapter.seq, lesson.seq, chapter.course_id, learn_time
+                FROM school_learnedlesson learn
+                JOIN school_lesson lesson ON learn.lesson_id = lesson.id
+                JOIN school_chapter chapter ON lesson.chapter_id = chapter.id
+                WHERE user_id = {uid}
+                AND learn_time > '{last_time}'
+            '''.format(uid=lab_user.class_id, last_time=last_time))
+    print(222222222)
+    course_list = get_lesson_format(lab_user, cur.fetchall())
+    print(33333333333)
+    _save_schedule(lab_user, course_list)
+
+
+@log_stack(2)
+def _save_sample(lab_user, last_time):
+    db = pymysql.connect(*crossin_db, charset="utf8")
+    cur = db.cursor()
+    cur.execute('''
+                SELECT project.title, project.seq, project.domain, solution.create_time
+                FROM oj_solution solution
+                JOIN oj_sample sample ON solution.sample_id = sample.id
+                JOIN oj_project project ON sample.project_id = project.id
+                WHERE user_id = {uid}
+            '''.format(uid=lab_user.class_id))
+    course_list = get_sample_format(cur.fetchall())
+    _save_schedule(lab_user, course_list)
+
+
+@log_stack(1)
 def _learning_courses_get(request, lab_user):
+    print('user.class_id:\t', lab_user.class_id)
     if lab_user.class_id:
         all_course = lab_user.courses.filter(course_id__gt=0)
         if all_course:
             last_time = all_course.latest('learn_time').learn_time
         else:
             last_time = 0
-        db = pymysql.connect(*crossin_db, charset="utf8")
-        cur = db.cursor()
-        cur.execute('''
-            SELECT chapter.title, lesson.title, chapter.seq, lesson.seq, chapter.course_id, learn_time
-            FROM school_learnedlesson learn
-            JOIN school_lesson lesson ON learn.lesson_id = lesson.id
-            JOIN school_chapter chapter ON lesson.chapter_id = chapter.id
-            WHERE user_id = {uid}
-            AND learn_time > '{last_time}'
-        '''.format(uid=lab_user.class_id, last_time=last_time))
-        course_list = get_course_format(lab_user, cur.fetchall())
-        # outer_course = lab_user.courses
-        # courses = get_whole_course(inner_course, outer_course)
-        _save_schedule(lab_user, course_list)
+        print(11111111)
+        _save_lesson(lab_user, last_time)
+        # _save_sample(lab_user, last_time)
     courses = LearnedCourse.objects.filter(user=lab_user).order_by('-learn_time')
     return render(request, 'labcrm/courses.html', {
         'lab_user': lab_user,
@@ -690,11 +727,13 @@ def _learning_courses_get(request, lab_user):
     })
 
 
-@log_this
+@log_stack
 @login_required
 def learning_courses(request):
+    print(999999)
     uid = request.GET.get('uid')
     lab_user = get_object_or_404(LabUser, id=uid)
+    print('user:\t', lab_user)
     if request.method == 'GET':
         return _learning_courses_get(request, lab_user)
     else:

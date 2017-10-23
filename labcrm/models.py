@@ -141,6 +141,7 @@ class LearnedCourse(models.Model):
         (0, '课外课程'),
         (1, 'Python 零基础入门'),
         (2, '爬虫实战'),
+        (3, '开发训练营')
     )
     user = models.ForeignKey(LabUser, verbose_name='用户', on_delete=models.CASCADE, related_name='courses')
     title = models.CharField(max_length=255, verbose_name='课程题目')
