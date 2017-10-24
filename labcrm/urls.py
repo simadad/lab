@@ -31,4 +31,5 @@ urlpatterns = [
     url(r'^courses', views.learning_courses, name='courses'),
     url(r'^statistic', views.subject_statistic, name='statistic'),
     url(r'^schedule', views.schedule_statistic, name='schedule'),
+    # url(r'^ttt', views.ttt)
 ]

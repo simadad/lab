@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django import forms
 from django.db.utils import IntegrityError
 from django.db.models import Max
+# from .admin import UsersResource
 from collections import namedtuple
 from PIL import Image
 import base64
@@ -938,3 +939,8 @@ def ajax_user_del(request):
     return render(request, 'labcrm/ajax/user_del.html', {
         'users': users
     })
+
+#
+# def ttt(request):
+#     data = UsersResource().export()
+#     return HttpResponse(data)

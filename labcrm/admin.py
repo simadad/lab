@@ -1,5 +1,8 @@
 from django.contrib import admin
 from .models import *
+from import_export import resources, fields
+from import_export.admin import ImportExportModelAdmin
+import json
 # Register your models here.
 
 
@@ -23,7 +26,28 @@ class PaperInline(admin.TabularInline):
     model = Paper
 
 
-class LabUserAdmin(admin.ModelAdmin):
+class LabUsersResource(resources.ModelResource):
+    """
+    用户数据导入导出配置
+    """
+    id = fields.Field('id', column_name='本站ID')
+    user = fields.Field('user', column_name='本站名')
+    nickname = fields.Field('nickname', column_name='用户名')
+    wechat = fields.Field('wechat', column_name='微信')
+    ta = fields.Field('ta', column_name='助教')
+    class_id = fields.Field('class_id', column_name='编程教室ID')
+    statistic = fields.Field('statistic', column_name='完课统计')
+
+    class Meta:
+        model = LabUser
+        export_order = ('id', 'user', 'nickname', 'wechat', 'class_id', 'ta', 'statistic', 'is_del')
+
+# class LabUserResourceAdmin(ImportExportModelAdmin):
+#     resource_class = LabUsersResource
+
+
+class LabUserAdmin(ImportExportModelAdmin):
+    resource_class = LabUsersResource
     inlines = [InfoQInline, InfoAInline, PaperInline, DialogInline]
     list_display = ('user', 'nickname', 'wechat')
     search_fields = ('user', 'nickname', 'wechat')
@@ -100,6 +124,7 @@ class DialogAdmin(admin.ModelAdmin):
             'fields': ('user', 'recorder', 'dialog')
         }],
     )
+
 
 admin.site.register(LabUser, LabUserAdmin)
 admin.site.register(Paper, PaperAdmin)
