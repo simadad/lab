@@ -12,8 +12,13 @@
 {% endblock %}
 {% block row-right %}
 <table class="table table-hover table-striped table-bordered">
-	<caption>成员列表</caption>
-		<thead class='thead-inverse'>
+	<caption>
+		<h3 class='text-center'>
+			<span>成员列表</span>
+			<span><input type='submit' class='btn btn-sm btn-primary pull-right' onclick='dumpdata()' form='formDowload' value='导出'></span>
+		</h3>
+	</caption>
+	<thead class='thead-inverse'>
 		<tr>
 			<th>本站名</th><!-- 昵称为本站 user.username -->
 			<th>用户名 | 学习记录</th><!-- 用户名为学习站 user.username 本站 lab_user.nickname -->
@@ -24,7 +29,7 @@
 			<th>沟通记录</th>
 			<th class='hidden tbHid'>删除</th>
 		</tr>
-		</thead>
+	</thead>
 	<tbody id='userList'>
 	{% include 'labcrm/ajax/user_del.html' %}
 	</tbody>
@@ -32,6 +37,10 @@
 {% endblock %}
 {% block modal %}
 <form class='hidden' id='formUserDel' action='{% url "crm:ajax:del" %}' method='POST'>{% csrf_token %}</form>
+<form class='hidden' id='formDowload' action='http://127.0.0.1:8000/admin/labcrm/labuser/export/' method='POST'>
+	{% csrf_token %}
+	<input class='hidden' name='file_format' value='0'>
+</form>
 <div class="modal fade" id='userAddModal' tabindex="-1" role="dialog">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
@@ -77,6 +86,35 @@
 	//alert('昵称重复');
 //};
 //{% endif %}
+
+function downloadFile(fileName, content){
+	// 文档下载函数
+    var aLink = document.createElement('a');
+    var blob = new Blob([content]);
+    var evt = document.createEvent("HTMLEvents");
+    evt.initEvent("click", false, false); //initEvent 不加后两个参数在FF下会报错
+    aLink.download = fileName;
+    aLink.href = URL.createObjectURL(blob);
+    aLink.dispatchEvent(evt);
+}
+
+function dumpdata(){
+	document.getElementById('formDowload').onsubmit = function(e){
+		e.preventDefault();
+		var f = e.target,
+			formData = new FormData(f),
+			xhr = new XMLHttpRequest();
+		xhr.open('POST', f.action, true);
+		xhr.onreadystatechange = function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var rowNew = xhr.responseText;
+				downloadFile('labuser.csv', rowNew);
+			};
+		};
+		xhr.send(formData);
+	};
+};
+
 function hidSwith(){
 // 标签显示与隐藏
 	var tags = document.getElementsByClassName("hidSwith");
@@ -114,23 +152,23 @@ function renameOver(){
 		para = document.getElementById('userList');
 	xhr.open('GET', '?refresh=1', true);
 	xhr.onreadystatechange=function(){
-			if(xhr.readyState == 4 && xhr.status == 200){
-				var btnModOver = document.getElementById('btnModOver'),
-					btnUserAdd = document.getElementById('btnUserAdd'),
-					btnUserDel = document.getElementById('btnUserDel'),
-					btnModify = document.getElementById('btnModify'),
-					attrModify = btnModify.getAttribute('class'),
-					attrModOver = btnModOver.getAttribute('class');
-				attrModOver += ' hidden';
-				attrModify = attrModify.replace('hidden', '');
-				btnModify.setAttribute('class', attrModify);
-				btnModOver.setAttribute('class', attrModOver);
-				btnUserAdd.removeAttribute('disabled');
-				btnUserDel.removeAttribute('disabled');
-				para.innerHTML = xhr.responseText;
-				//hidSwith();
-			};
+		if(xhr.readyState == 4 && xhr.status == 200){
+			var btnModOver = document.getElementById('btnModOver'),
+				btnUserAdd = document.getElementById('btnUserAdd'),
+				btnUserDel = document.getElementById('btnUserDel'),
+				btnModify = document.getElementById('btnModify'),
+				attrModify = btnModify.getAttribute('class'),
+				attrModOver = btnModOver.getAttribute('class');
+			attrModOver += ' hidden';
+			attrModify = attrModify.replace('hidden', '');
+			btnModify.setAttribute('class', attrModify);
+			btnModOver.setAttribute('class', attrModOver);
+			btnUserAdd.removeAttribute('disabled');
+			btnUserDel.removeAttribute('disabled');
+			para.innerHTML = xhr.responseText;
+			//hidSwith();
 		};
+	};
 	xhr.send();
 };
 

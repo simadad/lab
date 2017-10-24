@@ -37,10 +37,30 @@ class LabUsersResource(resources.ModelResource):
     ta = fields.Field('ta', column_name='助教')
     class_id = fields.Field('class_id', column_name='编程教室ID')
     statistic = fields.Field('statistic', column_name='完课统计')
+    is_del = fields.Field('is_del', column_name='是否删除')
+
+    def _statistic_format(self, statistic):
+        from .views import course_to_status
+        statistic_format = {}
+        key_replace = dict(LearnedCourse.COURSE_CHOICES)
+        value_replace = {j[0]: i for i, j in course_to_status.items()}
+        for key, value in statistic.items():
+            statistic_format[key_replace[int(key)]] = value_replace[value]
+        return statistic_format
 
     class Meta:
         model = LabUser
         export_order = ('id', 'user', 'nickname', 'wechat', 'class_id', 'ta', 'statistic', 'is_del')
+
+    def dehydrate_user(self, uu):
+        return uu.user.username
+
+    def dehydrate_statistic(self, uu):
+        statistic = self._statistic_format(json.loads(uu.statistic))
+        return '；'.join(['{}: {}'.format(*i) for i in statistic.items()])
+
+    def dehydrate_is_del(self, uu):
+        return {0: '否', 1: '是'}[uu.is_del]
 
 # class LabUserResourceAdmin(ImportExportModelAdmin):
 #     resource_class = LabUsersResource

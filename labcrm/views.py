@@ -743,7 +743,8 @@ def course_data_generator(course_id):
     完课统计展示数据生成器
     """
     courses = LearnedCourse.objects.filter(course_id=course_id)
-    status_to_course = {course_to_status[i][0]: course_to_status[i][1] for i in course_to_status}
+    # status_to_course = {course_to_status[i][0]: course_to_status[i][1] for i in course_to_status}
+    status_to_course = {j[0]: j[1] for i, j in course_to_status.items()}
     course_tuple = namedtuple('CourseTuple', ['user', 'amounts', 'max', 'latest', 'mid', 'end'])
     for uid, in set(courses.values_list('user')):
         lab_user = get_object_or_404(LabUser, id=uid)

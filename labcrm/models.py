@@ -15,7 +15,7 @@ class LabUser(models.Model):
     is_del = models.BooleanField(verbose_name='是否删除', default=False)
     class_id = models.IntegerField(verbose_name='教室ID', blank=True, null=True)
     ta = models.CharField(max_length=30, verbose_name='助教', default='暂无')
-    # json 格式可扩充字段，{course_id: status, }
+    # json 格式可扩充字段，{course_id: status}
     # status ={1: 期中, 2: 期末, 3: 期中+期末}
     statistic = models.TextField(verbose_name='完课统计', default='{}')
 
