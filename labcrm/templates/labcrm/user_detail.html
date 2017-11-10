@@ -316,10 +316,10 @@ function courseMore(){
 function scheduleDel(e){
 	// 删除进度信息行
 	var tr = e.parentElement.parentElement,
-		sid = tr.getAttribute('sid');
-	if(sid){
+		ls_id = tr.getAttribute('ls_id');
+	if(ls_id){
 		var xhr = new XMLHttpRequest();
-		xhr.open('GET', '{% url "crm:schedule" %}?del_sid='+sid, true);
+		xhr.open('GET', '{% url "crm:schedule" %}?del_sid='+ls_id, true);
 		xhr.send();
 	};
 	tr.parentElement.removeChild(tr);
