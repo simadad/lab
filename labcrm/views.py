@@ -831,7 +831,7 @@ def modify_schedule(request):
     """
     user_detail 学习进度修改
     """
-    sid = request.GET.get('sid')
+    sid = request.GET.get('ls_id')
     schedule = request.GET.get('schedule')
     note = request.GET.get('note')
     ls = get_object_or_404(LearningSchedule, id=sid)

@@ -94,7 +94,7 @@
 							</thead>
 						<tbody id='courseList'>
 						{% for schedule in labUser.schedule.all %}
-							<tr sid={{ schedule.id }}>
+							<tr ls_id={{ schedule.id }}>
 								<td>{{ schedule.get_course_id_display }}</td>
 								<td><a href='#' onclick='inputThis(this)' class='schedule'>{{ schedule.get_schedule_display }}</a></td>
 								<td><a href='#' onclick='inputThis(this)' class='note'>{{ schedule.note }}</a></td>
@@ -311,7 +311,7 @@ function courseMore(){
 				<span aria-hidden="true" style="color:red">&times;</span>\
 			</button>\
 		</td>'
-}
+};
 
 function scheduleDel(e){
 	// 删除进度信息行
@@ -350,14 +350,14 @@ function scheduleSave(){
 function inputThis(e){
 	// 得到焦点，开启输入框
 	var para = e.parentElement,
-		sid = para.parentElement.getAttribute('sid'),
+		ls_id = para.parentElement.getAttribute('ls_id'),
 		name = e.className,
 		value = e.innerText;
 	if(name=='note'){
-		para.innerHTML = '<input class="form-control" placeholder="备注" name="note" required value="' + value + '" onblur="inputThisSure(this,' + sid + ',\'' + name + '\')">';
+		para.innerHTML = '<input class="form-control" placeholder="备注" name="note" required value="' + value + '" onblur="inputThisSure(this,' + ls_id + ',\'' + name + '\')">';
 		para.firstElementChild.select();
 	}else{
-		para.innerHTML = '<select class="form-control" name="schedule" onblur="inputThisSure(this,' + sid + ',\'' + name + '\')">\
+		para.innerHTML = '<select class="form-control" name="schedule" onblur="inputThisSure(this,' + ls_id + ',\'' + name + '\')">\
 						{% for sid, schedule in schedules %}\
 							<option value="{{ sid }}">{{ schedule }}</option>\
 						{% endfor %}\
@@ -375,19 +375,19 @@ function showDropdown (element) {
     element.dispatchEvent(event);
 };
 
-function inputThisSure(e, sid, name){
+function inputThisSure(e, ls_id, name){
 	// 失去焦点，进度修改确认
 	var value = e.value
-	if(value && sid){
+	if(value && ls_id){
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", '{% url "crm:modify:schedule" %}?sid=' + sid + '&' + name + '=' + value, true);
+		xhr.open("GET", '{% url "crm:modify:schedule" %}?ls_id=' + ls_id + '&' + name + '=' + value, true);
 		xhr.onreadystatechange=function(){
 			if(xhr.readyState == 4 && xhr.status == 200){
 				e.parentElement.innerHTML = '<a href="#" class="' + name + '" onclick="inputThis(this)">' + xhr.responseText + '</a>';
 			};
 		};
 		xhr.send();
-	}else{
+	}else if(!value){
 		alert('该选项不能为空！');
 		e.focus();
 	};
